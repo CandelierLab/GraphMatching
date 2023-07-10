@@ -1,1 +1,3 @@
+import project
+
 print('ok')
