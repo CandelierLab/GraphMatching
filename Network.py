@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 # === Generic network ======================================================
@@ -24,15 +25,45 @@ class Generic:
     s += f'Number of edges: {self.nEd}\n'
 
     return s
+  
+  def subnet(self, nNd, method='random'):
+
+    # Create subnetwork
+    Sub = type(self)()
+
+    # Check
+    if nNd>self.nNd:
+      raise Exception(f"Subnetworking: The number of nodes in the subnet ({nNd}) is greater than in the original network ({self.nNd})")
+
+    match method:
+
+      case 'random':
+
+        # Draw random set of Nodes
+        I = random.sample(range(self.nNd), nNd)
+        K = np.ix_(I,I)
+
+        # Adjacency matrices
+        Sub.Adj = self.Adj[K]
+        Sub.Bdj = self.Bdj[K]
+
+        # Numbers
+        Sub.nNd = nNd
+        Sub.nEd = np.count_nonzero(Sub.Bdj)
+
+    return Sub
 
 # === Random Network =======================================================
 
 class Random(Generic):
   ''' Erdos-Renyi network '''
 
-  def __init__(self, N, p, method='Erdös-Rényi'):
+  def __init__(self, N=None, p=None, method='Erdös-Rényi'):
     
     super().__init__()
+
+    # Empty network
+    if p is None: return
 
     # Set number of nodes
     self.nNd = N
@@ -58,7 +89,10 @@ class Random(Generic):
         # In the ERG the edges are drawn randomly so the exact number of 
         # edges is not guaranteed.
 
-        B = None
+        self.Bdj = None
+
+    # Update number of edges
+    self.nEd = np.count_nonzero(self.Bdj)
 
     # --- Weighted adjacency matrix
 

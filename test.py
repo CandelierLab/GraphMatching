@@ -1,6 +1,10 @@
-
+import os
 import Network
 
-Net = Network.Random(10, 0.1)
+os.system('clear')
 
-print(Net.Adj)
+Net = Network.Random(10, 0.5)
+
+Sub = Net.subnet(5)
+
+print(Net, Sub)
