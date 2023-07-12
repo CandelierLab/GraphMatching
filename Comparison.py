@@ -2,8 +2,6 @@ import pprint
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-import Network
-
 def compare(NetA, NetB, weight_constraint=False, nIter=100):
   '''
   Comparison of two networks.
@@ -16,6 +14,10 @@ def compare(NetA, NetB, weight_constraint=False, nIter=100):
       Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
   '''
   
+  # Define edges
+  NetA.adj2edges()
+  NetB.adj2edges()
+
   # --- Definitions
 
   # Number of nodes
@@ -26,45 +28,32 @@ def compare(NetA, NetB, weight_constraint=False, nIter=100):
   mA = NetA.nEd
   mB = NetB.nEd
 
-  # NetA source-edge and terminus-edge matrices
-  As = np.zeros((nA, mA))
-  At = np.zeros((nA, mA))
-
-  # Net B source-edge and terminus-edge matrices
-  Bs = np.zeros((nB, mB))
-  Bt = np.zeros((nB, mB))
-
-  if weight_constraint:
-    W = np.zeros((mA, mB))
-
-  # --- Net A preparation 
+  # --- Source-edge and terminus-edge matrices
 
   # Net A
-  k = 0
+  As = np.zeros((nA, mA))
+  At = np.zeros((nA, mA))
+  for k, e in enumerate(NetA.edge):
+    As[e['i'], k] = 1
+    At[e['j'], k] = 1
 
-  for i, a in enumerate(NetA.Adj):
-    for j, w in enumerate(a):
+  # Net B
+  Bs = np.zeros((nB, mB))
+  Bt = np.zeros((nB, mB))
+  for k, e in enumerate(NetB.edge):
+    Bs[e['i'], k] = 1
+    Bt[e['j'], k] = 1
 
-      if NetA.Bdj[i,j]:
+  # --- Weight constraint
 
-        # Source-edge
-        As[i, k] = 1
-
-        # Terminus-edge
-        At[j, k] = 1
-
-        # Weight constraint
-        if weight_constraint:
-          W[i,j] = a['w'] - b['w']
-
-        # Edge index update
-        k += 1
+  if weight_constraint:
 
     # Edge weights
-    
+    W = np.zeros((mA, mB))
     for i, a in enumerate(NetA.edge):
       for j, b in enumerate(NetB.edge):
-        
+        W[i,j] = a['w'] - b['w']
+
     sigma2 = np.var(W)
     if sigma2>0:
       W = np.exp(-W**2/2/sigma2)
@@ -97,8 +86,6 @@ def compare(NetA, NetB, weight_constraint=False, nIter=100):
   S_edges = y.reshape((mA, mB))
 
   return(S_nodes, S_edges)
-
-# --------------------------------------------------------------------------
 
 def matching(NetA, NetB, threshold=None, **kwargs):
 

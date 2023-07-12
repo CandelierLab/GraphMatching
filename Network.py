@@ -11,6 +11,10 @@ class Generic:
     self.nNd = 0
     self.nEd = 0
 
+    # Lists of nodes and edges
+    self.node = None
+    self.edge = None
+
     # Adjacency matrices
     self.Adj = np.empty(0) 
     self.Bdj = np.empty(0)
@@ -26,6 +30,18 @@ class Generic:
 
     return s
   
+  def adj2edges(self):
+    ''' Define the list of edges based on the adjacency matrix. '''
+
+    # Skip if already existing
+    if self.edge is not None:
+      return
+
+    self.edge = []
+
+    for ij in np.argwhere(self.Bdj):
+      self.edge.append({'i': ij[0], 'j': ij[1], 'w': self.Adj[ij[0], ij[1]]})
+
   def subnet(self, nNd, method='random'):
 
     # Create subnetwork
@@ -51,7 +67,7 @@ class Generic:
         Sub.nNd = nNd
         Sub.nEd = np.count_nonzero(Sub.Bdj)
 
-    return Sub
+    return (Sub, I)
 
 # === Random Network =======================================================
 
