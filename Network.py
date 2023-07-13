@@ -16,8 +16,7 @@ class Generic:
     self.edge = None
 
     # Adjacency matrices
-    self.Adj = np.empty(0) 
-    self.Bdj = np.empty(0)
+    self.Adj = np.empty(0)
 
   def __repr__(self):
     ''' String representation of the network '''
@@ -30,51 +29,46 @@ class Generic:
 
     return s
   
-  def adj2edges(self):
+  def adj2edges(self, force=False):
     ''' Define the list of edges based on the adjacency matrix. '''
 
     # Skip if already existing
-    if self.edge is not None:
+    if self.edge is not None and not force:
       return
 
     self.edge = []
 
-    for ij in np.argwhere(self.Bdj):
-      self.edge.append({'i': ij[0], 'j': ij[1], 'w': self.Adj[ij[0], ij[1]]})
+    for ij in np.argwhere(self.Adj):
+      self.edge.append({'i': ij[0], 'j': ij[1], 'w': float(self.Adj[ij[0], ij[1]])})
 
-  def subnet(self, nNd, method='random'):
+  def subnet(self, idx):
 
     # Create subnetwork
     Sub = type(self)()
 
     # Check
-    if nNd>self.nNd:
-      raise Exception(f"Subnetworking: The number of nodes in the subnet ({nNd}) is greater than in the original network ({self.nNd})")
+    if not isinstance(idx, list) and idx>self.nNd:
+      raise Exception(f"Subnetworking: The number of nodes in the subnet ({idx}) is greater than in the original network ({self.nNd})")
 
-    match method:
+    # Indexes
+    I = idx if isinstance(idx, list) else random.sample(range(self.nNd), idx)
+    K = np.ix_(I,I)
 
-      case 'random':
+    # Adjacency matrices
+    Sub.Adj = self.Adj[K]
 
-        # Draw random set of Nodes
-        I = random.sample(range(self.nNd), nNd)
-        K = np.ix_(I,I)
-
-        # Adjacency matrices
-        Sub.Adj = self.Adj[K]
-        Sub.Bdj = self.Bdj[K]
-
-        # Numbers
-        Sub.nNd = nNd
-        Sub.nEd = np.count_nonzero(Sub.Bdj)
-
-    return (Sub, I)
+    # Numbers
+    Sub.nNd = len(I)
+    Sub.nEd = np.count_nonzero(Sub.Adj)
+    
+    return Sub if isinstance(idx, list) else (Sub, I)
 
 # === Random Network =======================================================
 
 class Random(Generic):
   ''' Erdos-Renyi network '''
 
-  def __init__(self, N=None, p=None, method='Erdös-Rényi'):
+  def __init__(self, N=None, p=None, method='rand'):
     
     super().__init__()
 
@@ -89,6 +83,12 @@ class Random(Generic):
     A = np.random.rand(self.nNd, self.nNd)
 
     match method:
+      case 'rand':
+        # In this methods the weights are drawn at random uniformly over 
+        # the range [0,1]
+
+        self.Adj = A
+
       case 'Erdös-Rényi' | 'ER':
         # In the ER model, the number of edges is guaranteed.
         # NB: the parameter p can be either the number of edges (int)
@@ -99,18 +99,19 @@ class Random(Generic):
           p = int(np.round(p*self.nNd**2))
 
         # Define edges
-        self.Bdj = (A < np.sort(A.flatten())[p])
+        Bdj = (A < np.sort(A.flatten())[p])
+
+        # Weighted adjacency matrix
+        self.Adj = Bdj.astype(float)
 
       case 'Erdös-Rényi-Gilbert' | 'ERG':
         # In the ERG the edges are drawn randomly so the exact number of 
         # edges is not guaranteed.
 
-        self.Bdj = None
+        self.Adj = None
 
     # Update number of edges
-    self.nEd = np.count_nonzero(self.Bdj)
+    self.nEd = np.count_nonzero(self.Adj)
 
-    # --- Weighted adjacency matrix
-
-    self.Adj = self.Bdj.astype(float)
+    
 

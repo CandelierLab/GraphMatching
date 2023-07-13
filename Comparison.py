@@ -1,8 +1,10 @@
+import time
 import pprint
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-def compare(NetA, NetB, weight_constraint=False, nIter=100):
+# === Comparison ===========================================================
+def compare(NetA, NetB, weight_constraint=True, nIter=100):
   '''
   Comparison of two networks.
 
@@ -87,22 +89,29 @@ def compare(NetA, NetB, weight_constraint=False, nIter=100):
 
   return(S_nodes, S_edges)
 
+# === Matching =============================================================
 def matching(NetA, NetB, threshold=None, **kwargs):
 
   # Get similarity measures
+  start = time.time()
   Sim = compare(NetA, NetB, **kwargs)[0]
+  print('Scoring:', time.time()-start)
 
   # Threshold
   if threshold is not None:
     Sim[Sim<threshold] = -np.inf
 
   # Hungarian algorithm (Jonker-Volgenant)
+  start = time.time()
   I, J = linear_sum_assignment(Sim, True)
+  print('Matching:', time.time()-start)
+
 
   # Output
   M = [(I[k], J[k]) for k in range(len(I))]
 
-  return MatchNet(NetA, NetB, M)
+  return M
+  # return MatchNet(NetA, NetB, M)
 
 # === MatchNet class ======================================================
 
@@ -121,8 +130,8 @@ class MatchNet():
     self.mn = np.array(M)
 
     # Unmatched nodes
-    self.unA = np.array([x for x in range(len(self.NetA.node)) if x not in self.mn[:,0]])
-    self.unB = np.array([x for x in range(len(self.NetB.node)) if x not in self.mn[:,1]])
+    self.unA = np.array([x for x in range(self.NetA.nNd) if x not in self.mn[:,0]])
+    self.unB = np.array([x for x in range(self.NetB.nNd) if x not in self.mn[:,1]])
 
     # Matched edges
     me = []
@@ -137,8 +146,8 @@ class MatchNet():
     self.me = np.array(me)
 
     # Unmatched edges
-    self.ueA = np.array([x for x in range(len(self.NetA.edge)) if x not in self.me[:,0]])
-    self.ueB = np.array([x for x in range(len(self.NetB.edge)) if x not in self.me[:,1]])
+    self.ueA = np.array([x for x in range(self.NetA.nEd) if x not in self.me[:,0]])
+    self.ueB = np.array([x for x in range(self.NetB.nEd) if x not in self.me[:,1]])
 
     # --- Ratios
 
