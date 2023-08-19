@@ -53,4 +53,9 @@ ax.axhline(y = 1/Nmax, color = 'w', linestyle = ':')
 
 ax.plot(Nsub, rho)
 
+ax.set_xlabel('Number of subgraph nodes')
+ax.set_xlim(1, Nmax)
+ax.set_ylabel('Correct matches ratio')
+ax.set_ylim(0, 1)
+
 plt.show()

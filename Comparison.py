@@ -1,6 +1,8 @@
 import time
 import pprint
 import numpy as np
+from scipy.sparse import dok_array
+from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 
 # === Comparison ===========================================================
@@ -30,82 +32,85 @@ def compare(NetA, NetB, weight_constraint=True, nIter=100):
   mA = NetA.nEd
   mB = NetB.nEd
 
-  # --- Source-edge and terminus-edge matrices
+  # --- Source-edge and terminus-edge matrices, weight vectors
 
   # Net A
   As = np.zeros((nA, mA))
   At = np.zeros((nA, mA))
+  wA = np.zeros(mA)
   for k, e in enumerate(NetA.edge):
     As[e['i'], k] = 1
     At[e['j'], k] = 1
+    wA[k] = e['w']
 
   # Net B
   Bs = np.zeros((nB, mB))
   Bt = np.zeros((nB, mB))
+  wB = np.zeros(mB)
   for k, e in enumerate(NetB.edge):
     Bs[e['i'], k] = 1
     Bt[e['j'], k] = 1
+    wB[k] = e['w']
 
   # --- Weight constraint
 
   if weight_constraint:
 
-    # Edge weights
-    W = np.zeros((mA, mB))
-    for i, a in enumerate(NetA.edge):
-      for j, b in enumerate(NetB.edge):
-        W[i,j] = a['w'] - b['w']
+    # Edge weights differences
+    W = np.subtract.outer(wA, wB)
+
+    # Slightly slower implementation:
+    # W = Wa[:,np.newaxis] - Wb
 
     sigma2 = np.var(W)
     if sigma2>0:
-      W = np.exp(-W**2/2/sigma2)
-      yc = W.reshape(mA*mB)
+      Yc = np.exp(-W**2/2/sigma2)
     else:
-      yc = np.ones(mA*mB)
+      Yc = np.ones((mA,mB))
 
   else:
-    yc = np.ones(mA*mB)
+    Yc = np.ones((mA,mB))
 
-  # --- Initialization
+  # --- Computation
 
-  x = np.ones(nA*nB)
-  y = np.ones(mA*mB)
-
-  # Structure matrix
-  G = np.kron(As.T, Bs.T) + np.kron(At.T, Bt.T)
+  X = np.ones((nA,nB))
+  Y = np.ones((mA,mB))
 
   for i in range(nIter):
 
-    y_ = (G @ x) * yc
-    x_ = G.T @ y
+    Y_ = (As.T @ X @ Bs + At.T @ X @ Bt) * Yc
+    X_ = As @ Y @ Bs.T + At @ Y @ Bt.T
 
     # Normalization
-    x = x_/np.sqrt(np.sum(x_**2))
-    y = y_/np.sqrt(np.sum(y_**2))
+    X = X_/np.sqrt(np.sum(X_**2))
+    Y = Y_/np.sqrt(np.sum(X_**2))
 
-  # Similarity matrices
-  S_nodes = x.reshape((nA, nB))
-  S_edges = y.reshape((mA, mB))
-
-  return(S_nodes, S_edges)
+  return(X, Y)
 
 # === Matching =============================================================
-def matching(NetA, NetB, threshold=None, **kwargs):
+def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):
 
   # Get similarity measures
-  start = time.time()
+  if verbose:
+    start = time.time()
+
   Sim = compare(NetA, NetB, **kwargs)[0]
-  print('Scoring:', time.time()-start)
+
+  if verbose:
+    print('Scoring: {:.02f} ms'.format((time.time()-start)*1000), end=' - ')
 
   # Threshold
   if threshold is not None:
     Sim[Sim<threshold] = -np.inf
 
   # Hungarian algorithm (Jonker-Volgenant)
-  start = time.time()
-  I, J = linear_sum_assignment(Sim, True)
-  print('Matching:', time.time()-start)
+  if verbose:
+    start = time.time()
 
+  I, J = linear_sum_assignment(Sim, True)
+
+  if verbose:
+    print('Matching: {:.02f} ms'.format((time.time()-start)*1000))
 
   # Output
   M = [(I[k], J[k]) for k in range(len(I))]

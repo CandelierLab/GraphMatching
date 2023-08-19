@@ -10,11 +10,11 @@ os.system('clear')
 # === Parameters ===========================================================
 
 Nmax = 50
-Nsub = list(range(1, Nmax+1, 5))
+Nsub = list(range(5, Nmax+1, 5))
 
 p = 0.5
 
-nIter = 1
+nIter = 10
 
 # ==========================================================================
 
@@ -80,5 +80,10 @@ ax.plot(Nsub, rho_rand, label='rand')
 ax.plot(Nsub, rho_bin, label='bin')
 
 ax.legend()
+
+ax.set_xlabel('Number of subgraph nodes')
+ax.set_xlim(1, Nmax)
+ax.set_ylabel('Correct matches ratio')
+ax.set_ylim(0, 1)
 
 plt.show()
