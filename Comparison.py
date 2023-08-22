@@ -1,9 +1,9 @@
 import time
 import pprint
 import numpy as np
-from scipy.sparse import dok_array
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
+import time
 
 # === Comparison ===========================================================
 def compare(NetA, NetB, weight_constraint=True, nIter=100):
@@ -18,9 +18,8 @@ def compare(NetA, NetB, weight_constraint=True, nIter=100):
       Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
   '''
   
-  # Define edges
-  NetA.adj2edges()
-  NetB.adj2edges()
+  start = time.time()
+  toc = lambda : print((time.time() - start)*1000)
 
   # --- Definitions
 
@@ -32,25 +31,11 @@ def compare(NetA, NetB, weight_constraint=True, nIter=100):
   mA = NetA.nEd
   mB = NetB.nEd
 
-  # --- Source-edge and terminus-edge matrices, weight vectors
+  # Weights B
+  wA = [e['w'] for e in NetA.edge]
+  wB = [e['w'] for e in NetB.edge]
 
-  # Net A
-  As = np.zeros((nA, mA))
-  At = np.zeros((nA, mA))
-  wA = np.zeros(mA)
-  for k, e in enumerate(NetA.edge):
-    As[e['i'], k] = 1
-    At[e['j'], k] = 1
-    wA[k] = e['w']
-
-  # Net B
-  Bs = np.zeros((nB, mB))
-  Bt = np.zeros((nB, mB))
-  wB = np.zeros(mB)
-  for k, e in enumerate(NetB.edge):
-    Bs[e['i'], k] = 1
-    Bt[e['j'], k] = 1
-    wB[k] = e['w']
+  toc()
 
   # --- Weight constraint
 
@@ -71,19 +56,25 @@ def compare(NetA, NetB, weight_constraint=True, nIter=100):
   else:
     Yc = np.ones((mA,mB))
 
+  toc()
+
   # --- Computation
+
+  print(nA, nB, mA, mB)
 
   X = np.ones((nA,nB))
   Y = np.ones((mA,mB))
 
   for i in range(nIter):
 
-    Y_ = (As.T @ X @ Bs + At.T @ X @ Bt) * Yc
-    X_ = As @ Y @ Bs.T + At @ Y @ Bt.T
+    Y_ = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+    X_ = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
 
     # Normalization
     X = X_/np.sqrt(np.sum(X_**2))
     Y = Y_/np.sqrt(np.sum(X_**2))
+
+  toc()
 
   return(X, Y)
 

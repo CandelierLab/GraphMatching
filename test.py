@@ -1,18 +1,13 @@
 import os
-import Network
+from Network import *
 from  Comparison import *
+import timeit
 
 os.system('clear')
 
-Net = Network.Random(30, 0.5)
+Net = Network(5)
+Net.set_rand_edges('ERG', 0.5)
 
-Sub, Idx = Net.subnet(10)
+print(Net)
 
-# print(Net.Adj)
-# print(Idx)
-# print(Sub.Adj)
-
-M = matching(Net, Sub, nIter=10, verbose=True)
-
-# Correct matches
-print(np.count_nonzero([Idx[m[1]]==m[0] for m in M])/Sub.nNd)
+# Net.print()

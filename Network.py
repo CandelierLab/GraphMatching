@@ -1,22 +1,24 @@
 import random
 import numpy as np
 
-# === Generic network ======================================================
-
-class Generic:
+class Network:
   ''' Generic class for networks '''
     
-  def __init__(self):
+  # === CONSTRUCTOR ========================================================
 
-    self.nNd = 0
+  def __init__(self, nNode=0):
+
+    self.nNd = nNode
     self.nEd = 0
 
     # Lists of nodes and edges
     self.node = None
     self.edge = None
 
-    # Adjacency matrices
+    # Adjacency matrix
     self.Adj = np.empty(0)
+
+  # === PRINT ==============================================================
 
   def __repr__(self):
     ''' String representation of the network '''
@@ -29,18 +31,64 @@ class Generic:
 
     return s
   
-  def adj2edges(self, force=False):
-    ''' Define the list of edges based on the adjacency matrix. '''
+  # ========================================================================
+  #                             GENERATION
+  # ========================================================================
 
-    # Skip if already existing
-    if self.edge is not None and not force:
-      return
+  # ------------------------------------------------------------------------
+  #                          Random structure
+  # ------------------------------------------------------------------------
 
-    self.edge = []
+  def set_rand_edges(self, method='ERG', p=0.5):
+    
+    A = np.random.rand(self.nNd, self.nNd)
 
-    for ij in np.argwhere(self.Adj):
-      self.edge.append({'i': ij[0], 'j': ij[1], 'w': float(self.Adj[ij[0], ij[1]])})
+    match method:
 
+      case 'Erdös-Rényi' | 'ER':
+        # In the ER model, the number of edges is guaranteed.
+        # NB: the parameter p can be either the number of edges (int)
+        #   or a proportion of edges (float, in [0,1])
+
+        # In case p is a proportion, convert it to an integer
+        if isinstance(p, float):
+          p = int(np.round(p*self.nNd**2))
+
+        self.Adj = A < np.sort(A.flatten())[p]
+
+      case 'Erdös-Rényi-Gilbert' | 'ERG':
+        # In the ERG the edges are drawn randomly so the exact number of 
+        # edges is not guaranteed.
+
+        self.Adj = A < p
+
+    # Update number of edges
+    self.nEd = len(self.edge)
+    
+  # ========================================================================
+  #                             PREPARATION
+  # ========================================================================
+
+  def prepare(self, force=False):
+
+    # --- Edges
+
+    if self.edge is None or force:
+
+      self.edge = []
+
+      for ij in np.argwhere(self.Adj):
+        self.edge.append({'i': ij[0], 'j': ij[1], 'w': float(self.Adj[ij[0], ij[1]])})
+
+    # --- Source-edge and terminus-edge matrices, weight vectors
+
+    # Net A
+    self.As = np.zeros((self.nNd, self.nEd))
+    self.At = np.zeros((self.nNd, self.nEd))
+    for k, e in enumerate(self.edge):
+      self.As[e['i'], k] = 1
+      self.At[e['j'], k] = 1
+    
   def subnet(self, idx):
 
     # Create subnetwork
@@ -62,10 +110,10 @@ class Generic:
     Sub.nEd = np.count_nonzero(Sub.Adj)
     
     return Sub if isinstance(idx, list) else (Sub, I)
-
+  
 # === Random Network =======================================================
 
-class Random(Generic):
+class Random(Network):
   ''' Erdos-Renyi network '''
 
   def __init__(self, N=None, p=None, method='rand'):
@@ -110,8 +158,6 @@ class Random(Generic):
 
         self.Adj = None
 
-    # Update number of edges
-    self.nEd = np.count_nonzero(self.Adj)
-
-    
+    # Prepare
+    self.prepare()
 
