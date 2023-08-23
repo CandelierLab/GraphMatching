@@ -21,7 +21,7 @@ class Network:
   # === PRINT ==============================================================
 
   def __repr__(self):
-    ''' String representation of the network '''
+    ''' Basic info on the network'''
 
     s = '-'*50 + '\n'
     s += self.__class__.__name__ + ' network\n\n'
@@ -31,6 +31,49 @@ class Network:
 
     return s
   
+  def print(self, maxrow=10, maxcol=10):
+    '''Extended info on the network'''
+
+    # Basic info
+    print(self)
+
+    # --- Header
+
+    r = ['    ', '    ', '    ']
+    for j in range(self.Adj.shape[1]):
+
+      if j>maxcol: 
+        r[-1] += ' ...'
+        break
+
+      d, u = divmod(j, 10)
+      r[0] += ' {:d}'.format(d)
+      r[1] += ' {:d}'.format(u)
+      r[-1] += '--'
+
+    print(r[0])
+    print(r[1])
+    print(r[-1])
+
+    # --- Rows
+
+    for i, row in enumerate(self.Adj):
+
+      if i>maxrow: 
+        print('...')
+        break
+
+      print('{:02d} |'.format(i), end='')
+      for j, a in enumerate(row):
+        if j>maxcol: 
+          print('    ', end='')
+          break
+        print(' 1' if a else ' .', end='')
+      print(' |')
+
+    print(r[-1])
+
+
   # ========================================================================
   #                             GENERATION
   # ========================================================================
@@ -63,7 +106,7 @@ class Network:
         self.Adj = A < p
 
     # Update number of edges
-    self.nEd = len(self.edge)
+    self.nEd = np.count_nonzero(self.Adj)
     
   # ========================================================================
   #                             PREPARATION
@@ -111,53 +154,3 @@ class Network:
     
     return Sub if isinstance(idx, list) else (Sub, I)
   
-# === Random Network =======================================================
-
-class Random(Network):
-  ''' Erdos-Renyi network '''
-
-  def __init__(self, N=None, p=None, method='rand'):
-    
-    super().__init__()
-
-    # Empty network
-    if p is None: return
-
-    # Set number of nodes
-    self.nNd = N
-
-    # --- Binary adjacency matrix
-
-    A = np.random.rand(self.nNd, self.nNd)
-
-    match method:
-      case 'rand':
-        # In this methods the weights are drawn at random uniformly over 
-        # the range [0,1]
-
-        self.Adj = A
-
-      case 'Erdös-Rényi' | 'ER':
-        # In the ER model, the number of edges is guaranteed.
-        # NB: the parameter p can be either the number of edges (int)
-        #   or a proportion of edges (float, in [0,1])
-
-        # In case p is a proportion, convert it to an integer
-        if isinstance(p, float):
-          p = int(np.round(p*self.nNd**2))
-
-        # Define edges
-        Bdj = (A < np.sort(A.flatten())[p])
-
-        # Weighted adjacency matrix
-        self.Adj = Bdj.astype(float)
-
-      case 'Erdös-Rényi-Gilbert' | 'ERG':
-        # In the ERG the edges are drawn randomly so the exact number of 
-        # edges is not guaranteed.
-
-        self.Adj = None
-
-    # Prepare
-    self.prepare()
-

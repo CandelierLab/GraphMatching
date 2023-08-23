@@ -5,9 +5,8 @@ import timeit
 
 os.system('clear')
 
-Net = Network(5)
-Net.set_rand_edges('ERG', 0.5)
+Net = Network(10)
+Net.set_rand_edges('ER', 0.1)
 
-print(Net)
-
-# Net.print()
+# print(Net)
+Net.print()
