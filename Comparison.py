@@ -6,7 +6,7 @@ from scipy.optimize import linear_sum_assignment
 import time
 
 # === Comparison ===========================================================
-def compare(NetA, NetB, weight_constraint=True, nIter=100):
+def compare(NetA, NetB, weight_constraint=False, nIter=100):
   '''
   Comparison of two networks.
 
@@ -31,11 +31,11 @@ def compare(NetA, NetB, weight_constraint=True, nIter=100):
   mA = NetA.nEd
   mB = NetB.nEd
 
-  # Weights B
-  wA = [e['w'] for e in NetA.edge]
-  wB = [e['w'] for e in NetB.edge]
+  # Weights
+  wA = 0 #NetA.edge_attr[0]
+  wB = 0 #NetB.edge_attr[0]
 
-  toc()
+  # toc()
 
   # --- Weight constraint
 
@@ -56,11 +56,11 @@ def compare(NetA, NetB, weight_constraint=True, nIter=100):
   else:
     Yc = np.ones((mA,mB))
 
-  toc()
+  # toc()
 
   # --- Computation
 
-  print(nA, nB, mA, mB)
+  # print(nA, nB, mA, mB)
 
   X = np.ones((nA,nB))
   Y = np.ones((mA,mB))
@@ -74,7 +74,7 @@ def compare(NetA, NetB, weight_constraint=True, nIter=100):
     X = X_/np.sqrt(np.sum(X_**2))
     Y = Y_/np.sqrt(np.sum(X_**2))
 
-  toc()
+  # toc()
 
   return(X, Y)
 

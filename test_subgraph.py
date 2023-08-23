@@ -1,16 +1,13 @@
 import os
-import Network
+from Network import *
 from  Comparison import *
 
 os.system('clear')
 
-Net = Network.Random(30, 0.5)
+Net = Network(30)
+Net.set_rand_edges('ER', 0.1)
 
 Sub, Idx = Net.subnet(10)
-
-# print(Net.Adj)
-# print(Idx)
-# print(Sub.Adj)
 
 M = matching(Net, Sub, nIter=10, verbose=True)
 

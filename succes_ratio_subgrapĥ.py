@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-import Network
+from Network import *
 from  Comparison import *
 
 os.system('clear')
@@ -28,7 +28,9 @@ for n in Nsub:
 
   for i in range(nIter):
 
-    Net = Network.Random(Nmax, p, method='ER')
+    Net = Network(Nmax)
+    Net.set_rand_edges('ER', p)
+
     Sub, Idx = Net.subnet(n)
 
     if not Sub.Adj.any():

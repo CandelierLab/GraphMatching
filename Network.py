@@ -124,6 +124,9 @@ class Network:
 
     # Update number of edges
     self.nEd = np.count_nonzero(self.Adj)
+
+    # Prepare structure
+    self.prepare()
     
   # ------------------------------------------------------------------------
   #                              Attributes
@@ -171,23 +174,14 @@ class Network:
 
   def prepare(self, force=False):
 
-    # --- Edges
+    # --- Source-edge and terminus-edge matrices
 
-    if self.edge is None or force:
-
-      self.edge = []
-
-      for ij in np.argwhere(self.Adj):
-        self.edge.append({'i': ij[0], 'j': ij[1], 'w': float(self.Adj[ij[0], ij[1]])})
-
-    # --- Source-edge and terminus-edge matrices, weight vectors
-
-    # Net A
     self.As = np.zeros((self.nNd, self.nEd))
     self.At = np.zeros((self.nNd, self.nEd))
-    for k, e in enumerate(self.edge):
-      self.As[e['i'], k] = 1
-      self.At[e['j'], k] = 1
+    I = np.where(self.Adj)
+    for i in range(len(I[0])):
+      self.As[I[0][i], i] = 1
+      self.At[I[1][i], i] = 1
     
   # ========================================================================
   #                             MODIFICATIONS
@@ -222,6 +216,9 @@ class Network:
     for i in range(self.nNa):
       Sub.add_node_attr(self.node_attr[i][I])
     
+    # Preparation
+    Sub.prepare()
+
     return Sub if isinstance(idx, list) else (Sub, I)
   
   def degrade(self, type, **kwargs):
@@ -279,6 +276,9 @@ class Network:
         K = np.random.choice(nEtr, n, replace=False)
         Det.Adj[I[0][K], I[1][K]] = False
 
+        # Unmodified edges
+        Idx = np.setdiff1d(range(Det.nEd), K)
+
         # New edges
         K = np.random.choice(nEtc, n, replace=False)
         Det.Adj[J[0][K], J[1][K]] = True
@@ -289,4 +289,4 @@ class Network:
       case 'attr':
         pass
 
-    return Det
+    return (Det, Idx)
