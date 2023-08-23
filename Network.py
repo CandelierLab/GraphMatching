@@ -1,4 +1,5 @@
 import random
+import copy
 import numpy as np
 
 class Network:
@@ -8,8 +9,11 @@ class Network:
 
   def __init__(self, nNode=0):
 
+    # NUmbers
     self.nNd = nNode
+    self.nNa = 0
     self.nEd = 0
+    self.nEa = 0
 
     # Lists of nodes and edges
     self.node = None
@@ -17,6 +21,10 @@ class Network:
 
     # Adjacency matrix
     self.Adj = np.empty(0)
+
+    # Attributes
+    self.edge_attr = []
+    self.node_attr = []
 
   # === PRINT ==============================================================
 
@@ -31,7 +39,7 @@ class Network:
 
     return s
   
-  def print(self, maxrow=10, maxcol=10):
+  def print(self, maxrow=20, maxcol=20):
     '''Extended info on the network'''
 
     # Basic info
@@ -73,6 +81,15 @@ class Network:
 
     print(r[-1])
 
+    # --- Edge attributes
+
+    for i in range(self.nEa):
+
+      print('\nEdge attribute {:d}:'.format(i))
+      print(self.edge_attr[0])
+
+
+    print('')
 
   # ========================================================================
   #                             GENERATION
@@ -108,6 +125,46 @@ class Network:
     # Update number of edges
     self.nEd = np.count_nonzero(self.Adj)
     
+  # ------------------------------------------------------------------------
+  #                              Attributes
+  # ------------------------------------------------------------------------
+
+  def add_edge_attr(self, *args, **kwargs):
+
+    if isinstance(args[0], str):
+
+      match args[0]:
+
+        case 'rand':
+
+          # Parameters
+          mv = kwargs['min'] if 'min' in kwargs else 0
+          Mv = kwargs['max'] if 'max' in kwargs else 1
+
+          # Attribute
+          attr = np.random.random(self.nEd)*(Mv-mv) + mv
+
+        case 'gauss':
+          
+          # Parameters
+          mu = kwargs['mean'] if 'mean' in kwargs else 0
+          sigma = kwargs['std'] if 'std' in kwargs else 1
+
+          # Attribute
+          attr = mu + sigma*np.random.randn(self.nEd)
+
+    else:
+      
+      attr = args[0]
+
+    self.edge_attr.append(attr)
+
+    # Update number of edge attributes
+    self.nEa = len(self.edge_attr)
+
+  def add_node_attr(self, method='rand', **kwargs):
+    pass
+
   # ========================================================================
   #                             PREPARATION
   # ========================================================================
@@ -132,6 +189,10 @@ class Network:
       self.As[e['i'], k] = 1
       self.At[e['j'], k] = 1
     
+  # ========================================================================
+  #                             MODIFICATIONS
+  # ========================================================================
+
   def subnet(self, idx):
 
     # Create subnetwork
@@ -151,6 +212,81 @@ class Network:
     # Numbers
     Sub.nNd = len(I)
     Sub.nEd = np.count_nonzero(Sub.Adj)
+    Sub.nNa = self.nNa
+    Sub.nEa = self.nEa
+
+    # Attributes
+    for i in range(self.nEa):
+      Sub.add_edge_attr(self.edge_attr[i][I])
+
+    for i in range(self.nNa):
+      Sub.add_node_attr(self.node_attr[i][I])
     
     return Sub if isinstance(idx, list) else (Sub, I)
   
+  def degrade(self, type, **kwargs):
+    '''Network degradation
+    Degradation can be done in several different ways:
+    - Structure: edges are reassigned, i.e. ones in the adjacency matrix are
+        moved to a different place. Corresponding attributes may be 
+        reassigned to a new value as well (type='struct+attr') or not (type='struct').
+    - Attributes: Values are reassigned (type='attr').
+
+    Parameters:
+      type='struct'
+        p: proportion of edges to reassign (default is undefined)
+        n: number of edges to reassign (default n=1)
+
+      type='struct+attr'
+        TO DO
+
+      type='attr'
+        TO DO
+    '''
+
+    # New network object
+    Det = copy.deepcopy(self)
+
+    match type:
+
+      case 'struct':
+        
+        # Number of modifications
+        if 'p' in kwargs:
+          n = round(kwargs['p']*Det.nEd)
+        else:
+          n = kwargs['n'] if 'n' in kwargs else 1
+
+        # --- Edges to remove
+
+        I = np.where(Det.Adj)
+        nEtr = len(I[0])
+
+        if n>nEtr:
+          raise Exception('Not enough edges to modify ({:d} asked for {:d} existing).'.format(n, nEtr)) 
+        
+        # --- Edges to create
+
+        J = np.where(Det.Adj==False)
+        nEtc = len(J[0])
+
+        if n>nEtc:
+          raise Exception('Too many edges to modify ({:d} asked for {:d} possible).'.format(n, nEtc)) 
+
+        # --- Operation
+
+        # Remove edges
+        K = np.random.choice(nEtr, n, replace=False)
+        Det.Adj[I[0][K], I[1][K]] = False
+
+        # New edges
+        K = np.random.choice(nEtc, n, replace=False)
+        Det.Adj[J[0][K], J[1][K]] = True
+
+      case 'struct+attr':
+        pass
+
+      case 'attr':
+        pass
+
+    return Det
