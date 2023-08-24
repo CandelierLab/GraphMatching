@@ -221,6 +221,8 @@ class Network:
 
     return Sub if isinstance(idx, list) else (Sub, I)
   
+  # ========================================================================
+
   def degrade(self, type, **kwargs):
     '''Network degradation
     Degradation can be done in several different ways:

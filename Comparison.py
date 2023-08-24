@@ -6,7 +6,8 @@ from scipy.optimize import linear_sum_assignment
 import time
 
 # === Comparison ===========================================================
-def compare(NetA, NetB, weight_constraint=False, nIter=100):
+
+def scores(NetA, NetB, weight_constraint=False, nIter=100):
   '''
   Comparison of two networks.
 
@@ -85,7 +86,7 @@ def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):
   if verbose:
     start = time.time()
 
-  Sim = compare(NetA, NetB, **kwargs)[0]
+  Sim = scores(NetA, NetB, **kwargs)[0]
 
   if verbose:
     print('Scoring: {:.02f} ms'.format((time.time()-start)*1000), end=' - ')

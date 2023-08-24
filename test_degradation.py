@@ -4,14 +4,24 @@ from  Comparison import *
 
 os.system('clear')
 
-Net = Network(10)
-Net.set_rand_edges('ER', 0.1)
+Net = Network(5)
+Net.set_rand_edges('ER', 5)
 
-Det, Idx = Net.degrade('struct', p=0.5)
+Det, Isim = Net.degrade('struct', n=1)
 
-M = matching(Net, Det, nIter=10, verbose=True)
+Net.print()
+print(Isim, np.setdiff1d(range(Net.nEd), Isim))
+Det.print()
+
+X, Y = scores(Net, Det)
+
+with np.printoptions(precision=2, suppress=True):
+  print(X)
+# print(Y)
+
+M = matching(Net, Det, nIter=100, verbose=True)
 
 print(M)
 
-# Correct matches
-print(np.count_nonzero([m[1]==m[0] for m in M])/Net.nNd)
+# # Correct matches
+# print(np.count_nonzero([m[1]==m[0] for m in M])/Net.nNd)
