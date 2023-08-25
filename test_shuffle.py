@@ -4,29 +4,42 @@ from  Comparison import *
 
 os.system('clear')
 
-n = 5
+# --- Parameters -----------------------------------------------------------
+
+n = 10
+p = 0.5 #round(n/10)
+
+# n = 1000
+# p = round(n/10)
+
+# --------------------------------------------------------------------------
 
 Net = Network(n)
-Net.set_rand_edges('ER', 0.5)
+Net.set_rand_edges('ER', p)
 
 # --- Identity
 
 Met = copy.deepcopy(Net)
 Icor = np.arange(n)
 
-# --- Scrambling
+# --- Shuffling
 
 Met, Icor = Net.shuffle()
 
 
-Net.print()
-print(Icor)
-Met.print()
+# Net.print()
+# print(Icor)
+# Met.print()
 
 # --- Matching
 
-M = matching(Net, Met, nIter=10, verbose=True)
+X, Y = scores(Net, Met, nIter=100)
+with np.printoptions(precision=3, suppress=True):
+  print(X)
+  print(np.mean(X/np.sqrt(np.sum(X**2))))
 
-# Correct matches
-print(M)
-print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/n)
+
+# M = matching(Net, Met, nIter=10, verbose=True)
+
+# # Correct matches
+# print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/n)

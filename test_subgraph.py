@@ -4,12 +4,19 @@ from  Comparison import *
 
 os.system('clear')
 
-Net = Network(100)
-Net.set_rand_edges('ER', 0.1)
+# --- Parameters -----------------------------------------------------------
 
-Sub, Isim = Net.subnet(100)
+n = 100
+p = 0.1
+
+# --------------------------------------------------------------------------
+
+Net = Network(n)
+Net.set_rand_edges('ER', p)
+
+Sub, Icor = Net.subnet(n)
 
 M = matching(Net, Sub, nIter=10, verbose=True)
 
 # Correct matches
-print(np.count_nonzero([Isim[m[1]]==m[0] for m in M])/Sub.nNd)
+print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/Sub.nNd)

@@ -299,7 +299,7 @@ class Network:
         Det.Adj[I[0][K], I[1][K]] = False
 
         # Unmodified edges
-        Idx = np.setdiff1d(range(Det.nEd), K)
+        Jcor = np.setdiff1d(range(Det.nEd), K)
 
         # New edges
         K = np.random.choice(nEtc, n, replace=False)
@@ -311,4 +311,7 @@ class Network:
       case 'attr':
         pass
 
-    return (Det, Idx)
+    # Preparation
+    Det.prepare()
+
+    return (Det, Jcor)
