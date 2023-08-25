@@ -36,7 +36,7 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   wA = 0 #NetA.edge_attr[0]
   wB = 0 #NetB.edge_attr[0]
 
-  # toc()
+  toc()
 
   # --- Weight constraint
 
@@ -57,25 +57,43 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   else:
     Yc = np.ones((mA,mB))
 
-  # toc()
+  toc()
 
   # --- Computation
 
-  # print(nA, nB, mA, mB)
-
+  # Preallocation
   X = np.ones((nA,nB))
   Y = np.ones((mA,mB))
 
   for i in range(nIter):
 
-    Y_ = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
-    X_ = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
+    print('Iter', i, end='')
 
-    # Normalization
-    X = X_/np.sqrt(np.sum(X_**2))
-    Y = Y_/np.sqrt(np.sum(X_**2))
+    Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+    X = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
+    
+    
+    print('', '{:.02f} ms'.format((time.time() - start)*1000), end='')
 
-  # toc()
+    ''' === A note on normalization ===
+
+    Normalization is useful for proving the convergence of the algorithm, 
+    but is not necessary in the computation since the scores are relative
+    and not absolute.
+    
+    So as long as the scores do not overflow the maximal float value, 
+    there is no need to normalize.
+
+    Nevertheless, if one needs normalization, is can be performed after the
+    iterative procedure by dividing the final score matrices X and Y by:
+    f = np.sqrt(np.sum(X**2))
+    This is much more efficient than computing the normalization at each
+    iteration.
+    '''
+
+    print('', '{:.02f} ms'.format((time.time() - start)*1000))
+
+  toc()
 
   return(X, Y)
 
