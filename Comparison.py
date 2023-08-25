@@ -22,7 +22,7 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   start = time.time()
   toc = lambda : print((time.time() - start)*1000)
 
-  # --- Definitions
+  # --- Definitions --------------------------------------------------------
 
   # Number of nodes
   nA = NetA.nNd
@@ -36,9 +36,17 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   wA = 0 #NetA.edge_attr[0]
   wB = 0 #NetB.edge_attr[0]
 
+  # Normalization factor
+  f = 2*np.sqrt(mA*mB/nA/nB)
+
   toc()
 
-  # --- Weight constraint
+  # --- Attributes ---------------------------------------------------------
+
+  # Node attributes
+  Xc = np.ones((nA,nB))/f
+
+  # Edge atttibutes
 
   if weight_constraint:
 
@@ -50,16 +58,16 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
 
     sigma2 = np.var(W)
     if sigma2>0:
-      Yc = np.exp(-W**2/2/sigma2)
+      Yc = np.exp(-W**2/2/sigma2)/f
     else:
-      Yc = np.ones((mA,mB))
+      Yc = np.ones((mA,mB))/f
 
   else:
-    Yc = np.ones((mA,mB))
+    Yc = np.ones((mA,mB))/f
 
   toc()
 
-  # --- Computation
+  # --- Computation --------------------------------------------------------
 
   # Preallocation
   X = np.ones((nA,nB))
@@ -67,13 +75,21 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
 
   for i in range(nIter):
 
-    print('Iter', i, end='')
+    ''' === A note on operation order ===
 
+    If all values of X are equal to the same value x, then updating Y gives
+    a homogeneous matrix with values 2x ; in this case the update of Y does
+    not give any additional information. However, when all Y are equal the 
+    update of X does not give an homogeneous matrix as some information 
+    about the network strutures is included.
+
+    So it is always preferable to start with the update of X.
+    '''
+
+    X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
     Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
-    X = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
-    
-    
-    print('', '{:.02f} ms'.format((time.time() - start)*1000), end='')
+        
+    # print('', '{:.02f} ms'.format((time.time() - start)*1000), end='')
 
     ''' === A note on normalization ===
 
@@ -82,16 +98,27 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
     and not absolute.
     
     So as long as the scores do not overflow the maximal float value, 
-    there is no need to normalize.
+    there is no need to normalize. But this can happen quite fast.
 
-    Nevertheless, if one needs normalization, is can be performed after the
-    iterative procedure by dividing the final score matrices X and Y by:
-    f = np.sqrt(np.sum(X**2))
+    A good approximation of the normalization factor is:
+
+            f = 2 sqrt[ (mA*mB)/(nA*nB) ] = 2 sqrt[ (mA/nA)(mB/nB) ]
+
+    for an ER network with a density of edges p, we have m = p.n^2 so:
+    
+            f = 2 sqrt(nA.nB.pA.pB)
+
+    Nevertheless, if one needs normalization as defined in Zager et.al.,
+    it can be performed after the iterative procedure by dividing the final
+    score matrices X and Y by:
+
+                        f = np.sqrt(np.sum(X**2))
+
     This is much more efficient than computing the normalization at each
     iteration.
     '''
 
-    print('', '{:.02f} ms'.format((time.time() - start)*1000))
+    # print('', '{:.02f} ms'.format((time.time() - start)*1000))
 
   toc()
 

@@ -6,8 +6,10 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-n = 10
+n = 100
 p = 0.5 #round(n/10)
+
+nIter = 10
 
 # n = 1000
 # p = round(n/10)
@@ -33,13 +35,9 @@ Met, Icor = Net.shuffle()
 
 # --- Matching
 
-X, Y = scores(Net, Met, nIter=100)
-with np.printoptions(precision=3, suppress=True):
-  print(X)
-  print(np.mean(X/np.sqrt(np.sum(X**2))))
+# X, Y = scores(Net, Met, nIter=nIter)
 
+M = matching(Net, Met, nIter=nIter, verbose=True)
 
-# M = matching(Net, Met, nIter=10, verbose=True)
-
-# # Correct matches
-# print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/n)
+# Correct matches
+print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/n)
