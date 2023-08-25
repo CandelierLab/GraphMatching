@@ -4,10 +4,10 @@ from  Comparison import *
 
 os.system('clear')
 
-Net = Network(30)
+Net = Network(100)
 Net.set_rand_edges('ER', 0.1)
 
-Sub, Isim = Net.subnet(10)
+Sub, Isim = Net.subnet(100)
 
 M = matching(Net, Sub, nIter=10, verbose=True)
 

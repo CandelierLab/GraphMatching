@@ -15,10 +15,6 @@ class Network:
     self.nEd = 0
     self.nEa = 0
 
-    # Lists of nodes and edges
-    self.node = None
-    self.edge = None
-
     # Adjacency matrix
     self.Adj = np.empty(0)
 
@@ -185,6 +181,30 @@ class Network:
     
   # ========================================================================
   #                             MODIFICATIONS
+  # ========================================================================
+
+  def shuffle(self):
+
+
+    # New network object
+    Met = copy.deepcopy(self)
+
+    # Suffling indexes
+    Icor = np.arange(self.nNd)
+    np.random.shuffle(Icor)
+
+    # Adjacency matrix
+    Met.Adj = Met.Adj[Icor, :][:, Icor]
+
+    # Attributes
+    # --- TO DO ---
+
+    # Preparation
+    # (Source-edge and terminus-edge matrices)
+    Met.prepare()
+
+    return (Met, Icor)
+
   # ========================================================================
 
   def subnet(self, idx):
