@@ -1,15 +1,15 @@
 import os
 from Network import *
-from  Comparison import *
+from Comparison import *
 
 os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-n = 100
+n = 10
 p = 0.5 #round(n/10)
 
-nIter = 10
+nIter = 5
 
 # n = 1000
 # p = round(n/10)
@@ -28,16 +28,29 @@ Icor = np.arange(n)
 
 Met, Icor = Net.shuffle()
 
-
 # Net.print()
 # print(Icor)
 # Met.print()
 
 # --- Matching
 
-# X, Y = scores(Net, Met, nIter=nIter)
+start = time.time()
 
-M = matching(Net, Met, nIter=nIter, verbose=True)
+X = scores(Net, Met, nIter=nIter)[0]
 
-# Correct matches
-print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/n)
+print((time.time() - start)*1000)
+print('Check: ', X[0][0])
+
+print('')
+
+start = time.time()
+
+X = scores_cpp(Net, Met, nIter=nIter)[0]
+
+print((time.time() - start)*1000)
+print('Check: ', X[0][0])
+
+# M = matching(Net, Met, nIter=nIter, verbose=True)
+
+# # Correct matches
+# print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/n)

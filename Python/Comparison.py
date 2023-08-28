@@ -5,6 +5,12 @@ from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 import time
 
+from ctypes import CDLL, POINTER
+from ctypes import c_size_t, c_double
+
+# load the library
+GASP = CDLL("C++/gasp.so")
+
 # === Comparison ===========================================================
 
 def scores(NetA, NetB, weight_constraint=False, nIter=100):
@@ -37,9 +43,9 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   wB = 0 #NetB.edge_attr[0]
 
   # Normalization factor
-  f = 2*np.sqrt(mA*mB/nA/nB)
+  f = 4*mA*mB/nA/nB
 
-  toc()
+  # toc()
 
   # --- Attributes ---------------------------------------------------------
 
@@ -58,14 +64,14 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
 
     sigma2 = np.var(W)
     if sigma2>0:
-      Yc = np.exp(-W**2/2/sigma2)/f
+      Yc = np.exp(-W**2/2/sigma2)
     else:
-      Yc = np.ones((mA,mB))/f
+      Yc = np.ones((mA,mB))
 
   else:
-    Yc = np.ones((mA,mB))/f
+    Yc = np.ones((mA,mB))
 
-  toc()
+  # toc()
 
   # --- Computation --------------------------------------------------------
 
@@ -120,9 +126,55 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
 
     # print('', '{:.02f} ms'.format((time.time() - start)*1000))
 
-  toc()
+  # toc()
 
   return(X, Y)
+
+def scores_cpp(NetA, NetB, nIter=100):
+  '''
+  Comparison of two networks.
+
+  The algorithm is identical to [1] but with the addition of a constraint
+  of edge weight similarity. Set weight_constraint=False to recover the 
+  original algorithm.
+
+  [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
+      Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
+  '''
+  
+  start = time.time()
+  toc = lambda : print((time.time() - start)*1000)
+
+  # --- Definitions --------------------------------------------------------
+
+  # Number of nodes
+  nA = NetA.nNd
+  nB = NetB.nNd
+
+  # Number of edges
+  mA = NetA.nEd
+  mB = NetB.nEd
+
+  # Normalization factor
+  f = 4*mA*mB/nA/nB
+
+  # toc()
+
+  # --- Computation --------------------------------------------------------
+
+  # Preallocation
+  X = np.ones((nA,nB))
+  Y = np.ones((mA,mB))
+
+  # Prototypes
+  ptr_np = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
+  GASP.scores.argtypes = [ptr_np, ptr_np, ptr_np, ptr_np, ptr_np, ptr_np, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
+  GASP.scores.restype = None
+
+  # Compute scores
+  GASP.scores(X, Y, NetA.As, NetA.At, NetB.As, NetB.At, nA, nB, mA, mB, f, nIter)
+
+  return (X, Y)
 
 # === Matching =============================================================
 def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):
