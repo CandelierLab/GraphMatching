@@ -6,10 +6,10 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-n = 30
-p = round(n*10)
+n = 50
+p = 0.5 #round(n*10)
 
-nIter = 25
+nIter = 1
 
 # n = 1000
 # p = round(n/10)

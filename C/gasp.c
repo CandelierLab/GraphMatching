@@ -3,7 +3,7 @@
    ---------------------------------------------
 
 Compile with:
-- gcc -shared -fPIC -o C++/gasp.so C++/gasp.c
+- gcc -shared -fPIC -o C/gasp.so C/gasp.c
 
 Inspiration:
 - https://asiffer.github.io/posts/numpy/

@@ -9,7 +9,7 @@ from ctypes import CDLL, POINTER
 from ctypes import c_size_t, c_double
 
 # load the library
-GASP = CDLL("C++/gasp.so")
+GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 

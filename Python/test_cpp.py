@@ -3,7 +3,7 @@ from ctypes import c_size_t, c_double
 import numpy as np
 
 # load the library
-mylib = CDLL("C++/gasp.so")
+mylib = CDLL("C/gasp.so")
 
 # C-type corresponding to numpy array 
 ND_POINTER = np.ctypeslib.ndpointer(dtype=np.float64, 
