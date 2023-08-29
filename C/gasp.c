@@ -11,18 +11,36 @@ Inspiration:
 ------------------------------------------------------------------------- */
 
 #include <stdio.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 
 void scores(double *X,  double *Y, int *eA, int *eB, int nA, int nB, int mA, int mB, double f, int nIter) {
 
-  // --- Index lists -----------------------------------------------------
+  // --- Index arrays ------------------------------------------------------
 
+  // Definitions
   int N = 2*mA*mB;
-  int I[N];
-  int J[N];
-
   int h = 0;
   int k = 0;
+
+  // --- Memoy allocation
+
+  // Define pointers
+  int *I = NULL;
+  int *J = NULL;
+
+  // Allocate memory
+  I = (int *) malloc(N*sizeof(int));
+  J = (int *) malloc(N*sizeof(int));
+
+  // Checks
+  if ((I==NULL || J==NULL)) {
+    fprintf(stderr, "GASP: Memory allocation failed.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // --- Build index arrays
 
   for (int i=0; i<mA; i++) {
 
@@ -64,5 +82,10 @@ void scores(double *X,  double *Y, int *eA, int *eB, int nA, int nB, int mA, int
     for (int i=0; i<N; i++) { Y[I[i]] += X[J[i]]; }
 
   }
+
+  // --- Memory management
+
+  free(I);
+  free(J);
 
 }
