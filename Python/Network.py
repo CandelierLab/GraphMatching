@@ -9,11 +9,14 @@ class Network:
 
   def __init__(self, nNode=0):
 
-    # NUmbers
+    # Numbers
     self.nNd = nNode
     self.nNa = 0
     self.nEd = 0
     self.nEa = 0
+
+    # Edge list
+    self.edges = None
 
     # Adjacency matrix
     self.Adj = np.empty(0)
@@ -170,12 +173,17 @@ class Network:
 
   def prepare(self, force=False):
 
-    # --- Source-edge and terminus-edge matrices
+    # Edge list
+    self.edges = np.zeros((self.nEd,2), dtype=np.int32)
 
+    # Source-edge and terminus-edge matrices
     self.As = np.zeros((self.nNd, self.nEd))
     self.At = np.zeros((self.nNd, self.nEd))
+
     I = np.where(self.Adj)
+
     for i in range(len(I[0])):
+      self.edges[i,:] = [I[0][i], I[1][i]]
       self.As[I[0][i], i] = 1
       self.At[I[1][i], i] = 1
     

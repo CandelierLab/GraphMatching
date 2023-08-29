@@ -6,10 +6,10 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-n = 20
-p = 0.5 #round(n/10)
+n = 30
+p = round(n*10)
 
-nIter = 10
+nIter = 25
 
 # n = 1000
 # p = round(n/10)
@@ -21,16 +21,13 @@ Net.set_rand_edges('ER', p)
 
 # --- Identity
 
-Met = copy.deepcopy(Net)
-Icor = np.arange(n)
+# Met = copy.deepcopy(Net)
+# Icor = np.arange(n)
 
 # --- Shuffling
 
 Met, Icor = Net.shuffle()
 
-# Net.print()
-# print(Icor)
-# Met.print()
 
 # --- Matching
 
@@ -39,7 +36,7 @@ start = time.time()
 X = scores(Net, Met, nIter=nIter)[0]
 
 print((time.time() - start)*1000)
-print('Check: ', X[0][0])
+print('Check: ', X[0,0:5])
 
 print('')
 
@@ -48,7 +45,7 @@ start = time.time()
 X = scores_cpp(Net, Met, nIter=nIter)[0]
 
 print((time.time() - start)*1000)
-print('Check: ', X[0][0])
+print('Check: ', X[0,0:5])
 
 # M = matching(Net, Met, nIter=nIter, verbose=True)
 

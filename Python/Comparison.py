@@ -44,6 +44,7 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
 
   # Normalization factor
   f = 4*mA*mB/nA/nB
+  # f = 1
 
   # toc()
 
@@ -167,12 +168,13 @@ def scores_cpp(NetA, NetB, nIter=100):
   Y = np.ones((mA,mB))
 
   # Prototypes
-  ptr_np = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
-  GASP.scores.argtypes = [ptr_np, ptr_np, ptr_np, ptr_np, ptr_np, ptr_np, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
+  p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
+  p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
+  GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
   GASP.scores.restype = None
 
   # Compute scores
-  GASP.scores(X, Y, NetA.As, NetA.At, NetB.As, NetB.At, nA, nB, mA, mB, f, nIter)
+  GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, f, nIter)
 
   return (X, Y)
 
