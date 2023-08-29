@@ -44,7 +44,6 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
 
   # Normalization factor
   f = 4*mA*mB/nA/nB
-  # f = 1
 
   # toc()
 

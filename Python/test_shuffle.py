@@ -6,11 +6,11 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-n = 100
-# p = 0.5
+n = 1000
+# p = 0.01
 p = round(n*10)
 
-nIter = 5
+nIter = 10
 
 # n = 1000
 # p = round(n/10)
@@ -28,6 +28,8 @@ Net.set_rand_edges('ER', p)
 # --- Shuffling
 
 Met, Icor = Net.shuffle()
+
+print('Number of operation: ', Net.nEd*Met.nEd)
 
 
 # --- Matching
