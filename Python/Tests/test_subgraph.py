@@ -17,11 +17,14 @@ rho = 0.5
 
 Net = Network(nA)
 Net.set_rand_edges('ER', p)
-Net.add_edge_attr('rand')
+Net.add_edge_attr('rand', name='test')
+Net.add_node_attr('rand', name='test2')
 
 Net.print()
 
-# Sub, Icor = Net.subnet(round(nA*rho))
+Sub, Icor = Net.subnet(round(nA*rho))
+
+Sub.print()
 
 # M = matching(Net, Sub, nIter=10, verbose=True)
 

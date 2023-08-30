@@ -84,9 +84,27 @@ class Network:
 
     for i in range(self.nEa):
 
-      print('\nEdge attribute {:d}:'.format(i))
-      print(self.edge_attr[0])
+      attr = self.edge_attr[0]
 
+      if 'name' in attr:
+        print("\nEdge attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
+      else:
+        print('\nEdge attribute {:d}:'.format(i))
+
+      print('', attr['values'])
+
+    # --- Node attributes
+
+    for i in range(self.nNa):
+
+      attr = self.node_attr[0]
+
+      if 'name' in attr:
+        print("\nNode attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
+      else:
+        print('\nNode attribute {:d}:'.format(i))
+
+      print('', attr['values'])
 
     print('')
 
@@ -144,7 +162,8 @@ class Network:
           Mv = kwargs['max'] if 'max' in kwargs else 1
 
           # Attribute
-          attr = np.random.random(self.nEd)*(Mv-mv) + mv
+          attr = {'measurable': True, 
+                  'values': np.random.random(self.nEd)*(Mv-mv) + mv}
 
         case 'gauss':
           
@@ -153,21 +172,62 @@ class Network:
           sigma = kwargs['std'] if 'std' in kwargs else 1
 
           # Attribute
-          attr = mu + sigma*np.random.randn(self.nEd)
+          attr = {'measurable': True, 
+                  'values': mu + sigma*np.random.randn(self.nEd)}
 
     else:
       
       attr = args[0]
 
+    if 'name' in kwargs:
+      attr['name'] = kwargs['name']
+
+    # Append attribute
     self.edge_attr.append(attr)
 
     # Update number of edge attributes
     self.nEa = len(self.edge_attr)
 
-  def add_node_attr(self, method='rand', **kwargs):
+  # ------------------------------------------------------------------------
 
-    
-    pass
+  def add_node_attr(self, *args, **kwargs):
+
+    if isinstance(args[0], str):
+
+      match args[0]:
+
+        case 'rand':
+
+          # Parameters
+          mv = kwargs['min'] if 'min' in kwargs else 0
+          Mv = kwargs['max'] if 'max' in kwargs else 1
+
+          # Attribute
+          attr = {'measurable': True, 
+                  'values': np.random.random(self.nNd)*(Mv-mv) + mv}
+
+        case 'gauss':
+          
+          # Parameters
+          mu = kwargs['mean'] if 'mean' in kwargs else 0
+          sigma = kwargs['std'] if 'std' in kwargs else 1
+
+          # Attribute
+          attr = {'measurable': True, 
+                  'values': mu + sigma*np.random.randn(self.nNd)}
+
+    else:
+      
+      attr = args[0]
+
+    if 'name' in kwargs:
+      attr['name'] = kwargs['name']
+
+    # Append attribute
+    self.node_attr.append(attr)
+
+    # Update number of node attributes
+    self.nNa = len(self.node_attr)
 
   # ========================================================================
   #                             PREPARATION
@@ -194,7 +254,6 @@ class Network:
   # ========================================================================
 
   def shuffle(self):
-
 
     # New network object
     Met = copy.deepcopy(self)
