@@ -9,7 +9,7 @@ os.system('clear')
 # --- Parameters -----------------------------------------------------------
 
 nA = 5
-p = 0.1
+p = 0.5
 
 rho = 0.5
 
@@ -24,6 +24,7 @@ Net.print()
 
 Sub, Icor = Net.subnet(round(nA*rho))
 
+print('Correspondence: ', Icor)
 Sub.print()
 
 # M = matching(Net, Sub, nIter=10, verbose=True)

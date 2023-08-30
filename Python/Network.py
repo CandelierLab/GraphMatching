@@ -80,19 +80,6 @@ class Network:
 
     print(r[-1])
 
-    # --- Edge attributes
-
-    for i in range(self.nEa):
-
-      attr = self.edge_attr[0]
-
-      if 'name' in attr:
-        print("\nEdge attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
-      else:
-        print('\nEdge attribute {:d}:'.format(i))
-
-      print('', attr['values'])
-
     # --- Node attributes
 
     for i in range(self.nNa):
@@ -103,6 +90,19 @@ class Network:
         print("\nNode attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
       else:
         print('\nNode attribute {:d}:'.format(i))
+
+      print('', attr['values'])
+
+    # --- Edge attributes
+
+    for i in range(self.nEa):
+
+      attr = self.edge_attr[0]
+
+      if 'name' in attr:
+        print("\nEdge attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
+      else:
+        print('\nEdge attribute {:d}:'.format(i))
 
       print('', attr['values'])
 
@@ -283,30 +283,43 @@ class Network:
 
     # Check
     if not isinstance(idx, list) and idx>self.nNd:
-      raise Exception(f"Subnetworking: The number of nodes in the subnet ({idx}) is greater than in the original network ({self.nNd})")
+      raise Exception(f"Subnetwork: The number of nodes in the subnet ({idx}) is greater than in the original network ({self.nNd})")
 
     # Indexes
     I = idx if isinstance(idx, list) else random.sample(range(self.nNd), idx)
     K = np.ix_(I,I)
 
-    # Adjacency matrices
+    # Adjacency matrix
     Sub.Adj = self.Adj[K]
 
-    # Numbers
+    # --- Properties
+
     Sub.nNd = len(I)
     Sub.nEd = np.count_nonzero(Sub.Adj)
     Sub.nNa = self.nNa
     Sub.nEa = self.nEa
 
-    # Attributes
-    for i in range(self.nEa):
-      Sub.add_edge_attr(self.edge_attr[i][I])
-
-    for i in range(self.nNa):
-      Sub.add_node_attr(self.node_attr[i][I])
-    
-    # Preparation
+     # Preparation
     Sub.prepare()
+
+    # --- Node attributes
+
+    for attr in self.node_attr:
+      attr['values'] = attr['values'][I]
+      Sub.add_node_attr(attr)
+    
+    # --- Edge attributes
+
+    if self.nEa:
+
+      # NB: Preparation has to be done before this point.
+
+      # Compute indexes
+      J = [np.where(np.all(self.edges==[I[e[0]], I[e[1]]], axis=1))[0][0] for e in Sub.edges]
+      
+      for attr in self.edge_attr:
+        attr['values'] = attr['values'][J]
+        Sub.add_edge_attr(attr)
 
     return Sub if isinstance(idx, list) else (Sub, I)
   
