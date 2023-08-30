@@ -165,6 +165,8 @@ class Network:
     self.nEa = len(self.edge_attr)
 
   def add_node_attr(self, method='rand', **kwargs):
+
+    
     pass
 
   # ========================================================================
