@@ -11,14 +11,16 @@ os.system('clear')
 nA = 5
 p = 0.5
 
-rho = 0.5
+rho = 4/nA
+
+nIter = 10
 
 # --------------------------------------------------------------------------
 
 Net = Network(nA)
 Net.set_rand_edges('ER', p)
-Net.add_edge_attr('rand', name='test')
-Net.add_node_attr('rand', name='test2')
+# Net.add_edge_attr('rand', name='test')
+Net.add_node_attr('rand', name='node_attr_1')
 
 Net.print()
 
@@ -27,7 +29,15 @@ Sub, Icor = Net.subnet(round(nA*rho))
 print('Correspondence: ', Icor)
 Sub.print()
 
-# M = matching(Net, Sub, nIter=10, verbose=True)
+# Purely structural scores
+# Xs = scores(Net, Sub, nIter=nIter)[0]
+
+# Structure & attribute scores
+X = scores(Net, Sub, nIter=nIter)[0]
+
+print(X)
+
+# M = matching(Net, Sub, nIter=nIter, verbose=True)
 
 # print(M)
 

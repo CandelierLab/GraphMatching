@@ -13,7 +13,7 @@ GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 
-def scores(NetA, NetB, weight_constraint=False, nIter=100):
+def scores(NetA, NetB, language='Python', nIter=100, attributes='all'):
   '''
   Comparison of two networks.
 
@@ -24,9 +24,6 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
       Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
   '''
-  
-  start = time.time()
-  toc = lambda : print((time.time() - start)*1000)
 
   # --- Definitions --------------------------------------------------------
 
@@ -45,15 +42,14 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   # Normalization factor
   f = 4*mA*mB/nA/nB
 
-  # toc()
-
   # --- Attributes ---------------------------------------------------------
 
   # Node attributes
   Xc = np.ones((nA,nB))/f
 
-  # Edge atttibutes
+  # Edge attributes
 
+  weight_constraint = False
   if weight_constraint:
 
     # Edge weights differences
@@ -79,103 +75,114 @@ def scores(NetA, NetB, weight_constraint=False, nIter=100):
   X = np.ones((nA,nB))
   Y = np.ones((mA,mB))
 
-  for i in range(nIter):
+  match language:
 
-    ''' === A note on operation order ===
+    case 'C':
 
-    If all values of X are equal to the same value x, then updating Y gives
-    a homogeneous matrix with values 2x ; in this case the update of Y does
-    not give any additional information. However, when all Y are equal the 
-    update of X does not give an homogeneous matrix as some information 
-    about the network strutures is included.
+      # Prototypes
+      p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
+      p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
+      GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
+      GASP.scores.restype = None
 
-    So it is always preferable to start with the update of X.
-    '''
+      # Compute scores
+      GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, f, nIter)
 
-    X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
-    Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+    case 'Python':
+
+      for i in range(nIter):
+
+        ''' === A note on operation order ===
+
+        If all values of X are equal to the same value x, then updating Y gives
+        a homogeneous matrix with values 2x ; in this case the update of Y does
+        not give any additional information. However, when all Y are equal the 
+        update of X does not give an homogeneous matrix as some information 
+        about the network strutures is included.
+
+        So it is always preferable to start with the update of X.
+        '''
+
+        X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
+        Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+            
+        # print('', '{:.02f} ms'.format((time.time() - start)*1000), end='')
+
+        ''' === A note on normalization ===
+
+        Normalization is useful for proving the convergence of the algorithm, 
+        but is not necessary in the computation since the scores are relative
+        and not absolute.
         
-    # print('', '{:.02f} ms'.format((time.time() - start)*1000), end='')
+        So as long as the scores do not overflow the maximal float value, 
+        there is no need to normalize. But this can happen quite fast.
 
-    ''' === A note on normalization ===
+        A good approximation of the normalization factor is:
 
-    Normalization is useful for proving the convergence of the algorithm, 
-    but is not necessary in the computation since the scores are relative
-    and not absolute.
-    
-    So as long as the scores do not overflow the maximal float value, 
-    there is no need to normalize. But this can happen quite fast.
+                f = 2 sqrt[ (mA*mB)/(nA*nB) ] = 2 sqrt[ (mA/nA)(mB/nB) ]
 
-    A good approximation of the normalization factor is:
+        for an ER network with a density of edges p, we have m = p.n^2 so:
+        
+                f = 2 sqrt(nA.nB.pA.pB)
 
-            f = 2 sqrt[ (mA*mB)/(nA*nB) ] = 2 sqrt[ (mA/nA)(mB/nB) ]
+        Nevertheless, if one needs normalization as defined in Zager et.al.,
+        it can be performed after the iterative procedure by dividing the final
+        score matrices X and Y by:
 
-    for an ER network with a density of edges p, we have m = p.n^2 so:
-    
-            f = 2 sqrt(nA.nB.pA.pB)
+                f = np.sqrt(np.sum(X**2))
 
-    Nevertheless, if one needs normalization as defined in Zager et.al.,
-    it can be performed after the iterative procedure by dividing the final
-    score matrices X and Y by:
-
-                        f = np.sqrt(np.sum(X**2))
-
-    This is much more efficient than computing the normalization at each
-    iteration.
-    '''
-
-    # print('', '{:.02f} ms'.format((time.time() - start)*1000))
-
-  # toc()
+        This is much more efficient than computing the normalization at each
+        iteration.
+        '''
 
   return(X, Y)
 
-def scores_cpp(NetA, NetB, nIter=100):
-  '''
-  Comparison of two networks.
+# def scores_cpp(NetA, NetB, nIter=100):
+#   '''
+#   Comparison of two networks.
 
-  The algorithm is identical to [1] but with the addition of a constraint
-  of edge weight similarity. Set weight_constraint=False to recover the 
-  original algorithm.
+#   The algorithm is identical to [1] but with the addition of a constraint
+#   of edge weight similarity. Set weight_constraint=False to recover the 
+#   original algorithm.
 
-  [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
-      Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
-  '''
+#   [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
+#       Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
+#   '''
   
-  start = time.time()
-  toc = lambda : print((time.time() - start)*1000)
+#   start = time.time()
+#   toc = lambda : print((time.time() - start)*1000)
 
-  # --- Definitions --------------------------------------------------------
+#   # --- Definitions --------------------------------------------------------
 
-  # Number of nodes
-  nA = NetA.nNd
-  nB = NetB.nNd
+#   # Number of nodes
+#   nA = NetA.nNd
+#   nB = NetB.nNd
 
-  # Number of edges
-  mA = NetA.nEd
-  mB = NetB.nEd
+#   # Number of edges
+#   mA = NetA.nEd
+#   mB = NetB.nEd
 
-  # Normalization factor
-  f = 4*mA*mB/nA/nB
+#   # Normalization factor
+#   f = 4*mA*mB/nA/nB
 
-  # toc()
+#   # toc()
 
-  # --- Computation --------------------------------------------------------
+#   # --- Computation --------------------------------------------------------
 
-  # Preallocation
-  X = np.ones((nA,nB))
-  Y = np.ones((mA,mB))
+#   # Preallocation
+#   X = np.ones((nA,nB))
+#   Y = np.ones((mA,mB))
 
-  # Prototypes
-  p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
-  p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
-  GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
-  GASP.scores.restype = None
+#   # Prototypes
+#   p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
+#   p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
+#   GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
+#   GASP.scores.restype = None
 
-  # Compute scores
-  GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, f, nIter)
+#   # Compute scores
+#   GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, f, nIter)
 
-  return (X, Y)
+#   return (X, Y)
 
 # === Matching =============================================================
 def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):

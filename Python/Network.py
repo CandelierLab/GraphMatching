@@ -57,6 +57,8 @@ class Network:
       r[0] += ' {:d}'.format(d)
       r[1] += ' {:d}'.format(u)
       r[-1] += '--'
+      
+    r[-1] += '-'
 
     print(r[0])
     print(r[1])
@@ -342,19 +344,17 @@ class Network:
     '''Network degradation
 
     Degradation can be done in many different ways ('type' argument):
-    - Structure only:
+    - Structure:
       'Rn': Remove nodes (and the corresponding edges)
       'Re': Remove edges
       'Ces': Change edge sources
       'Cet': Change edge targets
       'Cest': Change edge sources and targets
-    - Attributes only:
+    - Attributes:
       'Cna': Change node attributes
       'Cea': Change edge attributes
-    - Structure and attributes:
-      'CesCea': Change edge sources and change corresponding edge attributes
-      'CetCea': Change edge targets and change corresponding edge attributes
-      'CestCea': Change edge sources and targets and change corresponding edge attributes
+      'Nna': add Gaussian noise to node attribute
+      'Nea': add Gaussian noise to edge attribute
     '''
 
     # !!! TO RECODE !!!
