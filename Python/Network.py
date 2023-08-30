@@ -258,19 +258,32 @@ class Network:
     # New network object
     Met = copy.deepcopy(self)
 
-    # Suffling indexes
+    # Shuffling indexes
     Icor = np.arange(self.nNd)
     np.random.shuffle(Icor)
 
     # Adjacency matrix
     Met.Adj = Met.Adj[Icor, :][:, Icor]
 
-    # Attributes
-    # --- TO DO ---
-
     # Preparation
-    # (Source-edge and terminus-edge matrices)
     Met.prepare()
+
+    # --- Node attributes
+
+    for i, attr in enumerate(Met.node_attr):
+      Met.node_attr[i]['values'] = attr['values'][Icor]
+
+    # --- Edge attributes
+
+    if self.nEa:
+
+      # NB: Preparation has to be done before this point.
+
+      # Compute indexes
+      J = [np.where(np.all(self.edges==[Icor[e[0]], Icor[e[1]]], axis=1))[0][0] for e in Met.edges]
+      
+      for i, attr in enumerate(Met.edge_attr):
+        Met.edge_attr[i]['values'] = attr['values'][J]
 
     return (Met, Icor)
 
@@ -327,23 +340,24 @@ class Network:
 
   def degrade(self, type, **kwargs):
     '''Network degradation
-    Degradation can be done in several different ways:
-    - Structure: edges are reassigned, i.e. ones in the adjacency matrix are
-        moved to a different place. Corresponding attributes may be 
-        reassigned to a new value as well (type='struct+attr') or not (type='struct').
-    - Attributes: Values are reassigned (type='attr').
 
-    Parameters:
-      type='struct'
-        p: proportion of edges to reassign (default is undefined)
-        n: number of edges to reassign (default n=1)
-
-      type='struct+attr'
-        TO DO
-
-      type='attr'
-        TO DO
+    Degradation can be done in many different ways ('type' argument):
+    - Structure only:
+      'Rn': Remove nodes (and the corresponding edges)
+      'Re': Remove edges
+      'Ces': Change edge sources
+      'Cet': Change edge targets
+      'Cest': Change edge sources and targets
+    - Attributes only:
+      'Cna': Change node attributes
+      'Cea': Change edge attributes
+    - Structure and attributes:
+      'CesCea': Change edge sources and change corresponding edge attributes
+      'CetCea': Change edge targets and change corresponding edge attributes
+      'CestCea': Change edge sources and targets and change corresponding edge attributes
     '''
+
+    # !!! TO RECODE !!!
 
     # New network object
     Det = copy.deepcopy(self)

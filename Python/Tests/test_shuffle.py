@@ -1,54 +1,31 @@
 import os
+
+import project
 from Network import *
-from Comparison import *
+from  Comparison import *
 
 os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-n = 1000
-# p = 0.01
-p = round(n*10)
+nA = 5
+p = 0.5
 
-nIter = 10
-
-# n = 1000
-# p = round(n/10)
+rho = 0.5
 
 # --------------------------------------------------------------------------
 
-Net = Network(n)
+Net = Network(nA)
 Net.set_rand_edges('ER', p)
+Net.add_edge_attr('rand', name='test_edge')
+Net.add_node_attr('rand', name='test_node')
 
-# --- Identity
-
-# Met = copy.deepcopy(Net)
-# Icor = np.arange(n)
-
-# --- Shuffling
+Net.print()
 
 Met, Icor = Net.shuffle()
 
-print('Number of operation: ', Net.nEd*Met.nEd)
-
-
-# --- Matching
-
-start = time.time()
-
-X = scores(Net, Met, nIter=nIter)[0]
-
-print((time.time() - start)*1000)
-print('Check: ', X[0,0:5])
-
-print('')
-
-start = time.time()
-
-X = scores_cpp(Net, Met, nIter=nIter)[0]
-
-print((time.time() - start)*1000)
-print('Check: ', X[0,0:5])
+print('Correspondence: ', Icor)
+Met.print()
 
 # M = matching(Net, Met, nIter=nIter, verbose=True)
 
