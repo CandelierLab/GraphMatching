@@ -41,7 +41,7 @@ def scores(NetA, NetB, language='Python', nIter=100, attributes='all'):
 
   # Normalization factor
   f = 4*mA*mB/nA/nB
-
+  
   # --- Attributes ---------------------------------------------------------
 
   # Node attributes
@@ -137,52 +137,6 @@ def scores(NetA, NetB, language='Python', nIter=100, attributes='all'):
 
   return(X, Y)
 
-# def scores_cpp(NetA, NetB, nIter=100):
-#   '''
-#   Comparison of two networks.
-
-#   The algorithm is identical to [1] but with the addition of a constraint
-#   of edge weight similarity. Set weight_constraint=False to recover the 
-#   original algorithm.
-
-#   [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
-#       Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
-#   '''
-  
-#   start = time.time()
-#   toc = lambda : print((time.time() - start)*1000)
-
-#   # --- Definitions --------------------------------------------------------
-
-#   # Number of nodes
-#   nA = NetA.nNd
-#   nB = NetB.nNd
-
-#   # Number of edges
-#   mA = NetA.nEd
-#   mB = NetB.nEd
-
-#   # Normalization factor
-#   f = 4*mA*mB/nA/nB
-
-#   # toc()
-
-#   # --- Computation --------------------------------------------------------
-
-#   # Preallocation
-#   X = np.ones((nA,nB))
-#   Y = np.ones((mA,mB))
-
-#   # Prototypes
-#   p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
-#   p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
-#   GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
-#   GASP.scores.restype = None
-
-#   # Compute scores
-#   GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, f, nIter)
-
-#   return (X, Y)
 
 # === Matching =============================================================
 def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):
