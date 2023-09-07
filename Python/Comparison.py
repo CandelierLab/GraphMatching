@@ -14,7 +14,8 @@ GASP = CDLL("C/gasp.so")
 # === Comparison ===========================================================
 
 def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
-           attributes='all', i_function=None, measure_time=False):
+           attributes='all',
+           i_function=None, i_param=None, initial_evaluation=False, measure_time=False):
   '''
   Comparison of two networks.
 
@@ -81,6 +82,10 @@ def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
   if i_function is not None:
     output = []
 
+  # Initial evaluation
+  if i_function is not None and initial_evaluation:
+    output.append(i_function(locals(), i_param))
+
   match language:
 
     case 'C':
@@ -143,7 +148,7 @@ def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
         '''
 
         if i_function is not None:
-          output.append(i_function(locals))
+          output.append(i_function(locals(), i_param))
 
   if i_function is None:
     return(X, Y)
@@ -158,29 +163,36 @@ def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):
   if verbose:
     start = time.time()
 
-  Sim = scores(NetA, NetB, **kwargs)[0]
+  if 'i_function' in kwargs:
+    (X, Y, output) = scores(NetA, NetB, **kwargs)
+  else:
+    X = scores(NetA, NetB, **kwargs)[0]
 
   if verbose:
     print('Scoring: {:.02f} ms'.format((time.time()-start)*1000), end=' - ')
 
   # Threshold
   if threshold is not None:
-    Sim[Sim<threshold] = -np.inf
+    X[X<threshold] = -np.inf
 
   # Hungarian algorithm (Jonker-Volgenant)
   if verbose:
     start = time.time()
 
-  I, J = linear_sum_assignment(Sim, True)
+  I, J = linear_sum_assignment(X, True)
 
   if verbose:
     print('Matching: {:.02f} ms'.format((time.time()-start)*1000))
 
-  # Output
+  # --- Output
+
   M = [(I[k], J[k]) for k in range(len(I))]
 
-  return M
-  # return MatchNet(NetA, NetB, M)
+  if 'i_function' in kwargs:
+    return (M, output)
+  else:
+    return M
+
 
 # === MatchNet class ======================================================
 
