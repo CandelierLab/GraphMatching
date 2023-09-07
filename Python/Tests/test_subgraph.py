@@ -11,9 +11,9 @@ os.system('clear')
 nA = 5
 p = 0.5
 
-rho = 4/nA
+rho = 1 #4/nA
 
-nIter = 10
+nIter = 100
 
 # --------------------------------------------------------------------------
 
@@ -26,20 +26,20 @@ Net.print()
 
 Sub, Icor = Net.subnet(round(nA*rho))
 
-print('Correspondence: ', Icor)
-Sub.print()
+# print('Correspondence: ', Icor)
+# Sub.print()
 
 # Purely structural scores
 # Xs = scores(Net, Sub, nIter=nIter)[0]
 
 # Structure & attribute scores
-X = scores(Net, Sub, nIter=nIter)[0]
+X = scores(Net, Net, nIter=nIter, normalization=None)[0]
 
 print(X)
 
-# M = matching(Net, Sub, nIter=nIter, verbose=True)
+M = matching(Net, Net, nIter=nIter, normalization=None, verbose=True)
 
-# print(M)
+print(M)
 
-# # Correct matches
-# print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/Sub.nNd)
+# Correct matches
+print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/Sub.nNd)

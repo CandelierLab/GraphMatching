@@ -13,7 +13,8 @@ GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 
-def scores(NetA, NetB, language='Python', nIter=100, attributes='all'):
+def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
+           attributes='all'):
   '''
   Comparison of two networks.
 
@@ -40,34 +41,36 @@ def scores(NetA, NetB, language='Python', nIter=100, attributes='all'):
   wB = 0 #NetB.edge_attr[0]
 
   # Normalization factor
-  f = 4*mA*mB/nA/nB
+  if normalization is None:
+    f = 4*mA*mB/nA/nB
+  else:
+    f = normalization
   
   # --- Attributes ---------------------------------------------------------
 
   # Node attributes
   Xc = np.ones((nA,nB))/f
-
+  
   # Edge attributes
+  Yc = np.ones((mA,mB))
 
-  weight_constraint = False
-  if weight_constraint:
+  # weight_constraint = False
+  # if weight_constraint:
 
-    # Edge weights differences
-    W = np.subtract.outer(wA, wB)
+  #   # Edge weights differences
+  #   W = np.subtract.outer(wA, wB)
 
-    # Slightly slower implementation:
-    # W = Wa[:,np.newaxis] - Wb
+  #   # Slightly slower implementation:
+  #   # W = Wa[:,np.newaxis] - Wb
 
-    sigma2 = np.var(W)
-    if sigma2>0:
-      Yc = np.exp(-W**2/2/sigma2)
-    else:
-      Yc = np.ones((mA,mB))
+  #   sigma2 = np.var(W)
+  #   if sigma2>0:
+  #     Yc = np.exp(-W**2/2/sigma2)
+  #   else:
+  #     Yc = np.ones((mA,mB))
 
-  else:
-    Yc = np.ones((mA,mB))
-
-  # toc()
+  # else:
+  #   Yc = np.ones((mA,mB))
 
   # --- Computation --------------------------------------------------------
 
@@ -105,8 +108,6 @@ def scores(NetA, NetB, language='Python', nIter=100, attributes='all'):
 
         X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
         Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
-            
-        # print('', '{:.02f} ms'.format((time.time() - start)*1000), end='')
 
         ''' === A note on normalization ===
 

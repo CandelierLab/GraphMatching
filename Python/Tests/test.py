@@ -1,17 +1,41 @@
 import os
+import project
+
 from Network import *
 from  Comparison import *
-import timeit
 
 os.system('clear')
 
-Net = Network(20)
-Net.set_rand_edges('ER', 0.1)
-# Net.add_edge_attr('rand')
+nA = 3
+nB = 4
 
-# Set, Idx = Net.subnet(5)
-Det = Net.degrade('struct', p=0.5)
+nIter = 10
+f = 1
 
-# print(Net)
-Net.print()
-Det.print()
+NetA = Network(nA)
+NetA.Adj = np.zeros((nA, nA))
+NetA.Adj[1,0] = True
+NetA.Adj[0,2] = True
+NetA.nEd = 2
+NetA.prepare()
+
+NetB = Network(nB)
+NetB.Adj = np.zeros((nB, nB))
+NetB.Adj[1,0] = True
+NetB.Adj[0,2] = True
+NetB.Adj[0,3] = True
+NetB.nEd = 3
+NetB.prepare()
+
+NetA.print()
+NetB.print()
+
+for iter in range(0, nIter):
+
+  # Structure & attribute scores
+  X, Y = scores(NetA, NetA, nIter=iter+1, normalization=f)
+
+  print('---------------------------------------')
+  print(X, X/np.mean(X))
+  print('')
+  print(Y, Y/np.mean(Y))

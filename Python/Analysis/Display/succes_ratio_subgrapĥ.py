@@ -12,12 +12,13 @@ import project
 nA = 15
 
 p = 0.5
+power = 0.5
 
-nIter = 100
+nRun = 1000
 
 # --------------------------------------------------------------------------
 
-fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nIter={:d}.csv'.format(p, nA, nIter)
+fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nRun={:d}_power={:.01f}.csv'.format(p, nA, nRun, power)
 
 # ==========================================================================
 
