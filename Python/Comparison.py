@@ -14,7 +14,7 @@ GASP = CDLL("C/gasp.so")
 # === Comparison ===========================================================
 
 def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
-           attributes='all'):
+           attributes='all', i_function=None, measure_time=False):
   '''
   Comparison of two networks.
 
@@ -78,6 +78,9 @@ def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
   X = np.ones((nA,nB))
   Y = np.ones((mA,mB))
 
+  if i_function is not None:
+    output = []
+
   match language:
 
     case 'C':
@@ -94,6 +97,9 @@ def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
     case 'Python':
 
       for i in range(nIter):
+
+        if measure_time:
+          start = time.time()
 
         ''' === A note on operation order ===
 
@@ -136,7 +142,13 @@ def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
         iteration.
         '''
 
-  return(X, Y)
+        if i_function is not None:
+          output.append(i_function(locals))
+
+  if i_function is None:
+    return(X, Y)
+  else:
+    return(X, Y, output)
 
 
 # === Matching =============================================================

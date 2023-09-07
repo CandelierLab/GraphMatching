@@ -14,19 +14,18 @@ os.system('clear')
 n = 1000
 
 # Average number of edges per node
-l_nepn = [0.25, 0.5, 0.75, 1, 2, 3]
+l_nepn = [1]
 
-l_nIter = range(11)
+l_nIter = range(1,10)
 
 # ==========================================================================
 
-l_rho = []
+l_t = []
 
 for nepn in l_nepn:
 
   print('Nepn {:.01f} ...'.format(nepn), end='')
-  start = time.time()
-
+  
   # --- Network
 
   Net = Network(n)
@@ -36,16 +35,15 @@ for nepn in l_nepn:
 
   # --- Convergence
 
-  rho = []
+  t = []
 
   for nIter in l_nIter:
 
+    start = time.time()
     M = matching(Net, Set, nIter=nIter)
+    t.append(time.time() - start)
 
-    # Correct matches
-    rho.append(np.count_nonzero([Icorr[m[1]]==m[0] for m in M])/n)
-
-  l_rho.append(rho)
+  l_t.append(t)
 
   print('{:.02f} sec'.format((time.time() - start)))
 
@@ -55,16 +53,23 @@ for nepn in l_nepn:
 
 fig, ax = plt.subplots()
 
-for i, rho in enumerate(l_rho):
+for i, t in enumerate(l_t):
 
-  ax.plot(l_nIter, rho, '.-', label=l_nepn[i])
+  ax.plot(l_nIter, t, '.-', label=l_nepn[i])
+
+  # Fit
+  x = np.arange(2,10)
+  f = np.polyfit(x, t[1:], 1)
+
+  ax.plot(x, f[1]+f[0]*x, 'r-')
+
 
 ax.set_xlabel('Iteration')
-ax.set_ylabel(r'Ratio of correct matches $\rho$')
+ax.set_ylabel('Iteration time')
 ax.set_title('legend: average number of edge per node')
 
 # ax.set_xlim(0, max(l_nIter))
-ax.set_ylim(0,1)
+# ax.set_ylim(0,1)
 ax.legend()
 
 plt.show()
