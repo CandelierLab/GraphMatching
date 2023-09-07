@@ -133,7 +133,10 @@ class Network:
         if isinstance(p, float):
           p = int(np.round(p*self.nNd**2))
 
-        self.Adj = A < np.sort(A.flatten())[p]
+        if p==self.nNd**2:
+          self.Adj = np.full((self.nNd,self.nNd), True)
+        else:
+          self.Adj = A < np.sort(A.flatten())[p]
 
       case 'Erdös-Rényi-Gilbert' | 'ERG':
         # In the ERG the edges are drawn randomly so the exact number of 

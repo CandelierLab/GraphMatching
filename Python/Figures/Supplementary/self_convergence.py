@@ -20,13 +20,13 @@ nIter = 10
 
 # === Functions ============================================================
 
-def probe(V, param):
+def probe(V, param, out):
   
   # Local variables
   X = V['X']
 
   # Other parameters
-  n = param['n']
+  n = param['NetA'].nNd 
   Icorr = param['Icorr']
 
   # Matching
@@ -37,7 +37,7 @@ def probe(V, param):
   rho = np.count_nonzero([Icorr[J[k]]==I[k] for k in range(len(I))])/n
 
   # Output
-  return rho
+  out.append(rho)
 
 # ==========================================================================
 
@@ -59,7 +59,7 @@ for nepn in l_nepn:
 
   # Scores
   X, Y, rho = scores(Net, Set, nIter=nIter, i_function=probe, initial_evaluation=True,
-                     i_param={'n': n, 'Icorr': Icorr})
+                     i_param={'Icorr': Icorr})
     
   l_rho.append(rho)
 
