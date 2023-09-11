@@ -12,8 +12,6 @@ os.system('clear')
 n = 100
 
 # Average number of edges per node
-# l_nepn = [0.1, 1, 10, 50]
-l_nepn = np.geomspace(0.1, 100, 20)
 
 nIter = 10
 
@@ -29,19 +27,16 @@ fname = project.root + '/Files/Normalization/ER/n={:d}_nIter={:d}_nRun={:d}.csv'
 F = pd.read_csv(fname, index_col=0)
 
 # x-values
-x = np.array([float(i) for i in list(F)])/n
+x = np.array([float(i) for i in list(F)])
 
 # Compute mean and std
 mv = F.mean()
 s = F.std()
 
-# Simple normalisation factor
-f0 = 4*(x*n)**2
+# Simple normalization factor
+f0 = 4*x**2 + 1 
 
-# f1 = 4*(x*n)**2 + 18*(x*n)**0.7
-
-m = x*n**2
-f1 = 4*m**2/(n * (1-n*np.exp(-2*m/n)))**2
+# f1 = 4*x**2 + 4*x**0.8 + 1 
 
 # === Display =================================================================
 
@@ -55,12 +50,16 @@ ax.fill_between(x, mv-s, mv+s,
 
 ax.plot(x, mv, '.')
 
-ax.plot(x, f1, 'r-', linewidth=1)
+# ax.plot(x, f1, 'r-', linewidth=1)
 
-ax.set_xlabel('Relative ratio of edge per node')
+ax.set_xlabel('Ratio of edge per node')
 ax.set_ylabel('Normalization factor')
 
 ax.set_xscale('log')
 ax.set_yscale('log')
+
+ax.set_title('n = {:d}'.format(n))
+
+# ax.set_ylim(1, 6e4)
 
 plt.show()

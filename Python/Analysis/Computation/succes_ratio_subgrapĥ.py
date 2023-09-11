@@ -16,13 +16,11 @@ Nsub = list(range(1, nA+1))
 
 p = 0.5
 
-power = 0.5
-
 nRun = 1000
 
 # --------------------------------------------------------------------------
 
-fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nRun={:d}_power={:.01f}.csv'.format(p, nA, nRun, power)
+fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nRun={:d}.csv'.format(p, nA, nRun)
 
 # ==========================================================================
 
@@ -48,7 +46,7 @@ for n in Nsub:
 
     else:
 
-      M = matching(Net, Sub, power=power)
+      M = matching(Net, Sub)
 
       # Correct matches
       g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n

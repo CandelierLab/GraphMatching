@@ -13,7 +13,7 @@ GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 
-def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
+def scores(NetA, NetB, language='Python', nIter=20, normalization=None,
            attributes='all',
            i_function=None, i_param={}, initial_evaluation=False, measure_time=False):
   '''
@@ -119,8 +119,8 @@ def scores(NetA, NetB, language='Python', nIter=100, normalization=None,
         So it is always preferable to start with the update of X.
         '''
 
-        X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
-        Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+        X = (1 + NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
+        Y = (1 + NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
         ''' === A note on normalization ===
 

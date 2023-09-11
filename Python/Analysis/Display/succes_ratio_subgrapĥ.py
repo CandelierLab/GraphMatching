@@ -10,15 +10,12 @@ import project
 # === Parameters ===========================================================
 
 nA = 15
-
 p = 0.5
-power = 0.5
-
 nRun = 1000
 
 # --------------------------------------------------------------------------
 
-fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nRun={:d}_power={:.01f}.csv'.format(p, nA, nRun, power)
+fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nRun={:d}.csv'.format(p, nA, nRun)
 
 # ==========================================================================
 

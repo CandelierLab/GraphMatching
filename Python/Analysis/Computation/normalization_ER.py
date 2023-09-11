@@ -12,11 +12,10 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-n = 100
+n = 10
 
 # Average number of edges per node
-# l_nepn = [0.1, 1, 10, 50]
-l_nepn = np.geomspace(0.1, 100, 20)
+l_nepn = np.geomspace(1/n, n, 29)
 
 nIter = 10
 
