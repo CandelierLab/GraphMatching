@@ -13,7 +13,7 @@ GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 
-def scores(NetA, NetB, language='Python', nIter=20, normalization=None,
+def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
            attributes='all',
            i_function=None, i_param={}, initial_evaluation=False, measure_time=False):
   '''
@@ -41,16 +41,20 @@ def scores(NetA, NetB, language='Python', nIter=20, normalization=None,
   wA = 0 #NetA.edge_attr[0]
   wB = 0 #NetB.edge_attr[0]
 
+  # --- Default values
+
+  # Number of iterations
+  if nIter is None:
+    nIter = min(NetA.d, NetB.d) + 1 
+
   # Normalization factor
   if normalization is None:
-    f = 4*mA*mB/nA/nB
-  else:
-    f = normalization
+    normalization = 4*mA*mB/nA/nB + 1
   
   # --- Attributes ---------------------------------------------------------
 
   # Node attributes
-  Xc = np.ones((nA,nB))/f
+  Xc = np.ones((nA,nB))/normalization
   
   # Edge attributes
   Yc = np.ones((mA,mB))

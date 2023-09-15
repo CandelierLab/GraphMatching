@@ -1,6 +1,7 @@
 import random
 import copy
 import numpy as np
+import networkx as nx
 
 class Network:
   ''' Generic class for networks '''
@@ -24,6 +25,17 @@ class Network:
     # Attributes
     self.edge_attr = []
     self.node_attr = []
+
+    # --- Networkx
+
+    self.G = None
+
+    # Connected
+    self.isconnected = None
+
+    # Diameter
+    self.d = None
+
 
   # === PRINT ==============================================================
 
@@ -81,6 +93,14 @@ class Network:
       print(' |')
 
     print(r[-1])
+
+    # --- Network properties
+
+    if self.isconnected is not None:
+      print('The graph is {:s}connected'.format('' if self.isconnected else 'dis'))
+
+    if self.d is not None:
+      print('Diameter: {:d}'.format(self.d))
 
     # --- Node attributes
 
@@ -240,6 +260,9 @@ class Network:
 
   def prepare(self, force=False):
 
+    if self.nEd==0:
+      self.nEd = np.count_nonzero(self.Adj)
+
     # Edge list
     self.edges = np.zeros((self.nEd,2), dtype=np.int32)
 
@@ -253,6 +276,18 @@ class Network:
       self.edges[i,:] = [I[0][i], I[1][i]]
       self.As[I[0][i], i] = 1
       self.At[I[1][i], i] = 1
+
+    # Networkx
+    self.G = nx.from_numpy_array(self.Adj)
+
+    # Connectivity
+    self.isconnected = nx.is_connected(self.G)
+
+    # Diameter
+    if self.isconnected:
+      self.d = nx.diameter(self.G)
+    else:
+      self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.G)])
     
   # ========================================================================
   #                             MODIFICATIONS
