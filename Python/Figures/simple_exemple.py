@@ -12,6 +12,8 @@ os.system('clear')
 nA = 5
 nB = 5
 
+nIter = 4
+
 # ==========================================================================
 
 NetA = Network(nA)
@@ -20,17 +22,30 @@ NetA.Adj[0,1] = True
 NetA.Adj[0,2] = True
 NetA.Adj[1,3] = True
 NetA.Adj[2,4] = True
+NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0, 0]})
 NetA.prepare()
 
-# NetB = Network(nB)
-# NetB.set_rand_edges('ER', pB)
+NetB = Network(nB)
+NetB.Adj = np.zeros((nB,nB), dtype=bool)
+NetB.Adj[0,1] = True
+NetB.Adj[0,2] = True
+NetB.Adj[1,3] = True
+NetB.Adj[2,4] = True
+NetB.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0, 0]})
+NetB.prepare()
+
 
 NetA.print()
 
-
-X = scores(NetA, NetA, nIter=10, normalization=1)[0]
+X, Y = scores(NetA, NetB, nIter=nIter, normalization=1)
 
 print(X)
+print('')
+print(Y)
+
+M = matching(NetA, NetB, nIter=nIter, normalization=1)
+
+print(M)
 
 # # # R = np.zeros(nIterMax, dtype=int)
 

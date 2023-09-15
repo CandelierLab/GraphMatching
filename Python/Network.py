@@ -216,6 +216,11 @@ class Network:
   # ------------------------------------------------------------------------
 
   def add_node_attr(self, *args, **kwargs):
+    '''
+    In case attr is fed directly, it shoudl have the following structure:
+    attr = {'measurable': bool, 'values': val}
+    attr = {'measurable': bool, 'values': val, 'name': name}
+    '''
 
     if isinstance(args[0], str):
 
@@ -245,6 +250,7 @@ class Network:
       
       attr = args[0]
 
+    # Name
     if 'name' in kwargs:
       attr['name'] = kwargs['name']
 

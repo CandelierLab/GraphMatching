@@ -14,7 +14,6 @@ GASP = CDLL("C/gasp.so")
 # === Comparison ===========================================================
 
 def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
-           attributes='all',
            i_function=None, i_param={}, initial_evaluation=False, measure_time=False):
   '''
   Comparison of two networks.
@@ -53,10 +52,26 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
   
   # --- Attributes ---------------------------------------------------------
 
-  # Node attributes
+  # --- Node attributes
+
+  # Base
   Xc = np.ones((nA,nB))/normalization
+
+  for k, attr in enumerate(NetA.node_attr):
+
+    bttr = NetB.node_attr[k]
+
+    if attr['measurable']:
+      pass
+    else:
+      # Build contraint attribute
+      A = np.tile(attr['values'], (NetB.nNd,1)).transpose()
+      B = np.tile(bttr['values'], (NetA.nNd,1))
+      Xc *= A==B
   
-  # Edge attributes
+  # --- Edge attributes
+
+  # Base
   Yc = np.ones((mA,mB))
 
   # weight_constraint = False
@@ -103,7 +118,7 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
       GASP.scores.restype = None
 
       # Compute scores
-      GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, f, nIter)
+      GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, normalization, nIter)
 
     case 'Python':
 
@@ -122,7 +137,7 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
 
         So it is always preferable to start with the update of X.
         '''
-
+        
         X = (1 + NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
         Y = (1 + NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
