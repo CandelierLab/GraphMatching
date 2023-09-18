@@ -40,8 +40,6 @@ NetA.print()
 X, Y = scores(NetA, NetB, nIter=nIter, normalization=1)
 
 print(X)
-print('')
-print(Y)
 
 M = matching(NetA, NetB, nIter=nIter, normalization=1)
 
