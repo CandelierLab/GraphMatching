@@ -14,7 +14,7 @@ colorama_init()
 #                            COMMAND WINDOW
 # ========================================================================== 
 
-def line(text=None, thickness=1, char=None):
+def line(text=None, thickness=1, char=None, color=Style.DIM):
   '''
   Pretty ASCII line
 
@@ -37,11 +37,11 @@ def line(text=None, thickness=1, char=None):
       case 3: char = '≡'
 
   if text is None or text=='':
-    S = char*tw
+    S = color + char*tw + Style.RESET_ALL
 
   else:
-    S = char*3 + ' ' + text + ' '
-    S += char*(tw-len(S))
+    S = color + char*3 + Style.RESET_ALL + ' ' + text + ' '
+    S += color + char*(tw-len(S)+len(color+Style.RESET_ALL)) + Style.RESET_ALL
 
   # Display
   print(S)
@@ -72,7 +72,7 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
     # === Colors ===========================================================
 
     # Hidden parts
-    escchar = Fore.YELLOW + escchar + Style.RESET_ALL
+    escchar = Fore.CYAN + escchar + Style.RESET_ALL
 
     # Highlights
     if highlight is not None:
@@ -115,7 +115,7 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
 
       # --- Index line
 
-      hdr = [' '*(rms+2) + Fore.BLACK]
+      hdr = [' '*(rms+2) + Style.DIM]
 
       for j in range(Sub.shape[1]):
         match halign:
@@ -131,7 +131,7 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
     else:
 
       # Prepare rows
-      hdr = [' '*(rms+3)+Fore.BLACK for i in range(cms)]
+      hdr = [' '*(rms+3)+Style.DIM for i in range(cms)]
 
       for j in range(Sub.shape[1]):
 
@@ -186,7 +186,7 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
         break
 
       # Row header
-      print(Fore.BLACK + f'{i:>{rms}d}' + Style.RESET_ALL + ' │', end='')
+      print(Style.DIM + f'{i:>{rms}d}' + Style.RESET_ALL + ' │', end='')
 
       for j, a in enumerate(row):
 
