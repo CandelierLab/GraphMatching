@@ -2,27 +2,79 @@
 Pretty ASCII prints
 
 '''
+
+import os
 import numpy as np
 from colorama import init as colorama_init, Fore, Back, Style
 
 # Initialize colors
 colorama_init()
 
+# ==========================================================================
+#                            COMMAND WINDOW
+# ========================================================================== 
+
+def line(text=None, thickness=1, char=None):
+  '''
+  Pretty ASCII line
+
+  Print a line spanning the whole command line.
+
+  By default it is a single line (─) but other characters can be used: 
+    Double line: ═
+    Trople line: ≡
+
+  '''
+
+  # Terminal width
+  tw = os.get_terminal_size().columns
+
+  # Thickness
+  if char is None:
+    match thickness:
+      case 1: char = '─'
+      case 2: char = '═'
+      case 3: char = '≡'
+
+  if text is None or text=='':
+    S = char*tw
+
+  else:
+    S = char*3 + ' ' + text + ' '
+    S += char*(tw-len(S))
+
+  # Display
+  print(S)
+
+# ==========================================================================
+#                            MATRIX DIPLAY
+# ========================================================================== 
+
 def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
-           highlight=None, highColor=Fore.RED,
+           highlight=None, highColor=Fore.RED, title=None,
            cTrue='1', cFalse='.',
            precision=None):
     ''' 
     Pretty ASCII print of a matrix
     '''
 
+    # === Title ============================================================
+
+    if title is not None:
+      line(title, 1)
+      print('')
+
     # === Checks ===========================================================
     
     if not isinstance(M, np.ndarray):
       M = np.ndarray(M)
 
-    # === Highlight ========================================================
+    # === Colors ===========================================================
 
+    # Hidden parts
+    escchar = Fore.YELLOW + escchar + Style.RESET_ALL
+
+    # Highlights
     if highlight is not None:
       Hlg = highlight[0:maxrow, 0:maxcol]
 
@@ -63,7 +115,7 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
 
       # --- Index line
 
-      hdr = [' '*(rms+2)]
+      hdr = [' '*(rms+2) + Fore.BLACK]
 
       for j in range(Sub.shape[1]):
         match halign:
@@ -74,10 +126,12 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
           case 'l' | 'left':
             hdr[0] += f' {j:<{ms}d}'
 
+      hdr[0] += Style.RESET_ALL
+
     else:
 
       # Prepare rows
-      hdr = [' '*(rms+3) for i in range(cms)]
+      hdr = [' '*(rms+3)+Fore.BLACK for i in range(cms)]
 
       for j in range(Sub.shape[1]):
 
@@ -98,6 +152,8 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
               h = f'{j // 10**(cms-k-1) % 10:d}'
 
             hdr[k] += f'{h:{ms+1}s}'
+
+      hdr[-1] += Style.RESET_ALL
 
     # --- Deco line header
 
@@ -130,7 +186,7 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
         break
 
       # Row header
-      print(f'{i:>{rms}d} │', end='')
+      print(Fore.BLACK + f'{i:>{rms}d}' + Style.RESET_ALL + ' │', end='')
 
       for j, a in enumerate(row):
 
