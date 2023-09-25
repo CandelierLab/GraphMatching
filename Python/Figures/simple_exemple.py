@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import project
 from Network import *
 from  Comparison import *
+import paprint as pa
 
 os.system('clear')
 
@@ -13,6 +14,10 @@ nA = 5
 nB = 5
 
 nIter = 4
+
+# algo = 'Zager'
+algo = 'GASP'
+# algo = 'GASP2'
 
 # ==========================================================================
 
@@ -37,13 +42,17 @@ NetB.prepare()
 
 NetA.print()
 
-X, Y = scores(NetA, NetB, nIter=nIter, normalization=1)
+X, Y = scores(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo)
 
-print(X)
+print('Scores:')
+pa.matrix(X)
 
-M = matching(NetA, NetB, nIter=nIter, normalization=1)
+M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, all_solutions=True)
 
-print(M)
+print(f'{len(M)} Matchings:')
+
+for m in M:
+  print(m)
 
 # # # R = np.zeros(nIterMax, dtype=int)
 

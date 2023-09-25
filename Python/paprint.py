@@ -95,7 +95,7 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
     # Floats
     elif np.issubdtype(Sub.dtype, np.floating):
 
-      msi = int(np.ceil(np.max(1*(Sub<0) + np.maximum(1, np.log10(np.abs(Sub)))))) + 1
+      msi = int(np.ceil(np.max(1*(Sub[Sub!=0]<0) + np.maximum(1, np.log10(np.abs(Sub[Sub!=0])))))) + 1
       prec = max(4-msi, 0) if precision is None else precision
       ms = msi + prec - (prec==0)
 

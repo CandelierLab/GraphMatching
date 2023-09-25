@@ -2,6 +2,7 @@ import random
 import copy
 import numpy as np
 import networkx as nx
+import paprint as pa
 
 class Network:
   ''' Generic class for networks '''
@@ -42,10 +43,9 @@ class Network:
   def __repr__(self):
     ''' Basic info on the network'''
 
-    s = '-'*50 + '\n'
-    s += self.__class__.__name__ + ' network\n\n'
+    pa.line(self.__class__.__name__)
 
-    s += f'Number of nodes: {self.nNd}\n'
+    s = f'\nNumber of nodes: {self.nNd}\n'
     s += f'Number of edges: {self.nEd}\n'
 
     return s
@@ -56,43 +56,8 @@ class Network:
     # Basic info
     print(self)
 
-    # --- Header
-
-    r = ['    ', '    ', '    ']
-    for j in range(self.Adj.shape[1]):
-
-      if j>maxcol: 
-        r[-1] += ' ...'
-        break
-
-      d, u = divmod(j, 10)
-      r[0] += ' {:d}'.format(d)
-      r[1] += ' {:d}'.format(u)
-      r[-1] += '--'
-      
-    r[-1] += '-'
-
-    print(r[0])
-    print(r[1])
-    print(r[-1])
-
-    # --- Rows
-
-    for i, row in enumerate(self.Adj):
-
-      if i>maxrow: 
-        print('...')
-        break
-
-      print('{:02d} |'.format(i), end='')
-      for j, a in enumerate(row):
-        if j>maxcol: 
-          print('    ', end='')
-          break
-        print(' 1' if a else ' .', end='')
-      print(' |')
-
-    print(r[-1])
+    # Adjacency matrix
+    pa.matrix(self.Adj)
 
     # --- Network properties
 
@@ -128,6 +93,8 @@ class Network:
 
       print('', attr['values'])
 
+    print('')
+    pa.line()
     print('')
 
   # ========================================================================

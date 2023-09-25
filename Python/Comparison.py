@@ -3,7 +3,9 @@ import pprint
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
+from itertools import combinations
 import time
+import copy
 
 from ctypes import CDLL, POINTER
 from ctypes import c_size_t, c_double
@@ -13,14 +15,15 @@ GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 
-def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
+def scores(NetA, NetB, nIter=None,
+           algorithm='GASP', normalization=None, language='Python',
            i_function=None, i_param={}, initial_evaluation=False, measure_time=False):
   '''
   Comparison of two networks.
 
-  The algorithm is identical to [1] but with the addition of a constraint
-  of edge weight similarity. Set weight_constraint=False to recover the 
-  original algorithm.
+  The algorithm parameters can be:
+   - 'Zager', as in [1]
+   - 'GASP' (default)
 
   [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
       Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
@@ -52,27 +55,53 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
   
   # --- Attributes ---------------------------------------------------------
 
-  # --- Node attributes
+  match algorithm:
 
-  # Base
-  Xc = np.ones((nA,nB))/normalization
+    case 'Zager':
 
-  for k, attr in enumerate(NetA.node_attr):
+      # --- Node attributes
 
-    bttr = NetB.node_attr[k]
+      # Base
+      Xc = np.ones((nA,nB))
 
-    if attr['measurable']:
-      pass
-    else:
-      # Build contraint attribute
-      A = np.tile(attr['values'], (NetB.nNd,1)).transpose()
-      B = np.tile(bttr['values'], (NetA.nNd,1))
-      Xc *= A==B
-  
-  # --- Edge attributes
+      for k, attr in enumerate(NetA.node_attr):
 
-  # Base
-  Yc = np.ones((mA,mB))
+        bttr = NetB.node_attr[k]
+
+        if attr['measurable']:
+          pass
+        else:
+          # Build contraint attribute
+          A = np.tile(attr['values'], (NetB.nNd,1)).transpose()
+          B = np.tile(bttr['values'], (NetA.nNd,1))
+          Xc *= A==B
+      
+      # Remapping in [-1, 1]
+      Xc = Xc*2 - 1
+
+    case _:
+
+      # --- Node attributes
+
+      # Base
+      Xc = np.ones((nA,nB))/normalization
+
+      for k, attr in enumerate(NetA.node_attr):
+
+        bttr = NetB.node_attr[k]
+
+        if attr['measurable']:
+          pass
+        else:
+          # Build contraint attribute
+          A = np.tile(attr['values'], (NetB.nNd,1)).transpose()
+          B = np.tile(bttr['values'], (NetA.nNd,1))
+          Xc *= A==B
+      
+      # --- Edge attributes
+
+      # Base
+      Yc = np.ones((mA,mB))
 
   # weight_constraint = False
   # if weight_constraint:
@@ -111,6 +140,8 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
 
     case 'C':
 
+      # NB: Zager is not supported yet with the C++ implementation
+
       # Prototypes
       p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
       p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
@@ -127,6 +158,26 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
         if measure_time:
           start = time.time()
 
+        match algorithm:
+
+          case 'Zager':
+            X = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
+            Y = NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At
+
+            if normalization is None:
+              X /= np.mean(X)
+              Y /= np.mean(Y)
+            else:
+              X /= normalization
+        
+          case 'GASP':
+            X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T +1) * Xc
+            Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+
+          case 'GASP2':
+            X = (1 + NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
+            Y = (1 + NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+
         ''' === A note on operation order ===
 
         If all values of X are equal to the same value x, then updating Y gives
@@ -137,9 +188,6 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
 
         So it is always preferable to start with the update of X.
         '''
-        
-        X = (1 + NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
-        Y = (1 + NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
         ''' === A note on normalization ===
 
@@ -171,6 +219,10 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
         if i_function is not None:
           i_function(locals(), i_param, output)
 
+  # Final step
+  if algorithm=='Zager':
+    X = X * Xc
+
   if i_function is None:
     return(X, Y)
   else:
@@ -178,7 +230,7 @@ def scores(NetA, NetB, language='Python', nIter=None, normalization=None,
 
 
 # === Matching =============================================================
-def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):
+def matching(NetA, NetB, threshold=None, all_solutions=False, verbose=False, **kwargs):
 
   # Get similarity measures
   if verbose:
@@ -200,89 +252,48 @@ def matching(NetA, NetB, threshold=None, verbose=False, **kwargs):
   if verbose:
     start = time.time()
 
-  I, J = linear_sum_assignment(X, True)
+  I, J = linear_sum_assignment(X, maximize=True)
 
   if verbose:
     print('Matching: {:.02f} ms'.format((time.time()-start)*1000))
 
   # --- Output
 
-  M = [(I[k], J[k]) for k in range(len(I))]
+  if all_solutions:
+
+    # Solution score
+    s = np.sum([X[I[k], J[k]] for k in range(len(I))])
+
+    # Candidates
+    C = [[[I[k], J[k]] for k in range(len(I))]]
+
+    # Solution container
+    M = []
+
+    # Loop over candidates
+    while C:
+
+      # Append solution
+      m = C.pop()
+      M.append(m)
+
+      # Test all possible dual inversions
+      for d in combinations(range(len(m)), 2):
+        
+        if X[m[d[0]][0], m[d[0]][1]]+X[m[d[1]][0], m[d[1]][1]] == X[m[d[0]][0], m[d[1]][1]]+X[m[d[1]][0], m[d[0]][1]]:
+          
+          # New solution
+          ns = copy.deepcopy(m)
+          ns[d[1]][1] = m[d[0]][1]
+          ns[d[0]][1] = m[d[1]][1]
+
+          if ns not in M:
+            C.append(ns)
+      
+  else:
+    M = [(I[k], J[k]) for k in range(len(I))]
 
   if 'i_function' in kwargs:
     return (M, output)
   else:
     return M
-
-
-# === MatchNet class ======================================================
-
-class MatchNet():
-
-  def __init__(self, NetA, NetB, M):
-
-    #  --- Nets
-
-    self.NetA = NetA
-    self.NetB = NetB
-
-    # --- Nodes and edges
-
-    # Matched nodes
-    self.mn = np.array(M)
-
-    # Unmatched nodes
-    self.unA = np.array([x for x in range(self.NetA.nNd) if x not in self.mn[:,0]])
-    self.unB = np.array([x for x in range(self.NetB.nNd) if x not in self.mn[:,1]])
-
-    # Matched edges
-    me = []
-    eB = np.array([[e['i'], e['j']] for e in self.NetB.edge])
-    for u, e in enumerate(self.NetA.edge):
-      i = self.mn[self.mn[:,0]==e['i'], 1]
-      j = self.mn[self.mn[:,0]==e['j'], 1]
-      if i.size and j.size:
-        w = np.where((eB == (i[0], j[0])).all(axis=1))[0]
-        if w.size: me.append((u, w[0]))
-        
-    self.me = np.array(me)
-
-    # Unmatched edges
-    self.ueA = np.array([x for x in range(self.NetA.nEd) if x not in self.me[:,0]])
-    self.ueB = np.array([x for x in range(self.NetB.nEd) if x not in self.me[:,1]])
-
-    # --- Ratios
-
-    # Ratio of matched nodes
-    self.rmn = self.mn.size/(self.mn.size + self.unA.size + self.unB.size)
-
-    # Ratio of matched edges
-    self.rme = self.me.size/(self.me.size + self.ueA.size + self.ueB.size)
-
-    # --- Edge weight distances
-
-    # Average matched edge weights distance
-    wA = np.array([self.NetA.edge[i]['w'] for i in self.me[:,0]])
-    wB = np.array([self.NetB.edge[j]['w'] for j in self.me[:,1]])
-    # self.amewd = np.mean((np.abs(wA-wB)))
-    self.amewd = np.mean((wA-wB)**2)
-
-    # Average unmatched edge weights
-    wA = np.array([self.NetA.edge[i]['w'] for i in self.unA])
-    wB = np.array([self.NetB.edge[j]['w'] for j in self.unB])
-    if wA.size or wB.size:
-      self.auew = np.mean(np.abs(np.concatenate((wA, wB))))
-    else:
-      self.auew = None
-
-  def print(self):
-
-    pp = pprint.PrettyPrinter(depth=4)
-    pp.pprint(self.__dict__)
-
-    print('Matched node proportion: {:.2f}'.format(100*self.rmn))
-    print('Matched egde proportion: {:.2f}'.format(100*self.rme))
-
-    print('Average matched edge weight distance: {:.02f}'.format(self.amewd))
-    if self.auew is not None:
-      print('Average unmatched edge weight: {:.02f}'.format(self.auew))

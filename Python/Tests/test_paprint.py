@@ -6,10 +6,10 @@ import paprint as pa
 
 os.system('clear')
 
-w = 50
-h = 50
+w = 5
+h = 5
 
 M = np.random.rand(h,w)
 # M = np.random.randint(-1100,100,(5,5))
 
-pa.matrix(M, title='This is a title')
+pa.matrix(M)
