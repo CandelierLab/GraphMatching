@@ -9,8 +9,8 @@ import project
 
 # === Parameters ===========================================================
 
-nA = 15
-p = 0.5
+nA = 100
+p = np.log(nA)/nA
 nRun = 1000
 
 # --------------------------------------------------------------------------
@@ -40,9 +40,9 @@ ax.axhline(y = 1/nA, color = 'w', linestyle = ':')
 
 ax.plot(rho, m)
 
-ax.set_xlabel(r'Subgraph ratio $\rho$')
+ax.set_xlabel(r'subgraph ratio $\rho$')
 ax.set_xlim(0, 1)
-ax.set_ylabel(r'Correct matches ratio $\gamma$')
+ax.set_ylabel(r'ratio of correct matches $\gamma$')
 ax.set_ylim(0, 1)
 
 plt.show()

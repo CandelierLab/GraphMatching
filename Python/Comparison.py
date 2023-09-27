@@ -47,7 +47,7 @@ def scores(NetA, NetB, nIter=None,
 
   # Number of iterations
   if nIter is None:
-    nIter = min(NetA.d, NetB.d) + 1 
+    nIter = max(min(NetA.d, NetB.d), 1)
 
   # Normalization factor
   if normalization is None:

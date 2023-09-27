@@ -80,6 +80,7 @@ ax.set_ylabel(r'Ratio of correct matches $\rho$')
 ax.set_title('legend: average number of edge per node')
 
 # ax.set_xlim(0, max(l_nIter))
+ax.xaxis.grid(True)
 ax.set_ylim(0,1)
 ax.legend()
 

@@ -12,18 +12,16 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-n = 10
+n = 100
 
-# Average number of edges per node
-l_nepn = np.geomspace(1/n, n, 29)
-
-nIter = 10
+# Degrees (average number of edges per node)
+l_deg = np.geomspace(1/n, n, 29)
 
 nRun = 100
 
 # --------------------------------------------------------------------------
 
-fname = project.root + '/Files/Normalization/ER/n={:d}_nIter={:d}_nRun={:d}.csv'.format(n, nIter, nRun)
+fname = project.root + '/Files/Normalization/ER/n={:d}_nRun={:d}.csv'.format(n, nRun)
 
 # === Functions ============================================================
 
@@ -38,9 +36,9 @@ def probe(V, param, out):
 
 fac = pd.DataFrame()
 
-for nepn in l_nepn:
+for deg in l_deg:
 
-  print('Nepn {:.01f} ...'.format(nepn), end='')
+  print('deg {:.01f} ...'.format(deg), end='')
   start = time.time()
 
   f = np.empty(nRun)
@@ -50,22 +48,22 @@ for nepn in l_nepn:
     # --- Network
 
     NetA = Network(n)
-    NetA.set_rand_edges('ER', int(nepn*n))
+    NetA.set_rand_edges('ER', int(deg*n))
 
     NetB, Icorr = NetA.shuffle()
 
     # NetB = Network(int(n))
-    # NetB.set_rand_edges('ER', int(nepn*n))
+    # NetB.set_rand_edges('ER', int(deg*n))
 
     # --- Convergence
 
     # Scores
-    X, Y, output = scores(NetA, NetB, nIter=nIter, normalization=1,
+    X, Y, output = scores(NetA, NetB, normalization=1,
                           i_function=probe, initial_evaluation=True)
 
     f[run] = output[-1]/output[-2]
 
-  fac[nepn] = f
+  fac[deg] = f
 
   print('{:.02f} sec'.format((time.time() - start)))
 
