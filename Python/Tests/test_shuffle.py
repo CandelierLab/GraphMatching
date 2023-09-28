@@ -9,7 +9,7 @@ os.system('clear')
 # --- Parameters -----------------------------------------------------------
 
 nA = 5
-p = 0.5
+p = 0
 
 rho = 0.5
 
@@ -27,7 +27,9 @@ Met, Icor = Net.shuffle()
 print('Correspondence: ', Icor)
 Met.print()
 
-# M = matching(Net, Met, nIter=nIter, verbose=True)
+M = matching(Net, Met, verbose=True)
 
-# # Correct matches
-# print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/n)
+print(M)
+
+# Correct matches
+print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/nA)

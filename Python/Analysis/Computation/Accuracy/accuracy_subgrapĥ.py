@@ -40,15 +40,10 @@ for n in Nsub:
 
     Sub, Idx = Net.subnet(n)    
 
-    if not Sub.Adj.any():
-      g[i] = 0
+    M = matching(Net, Sub)
 
-    else:
-
-      M = matching(Net, Sub)
-
-      # Correct matches
-      g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
+    # Correct matches
+    g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
 
     gamma[n] = g
 
