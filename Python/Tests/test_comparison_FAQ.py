@@ -11,7 +11,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 50
+nA = 100
 Nsub = list(range(1, nA+1))
 
 p = np.log(nA)/nA
@@ -25,11 +25,11 @@ p = np.log(nA)/nA
 NetA = Network(nA)
 NetA.set_rand_edges('ER', p)
 
-NetB = NetA
-# NetB, Idx = NetA.shuffle()
+# NetB = NetA
+NetB, Idx = NetA.subnet(50)
 
-NetA.print()
-NetB.print()
+# NetA.print()
+# NetB.print()
 
 # print(Idx)
 
@@ -38,24 +38,26 @@ NetB.print()
 print('FAQ ...', end='')
 start = time.time()
 
-res = quadratic_assignment(NetA.Adj, NetB.Adj)
+res = quadratic_assignment(NetB.Adj, NetA.Adj, options={'maximize': True})
 
 print('{:.02f} sec'.format((time.time() - start)))
 
-print(res.col_ind)
-
+# Accuracy
+gamma_FAQ = np.count_nonzero([res.col_ind==Idx])/nA
 
 # --- GASP
 
-# print('GASP ...', end='')
-# start = time.time()
+print('GASP ...', end='')
+start = time.time()
 
-# M = matching(NetA, NetB)
+M = matching(NetA, NetB)
 
-# # Correct matches
-# gamma = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/nA
+print('{:.02f} sec'.format((time.time() - start)))
 
-# print('{:.02f} sec'.format((time.time() - start)))
+# Accuracy
+gamma_GASP = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/nA
 
-# print(gamma)
+
+print(f'Accruacy FAQ: {gamma_FAQ}')
+print(f'Accruacy GASP: {gamma_GASP}')
 

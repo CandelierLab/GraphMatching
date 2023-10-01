@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 # === Parameters ===========================================================
 
-nA = 200
+nA = 10
 rho = 0.75
 nRun = 100000
 
