@@ -13,7 +13,11 @@ nA = 20
 l_p = np.linspace(0,1,101)
 nRun = 10000
 
+dname = project.root + '/Files/Success ratios/p_star/'
+
 # ==========================================================================
+
+# --- Accuracy -------------------------------------------------------------
 
 Z = None
 
@@ -44,19 +48,18 @@ for i, p in enumerate(l_p):
   
   Z[i,:] = m
 
+# --- p star ---------------------------------------------------------------
+
+with open(dname + f'nA={nA}.txt') as f:
+  p_star = float(f.read()[0:-1])
+
 # --- Display --------------------------------------------------------------
 
 fig, ax = plt.subplots()
 
-S = np.zeros(len(l_p))
 
 for k in range(len(rho)):
-
   ax.plot(l_p, Z[:,k], '-', label=rf'$\rho = {rho[k]:.1f}$')
-
-  S += Z[:,k]/len(l_p)
-
-p_star = l_p[np.argmax(S)]
 
 print(p_star)
 
@@ -67,7 +70,7 @@ ax.set_xlim(0, 1)
 ax.set_ylabel(r'$\gamma$')
 # ax.set_ylim(0, 1)
 # ax.grid(True)
-ax.set_title(rf'$n_A = {nA:d}, p^*={p_star:.02f}$')
+ax.set_title(rf'$n_A = {nA:d}, p^*={p_star:.03f}$')
 ax.set_yscale('log')
 ax.legend()
 

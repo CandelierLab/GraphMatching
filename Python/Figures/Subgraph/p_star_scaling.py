@@ -25,8 +25,10 @@ p = re.compile("nA=(.*)\.txt")
 for fname in os.listdir(dname):
 
   with open(dname + fname) as f:
-    nA.append(int(p.search(fname).group(1)))
-    p_star.append(float(f.read()[0:-1]))
+    res = p.search(fname)
+    if res is not None:
+      nA.append(int(res.group(1)))
+      p_star.append(float(f.read()[0:-1]))
     
 # Sort it
 nA, p_star = zip(*sorted(zip(nA, p_star)))
@@ -36,9 +38,6 @@ nA, p_star = zip(*sorted(zip(nA, p_star)))
 P = np.polyfit(np.log(nA), np.log(p_star), 1)
 a = P[0]
 b = np.exp(P[1])
-
-# a = -1
-# b = 2
 
 x = np.geomspace(10, 1000, 100)
 y = b*x**a

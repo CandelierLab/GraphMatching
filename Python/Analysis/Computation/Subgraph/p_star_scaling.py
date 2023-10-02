@@ -4,21 +4,16 @@ Searching for p*
 
 import os
 import numpy as np
-import pandas as pd
-import time
 
 import project
 from Network import *
 from Comparison import *
-import paprint as pa
-
-import matplotlib.pyplot as plt
 
 # os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 10
+nA = 1000
 rho = 0.75
 nRun = 100000
 
@@ -55,7 +50,8 @@ if force or not os.path.exists(fname):
     # Correct matches
     g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
 
-    y += g[i]*np.exp(-(((x-p[i])/sigma)**2)/2)/nRun
+    if g[i]>0:
+      y -= np.log(g[i])*np.exp(-(((x-p[i])/sigma)**2)/2)/nRun
 
     if not i % (nRun/100):
       print(f'{int(i*100/nRun):02d} %')
@@ -68,3 +64,17 @@ if force or not os.path.exists(fname):
 
   with open(fname, 'w') as f:
     f.write(str(p_star))
+
+# --- Display --------------------------------------------------------------
+
+# import matplotlib.pyplot as plt
+
+# plt.style.use('dark_background')
+
+# fig, ax = plt.subplots()
+
+# ax.scatter(p, g, marker='.')
+
+# ax.plot(x, y, 'r-')
+
+# plt.show()
