@@ -6,6 +6,7 @@ from scipy.optimize import linear_sum_assignment
 from itertools import combinations
 import time
 import copy
+import paprint as pa
 
 from ctypes import CDLL, POINTER
 from ctypes import c_size_t, c_double
@@ -88,15 +89,23 @@ def scores(NetA, NetB, nIter=None,
 
       for k, attr in enumerate(NetA.node_attr):
 
-        bttr = NetB.node_attr[k]
+        wA = attr['values']
+        wB = NetB.node_attr[k]['values']
 
         if attr['measurable']:
-          pass
+          # *** Measurable attributes
+
+          # Edge weights differences
+          W = np.subtract.outer(wA, wB)
+
+          sigma2 = np.var(W)
+          if sigma2>0:
+            Xc *= np.exp(-W**2/2/sigma2)
+
         else:
-          # Build contraint attribute
-          A = np.tile(attr['values'], (NetB.nNd,1)).transpose()
-          B = np.tile(bttr['values'], (NetA.nNd,1))
-          Xc *= A==B
+          # *** Non-measurable attributes
+
+          Xc *= np.equal.outer(wA, wB)
       
       # --- Edge attributes
 

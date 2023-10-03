@@ -23,7 +23,7 @@ Z = None
 
 for i, p in enumerate(l_p):
 
-  fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nRun={:d}.csv'.format(p, nA, nRun)
+  fname = project.root + '/Files/Success ratios/p/ER_p={:.02f}_nA={:d}_nRun={:d}.csv'.format(p, nA, nRun)
 
   if os.path.exists(fname):
 

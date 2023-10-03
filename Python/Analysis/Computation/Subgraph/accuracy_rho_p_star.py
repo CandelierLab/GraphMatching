@@ -11,15 +11,15 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 1000
-p = np.log(nA)/nA
-nRun = 100
+nA = 200
+p_star = 2/nA
+nRun = 10000
 
 # --------------------------------------------------------------------------
 
-fname = project.root + '/Files/Success ratios/ER_p={:.02f}_nA={:d}_nRun={:d}.csv'.format(p, nA, nRun)
+fname = project.root + '/Files/Success ratios/rho/ER_nA={:d}_nRun={:d}.csv'.format(nA, nRun)
 
-Nsub = list(range(1, nA+1, 50))
+Nsub = np.linspace(nA/10, nA, 10, dtype=int)
 
 # ==========================================================================
 
@@ -36,9 +36,9 @@ for n in Nsub:
   for i in range(nRun):
 
     Net = Network(nA)
-    Net.set_rand_edges('ER', p)
+    Net.set_rand_edges('ER', p_star)
 
-    Sub, Idx = Net.subnet(n)    
+    Sub, Idx = Net.subnet(n)
 
     M = matching(Net, Sub)
 

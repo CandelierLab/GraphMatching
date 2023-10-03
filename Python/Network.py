@@ -184,7 +184,7 @@ class Network:
 
   def add_node_attr(self, *args, **kwargs):
     '''
-    In case attr is fed directly, it shoudl have the following structure:
+    In case attr is fed directly, it should have the following structure:
     attr = {'measurable': bool, 'values': val}
     attr = {'measurable': bool, 'values': val, 'name': name}
     '''
@@ -331,8 +331,8 @@ class Network:
     # --- Node attributes
 
     for attr in self.node_attr:
-      attr['values'] = attr['values'][I]
-      Sub.add_node_attr(attr)
+
+      Sub.add_node_attr( {'measurable': attr['measurable'], 'values': attr['values'][I]} )
     
     # --- Edge attributes
 
@@ -344,8 +344,7 @@ class Network:
       J = [np.where(np.all(self.edges==[I[e[0]], I[e[1]]], axis=1))[0][0] for e in Sub.edges]
       
       for attr in self.edge_attr:
-        attr['values'] = attr['values'][J]
-        Sub.add_edge_attr(attr)
+        Sub.add_edge_attr( {'measurable': attr['measurable'], 'values': attr['values'][J]} )
 
     return Sub if isinstance(idx, list) else (Sub, I)
   

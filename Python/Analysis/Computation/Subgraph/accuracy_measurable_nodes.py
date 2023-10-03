@@ -11,29 +11,35 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 20
-l_p = np.linspace(0,1,101)
+nA = 100
+p_star = 2/nA
 nRun = 10000
+
+l_zeta = np.arange(9)
+
+force = False
 
 # --------------------------------------------------------------------------
 
-# Nsub = list(range(2, nA+1, 2))
 Nsub = np.linspace(nA/10, nA, 10, dtype=int)
 
 # ==========================================================================
 
-for p in l_p:
+for zeta in l_zeta:
 
-  print(f'p={p:0.2f}')
+  print(f'--- Zeta = {zeta}')
 
-  fname = project.root + '/Files/Success ratios/p/ER_p={:.02f}_nA={:d}_nRun={:d}.csv'.format(p, nA, nRun)
+  fname = project.root + '/Files/Success ratios/Meas_nodes/ER_nA={:d}_zeta={:d}_nRun={:d}.csv'.format(nA, zeta, nRun)
+
+  # Skip if existing
+  if os.path.exists(fname) and not force: continue
 
   # Creating dataframe
   gamma = pd.DataFrame()
 
   for n in Nsub:
 
-    print('{:d} iterations: rho={:.2f} ...'.format(nRun, n/nA), end='')
+    print('{:d} iterations with subgraph of size {:d} ...'.format(nRun, n), end='')
     start = time.time()
     
     g = np.empty(nRun)
@@ -41,7 +47,10 @@ for p in l_p:
     for i in range(nRun):
 
       Net = Network(nA)
-      Net.set_rand_edges('ER', p)
+      Net.set_rand_edges('ER', p_star)
+
+      for z in range(zeta):
+        Net.add_node_attr('gauss')
 
       Sub, Idx = Net.subnet(n)
 
