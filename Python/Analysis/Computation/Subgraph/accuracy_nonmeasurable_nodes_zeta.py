@@ -15,9 +15,10 @@ nA = 100
 p_star = 2/nA
 nRun = 1000
 
-l_zeta = np.arange(9)
+l_zeta = np.arange(11)
+nc = 2
 
-force = True
+force = False
 
 # --------------------------------------------------------------------------
 
@@ -30,7 +31,7 @@ for zeta in l_zeta:
 
   print(f'--- Zeta = {zeta}')
 
-  fname = project.root + '/Files/Success ratios/Meas_nodes/ER_nA={:d}_zeta={:d}_nRun={:d}.csv'.format(nA, zeta, nRun)
+  fname = project.root + '/Files/Success ratios/nMeas_nodes_zeta/ER_nA={:d}_zeta={:d}_nRun={:d}.csv'.format(nA, zeta, nRun)
 
   # Skip if existing
   if os.path.exists(fname) and not force: continue
@@ -51,7 +52,15 @@ for zeta in l_zeta:
       Net.set_rand_edges('ER', p_star)
 
       for z in range(zeta):
-        Net.add_node_attr('gauss')
+        
+        '''
+        zeta variable
+        nc = 2
+        '''
+
+        val = np.floor(np.linspace(0, 1, Net.nNd)*nc).astype('int')
+        np.random.shuffle(val)
+        Net.add_node_attr({'measurable': False, 'values': val})
 
       Sub, Idx = Net.subnet(n)
 

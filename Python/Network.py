@@ -250,18 +250,20 @@ class Network:
       self.As[I[0][i], i] = 1
       self.At[I[1][i], i] = 1
 
-    # Networkx
-    self.G = nx.from_numpy_array(self.Adj)
+    if self.nEd>0:
+      
+      # Networkx
+      self.G = nx.from_numpy_array(self.Adj)
 
-    # Connectivity
-    self.isconnected = nx.is_connected(self.G)
+      # Connectivity
+      self.isconnected = nx.is_connected(self.G)
 
-    # Diameter
-    if self.isconnected:
-      self.d = nx.diameter(self.G)
-    else:
-      self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.G)])
-    
+      # Diameter
+      if self.isconnected:
+        self.d = nx.diameter(self.G)
+      else:
+        self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.G)])
+      
   # ========================================================================
   #                             MODIFICATIONS
   # ========================================================================

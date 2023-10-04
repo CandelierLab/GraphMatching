@@ -40,19 +40,22 @@ def scores(NetA, NetB, nIter=None,
   mA = NetA.nEd
   mB = NetB.nEd
 
-  # Weights
-  wA = 0 #NetA.edge_attr[0]
-  wB = 0 #NetB.edge_attr[0]
+  # --- Structural matching parameters
 
-  # --- Default values
+  if not mA or not mB:
 
-  # Number of iterations
-  if nIter is None:
-    nIter = max(min(NetA.d, NetB.d), 1)
+    nIter = 0
+    normalization = 1
 
-  # Normalization factor
-  if normalization is None:
-    normalization = 4*mA*mB/nA/nB + 1
+  else:
+
+    # Number of iterations
+    if nIter is None:
+      nIter = max(min(NetA.d, NetB.d), 1)
+
+    # Normalization factor
+    if normalization is None:
+      normalization = 4*mA*mB/nA/nB + 1
   
   # --- Attributes ---------------------------------------------------------
 
@@ -83,154 +86,175 @@ def scores(NetA, NetB, nIter=None,
     case _:
 
       # --- Node attributes
-
-      # Base
-      Xc = np.ones((nA,nB))/normalization
-
-      for k, attr in enumerate(NetA.node_attr):
-
-        wA = attr['values']
-        wB = NetB.node_attr[k]['values']
-
-        if attr['measurable']:
-          # *** Measurable attributes
-
-          # Edge weights differences
-          W = np.subtract.outer(wA, wB)
-
-          sigma2 = np.var(W)
-          if sigma2>0:
-            Xc *= np.exp(-W**2/2/sigma2)
-
-        else:
-          # *** Non-measurable attributes
-
-          Xc *= np.equal.outer(wA, wB)
       
-      # --- Edge attributes
+      if not nA or not nB:
 
-      # Base
-      Yc = np.ones((mA,mB))
+        Xc = np.empty(0)
+        Yc = np.empty(0)
 
-  # weight_constraint = False
-  # if weight_constraint:
+      else:
 
-  #   # Edge weights differences
-  #   W = np.subtract.outer(wA, wB)
+        # Base
+        Xc = np.ones((nA,nB))/normalization
 
-  #   # Slightly slower implementation:
-  #   # W = Wa[:,np.newaxis] - Wb
+        for k, attr in enumerate(NetA.node_attr):
 
-  #   sigma2 = np.var(W)
-  #   if sigma2>0:
-  #     Yc = np.exp(-W**2/2/sigma2)
-  #   else:
-  #     Yc = np.ones((mA,mB))
+          wA = attr['values']
+          wB = NetB.node_attr[k]['values']
 
-  # else:
-  #   Yc = np.ones((mA,mB))
+          if attr['measurable']:
+            # *** Measurable attributes
+
+            # Edge weights differences
+            W = np.subtract.outer(wA, wB)
+
+            sigma2 = np.var(W)
+            if sigma2>0:
+              Xc *= np.exp(-W**2/2/sigma2)
+
+          else:
+            # *** Non-measurable attributes
+
+            Xc *= np.equal.outer(wA, wB)
+        
+        # --- Edge attributes
+
+        # Base
+        Yc = np.ones((mA,mB))
+
+        if mA and mB:
+
+          for k, attr in enumerate(NetA.edge_attr):
+
+            wA = attr['values']
+            wB = NetB.edge_attr[k]['values']
+
+            if attr['measurable']:
+              # *** Measurable attributes
+
+              # Edge weights differences
+              W = np.subtract.outer(wA, wB)
+
+              sigma2 = np.var(W)
+              if sigma2>0:
+                Yc *= np.exp(-W**2/2/sigma2)
+
+            else:
+              # *** Non-measurable attributes
+
+              Yc *= np.equal.outer(wA, wB)
+
 
   # --- Computation --------------------------------------------------------
 
-  # Preallocation
-  X = np.ones((nA,nB))
-  Y = np.ones((mA,mB))
+  if not mA or not mB:
 
-  if i_function is not None:
-    i_param['NetA'] = NetA
-    i_param['NetB'] = NetB
-    output = []
+    X = Xc
+    Y = Yc
 
-  # Initial evaluation
-  if i_function is not None and initial_evaluation:
-    i_function(locals(), i_param, output)
+  else:
 
-  match language:
+    # Preallocation
+    X = np.ones((nA,nB))
+    Y = np.ones((mA,mB))
 
-    case 'C':
+    if i_function is not None:
+      i_param['NetA'] = NetA
+      i_param['NetB'] = NetB
+      output = []
 
-      # NB: Zager is not supported yet with the C++ implementation
+    # Initial evaluation
+    if i_function is not None and initial_evaluation:
+      i_function(locals(), i_param, output)
 
-      # Prototypes
-      p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
-      p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
-      GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
-      GASP.scores.restype = None
+    match language:
 
-      # Compute scores
-      GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, normalization, nIter)
+      case 'C':
 
-    case 'Python':
+        # NB: Zager is not supported yet with the C++ implementation
 
-      for i in range(nIter):
+        # Prototypes
+        p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
+        p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
+        GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
+        GASP.scores.restype = None
 
-        if measure_time:
-          start = time.time()
+        # Compute scores
+        GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, normalization, nIter)
 
-        match algorithm:
+      case 'Python':
 
-          case 'Zager':
-            X = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
-            Y = NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At
+        for i in range(nIter):
 
-            if normalization is None:
-              X /= np.mean(X)
-              Y /= np.mean(Y)
-            else:
-              X /= normalization
-        
-          case 'GASP':
-            X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T +1) * Xc
-            Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+          if measure_time:
+            start = time.time()
 
-          case 'GASP2':
-            X = (1 + NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
-            Y = (1 + NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+          match algorithm:
 
-        ''' === A note on operation order ===
+            case 'Zager':
+              X = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
+              Y = NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At
 
-        If all values of X are equal to the same value x, then updating Y gives
-        a homogeneous matrix with values 2x ; in this case the update of Y does
-        not give any additional information. However, when all Y are equal the 
-        update of X does not give an homogeneous matrix as some information 
-        about the network strutures is included.
+              if normalization is None:
+                X /= np.mean(X)
+                Y /= np.mean(Y)
+              else:
+                X /= normalization
+          
+            case 'GASP':
+              X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T +1) * Xc
+              Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
-        So it is always preferable to start with the update of X.
-        '''
+            case 'GASP2':
+              X = (1 + NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
+              Y = (1 + NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
-        ''' === A note on normalization ===
+          ''' === A note on operation order ===
 
-        Normalization is useful for proving the convergence of the algorithm, 
-        but is not necessary in the computation since the scores are relative
-        and not absolute.
-        
-        So as long as the scores do not overflow the maximal float value, 
-        there is no need to normalize. But this can happen quite fast.
+          If all values of X are equal to the same value x, then updating Y gives
+          a homogeneous matrix with values 2x ; in this case the update of Y does
+          not give any additional information. However, when all Y are equal the 
+          update of X does not give an homogeneous matrix as some information 
+          about the network strutures is included.
 
-        A good approximation of the normalization factor is:
+          So it is always preferable to start with the update of X.
+          '''
 
-                f = 2 sqrt[ (mA*mB)/(nA*nB) ] = 2 sqrt[ (mA/nA)(mB/nB) ]
+          ''' === A note on normalization ===
 
-        for an ER network with a density of edges p, we have m = p.n^2 so:
-        
-                f = 2 sqrt(nA.nB.pA.pB)
+          Normalization is useful for proving the convergence of the algorithm, 
+          but is not necessary in the computation since the scores are relative
+          and not absolute.
+          
+          So as long as the scores do not overflow the maximal float value, 
+          there is no need to normalize. But this can happen quite fast.
 
-        Nevertheless, if one needs normalization as defined in Zager et.al.,
-        it can be performed after the iterative procedure by dividing the final
-        score matrices X and Y by:
+          A good approximation of the normalization factor is:
 
-                f = np.sqrt(np.sum(X**2))
+                  f = 2 sqrt[ (mA*mB)/(nA*nB) ] = 2 sqrt[ (mA/nA)(mB/nB) ]
 
-        This is much more efficient than computing the normalization at each
-        iteration.
-        '''
+          for an ER network with a density of edges p, we have m = p.n^2 so:
+          
+                  f = 2 sqrt(nA.nB.pA.pB)
 
-        if i_function is not None:
-          i_function(locals(), i_param, output)
+          Nevertheless, if one needs normalization as defined in Zager et.al.,
+          it can be performed after the iterative procedure by dividing the final
+          score matrices X and Y by:
 
-  # Final step
-  if algorithm=='Zager':
-    X = X * Xc
+                  f = np.sqrt(np.sum(X**2))
+
+          This is much more efficient than computing the normalization at each
+          iteration.
+          '''
+
+          if i_function is not None:
+            i_function(locals(), i_param, output)
+
+    # Final step
+    if algorithm=='Zager':
+      X = X * Xc
+
+  # --- Output
 
   if i_function is None:
     return(X, Y)
@@ -261,7 +285,11 @@ def matching(NetA, NetB, threshold=None, all_solutions=False, verbose=False, **k
   if verbose:
     start = time.time()
 
-  I, J = linear_sum_assignment(X, maximize=True)
+  if X.size:
+    I, J = linear_sum_assignment(X, maximize=True)
+  else:
+    I = []
+    J = []
 
   if verbose:
     print('Matching: {:.02f} ms'.format((time.time()-start)*1000))

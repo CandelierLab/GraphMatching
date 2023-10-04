@@ -15,7 +15,8 @@ nA = 100
 p_star = 2/nA
 nRun = 1000
 
-l_zeta = np.arange(9)
+zeta = 1
+l_nc = np.round(np.geomspace(1, 2*nA, 10)).astype(int)
 
 force = True
 
@@ -26,11 +27,11 @@ Nsub[0] = 1
 
 # ==========================================================================
 
-for zeta in l_zeta:
+for nc in l_nc:
 
-  print(f'--- Zeta = {zeta}')
+  print('--- Number of categories nc =', nc)
 
-  fname = project.root + '/Files/Success ratios/Meas_nodes/ER_nA={:d}_zeta={:d}_nRun={:d}.csv'.format(nA, zeta, nRun)
+  fname = project.root + '/Files/Success ratios/nMeas_edges_nc/ER_nA={:d}_nc={:d}_nRun={:d}.csv'.format(nA, nc, nRun)
 
   # Skip if existing
   if os.path.exists(fname) and not force: continue
@@ -50,8 +51,13 @@ for zeta in l_zeta:
       Net = Network(nA)
       Net.set_rand_edges('ER', p_star)
 
-      for z in range(zeta):
-        Net.add_node_attr('gauss')
+      '''
+      zeta = 1
+      nc variable
+      '''
+
+      val = np.ceil(np.linspace(1e-10, 1, Net.nEd)*nc).astype('int')
+      Net.add_edge_attr({'measurable': False, 'values': val})
 
       Sub, Idx = Net.subnet(n)
 
