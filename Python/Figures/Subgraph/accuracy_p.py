@@ -56,7 +56,7 @@ with open(dname + f'nA={nA}.txt') as f:
 # --- Display --------------------------------------------------------------
 
 fig, ax = plt.subplots()
-
+ax.set_prop_cycle(plt.cycler(color=plt.cm.turbo(np.linspace(0,1,len(rho)+1))))
 
 for k in range(len(rho)):
   ax.plot(l_p, Z[:,k], '-', label=rf'$\rho = {rho[k]:.1f}$')

@@ -11,44 +11,48 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 500
-p_star = 2/nA
-nRun = 10000
-
-# --------------------------------------------------------------------------
-
-fname = project.root + '/Files/Success ratios/rho/ER_nA={:d}_nRun={:d}.csv'.format(nA, nRun)
-
-Nsub = np.linspace(nA/10, nA, 10, dtype=int)
+l_nA = [10, 20, 50, 100, 200, 500, 1000]
 
 # ==========================================================================
 
-# Creating dataframe
-gamma = pd.DataFrame()
+for nA in l_nA:
 
-for n in Nsub:
+  p_star = 2/nA
+  nRun = 10000
 
-  print('{:d} iterations with subgraph of size {:d} ...'.format(nRun, n), end='')
-  start = time.time()
-  
-  g = np.empty(nRun)
+  # --------------------------------------------------------------------------
 
-  for i in range(nRun):
+  fname = project.root + '/Files/Success ratios/rho/ER_nA={:d}_nRun={:d}.csv'.format(nA, nRun)
 
-    Net = Network(nA)
-    Net.set_rand_edges('ER', p_star)
+  Nsub = np.linspace(0, nA, 11, dtype=int)
+  Nsub[0] = 1
 
-    Sub, Idx = Net.subnet(n)
+  # Creating dataframe
+  gamma = pd.DataFrame()
 
-    M = matching(Net, Sub)
+  for n in Nsub:
 
-    # Correct matches
-    g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
+    print('{:d} iterations with subgraph of size {:d} ...'.format(nRun, n), end='')
+    start = time.time()
+    
+    g = np.empty(nRun)
 
-    gamma[n] = g
+    for i in range(nRun):
 
-  print('{:.02f} sec'.format((time.time() - start)))
+      Net = Network(nA)
+      Net.set_rand_edges('ER', p_star)
 
-# === Save =================================================================
+      Sub, Idx = Net.subnet(n)
 
-gamma.to_csv(fname)
+      M = matching(Net, Sub)
+
+      # Correct matches
+      g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
+
+      gamma[n] = g
+
+    print('{:.02f} sec'.format((time.time() - start)))
+
+  # === Save =================================================================
+
+  gamma.to_csv(fname)

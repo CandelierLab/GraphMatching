@@ -6,16 +6,18 @@ import matplotlib.pyplot as plt
 
 import project
 
-# os.system('clear')
+os.system('clear')
 
 # === Parameters ===========================================================
 
-dname = project.root + '/Files/Success ratios/rho/'
+dname = project.root + '/Files/Success ratios/Meas_nodes_noise/'
+
+refname = project.root + '/Files/Success ratios/Meas_nodes/ER_nA=100_zeta=0_nRun=1000.csv'
 
 # ==========================================================================
 
 # Regular expression
-p = re.compile("ER_nA=(.*)_nRun=(.*)\.csv")
+p = re.compile("ER_nA=(.*)_sigma=(.*)_nRun=(.*)\.csv")
 
 # --- Display
 
@@ -28,10 +30,8 @@ for fname in os.listdir(dname):
   res = p.search(fname)
   if res is not None:
     nA = int(res.group(1))
-    nRun = int(res.group(2))
-
-  # Random matchings
-  # ax.axhline(y = 1/nA, color = 'w', linestyle = ':')
+    sigma = float(res.group(2))
+    nRun = int(res.group(3))
 
   # --- Load data
 
@@ -45,24 +45,29 @@ for fname in os.listdir(dname):
   m = gamma.mean()
   s = gamma.std()
 
-  # Approx
-  # y = np.exp((rho-1)*np.log(nA))
+  # Plot
+  ax.plot(rho, m, '.-', label=sigma)
 
-  # --- Display
+# --- Reference
 
-  ax.plot(rho, m, '.-', label=nA)
-  # ax.plot(rho, y, 'w:')
+gamma = pd.read_csv(refname, index_col=0)
 
-  # ax.plot(rho, m/y, '.-')
+# x-values
+Nsub = np.array([int(i) for i in list(gamma)])
+rho = Nsub/Nsub[-1]
 
-# --- Misc display settings
+# Compute mean and std
+m = gamma.mean()
 
-ax.set_yscale('log')
+# Plot
+ax.plot(rho, m, 'w--', label='Ref')
+
+# --- Misc display
 
 ax.set_xlabel(r'subgraph ratio $\rho$')
 ax.set_xlim(0, 1)
-ax.set_ylabel(r'accuracy $\gamma$')
-# ax.set_ylim(0, 1.2)
+ax.set_ylabel(r'Accuracy $\gamma$')
+ax.set_ylim(0, 1)
 
 ax.legend()
 
