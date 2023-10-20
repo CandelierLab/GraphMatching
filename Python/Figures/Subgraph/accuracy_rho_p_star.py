@@ -6,20 +6,20 @@ import matplotlib.pyplot as plt
 
 import project
 
-os.system('clear')
+# os.system('clear')
 
 # === Parameters ===========================================================
 
-dname = project.root + '/Files/Success ratios/nMeas_edges_nc/'
+dname = project.root + '/Files/Success ratios/rho/'
 
 # ==========================================================================
 
 # Regular expression
-p = re.compile("ER_nA=(.*)_nc=(.*)_nRun=(.*)\.csv")
+p = re.compile("ER_nA=(.*)_nRun=(.*)\.csv")
 
 # --- Display
 
-fig, ax = plt.subplots()
+Z = []
 
 for fname in os.listdir(dname):
 
@@ -27,8 +27,10 @@ for fname in os.listdir(dname):
   res = p.search(fname)
   if res is not None:
     nA = int(res.group(1))
-    nc = int(res.group(2))
-    nRun = int(res.group(3))
+    nRun = int(res.group(2))
+
+  # Random matchings
+  # ax.axhline(y = 1/nA, color = 'w', linestyle = ':')
 
   # --- Load data
 
@@ -42,17 +44,27 @@ for fname in os.listdir(dname):
   m = gamma.mean()
   s = gamma.std()
 
-  # Plot
-  ax.plot(rho, m, '.-', label=nc)
+  Z.append((rho, m, nA))
 
-# --- Misc display
+# Sort Z
+Z = [Z[i] for i in np.argsort([z[2] for z in Z])]
 
-# Random matchings
+# --- Display
+
+fig, ax = plt.subplots()
+ax.set_prop_cycle(plt.cycler(color=plt.cm.turbo(np.linspace(0,1,len(Z)+1))))
+
+for z in Z:
+  ax.plot(z[0], z[1], '.-', label=z[2])
+
+# --- Misc display settings
+
+ax.set_yscale('log')
 
 ax.set_xlabel(r'subgraph ratio $\rho$')
 ax.set_xlim(0, 1)
-ax.set_ylabel(r'Accuracy $\gamma$')
-ax.set_ylim(0, 1)
+ax.set_ylabel(r'accuracy $\gamma$')
+# ax.set_ylim(0, 1.2)
 
 ax.legend()
 

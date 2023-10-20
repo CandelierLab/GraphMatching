@@ -13,6 +13,8 @@ os.system('clear')
 
 l_nA = [10, 20, 50, 100, 200, 500, 1000]
 
+force = False
+
 # ==========================================================================
 
 for nA in l_nA:
@@ -23,6 +25,9 @@ for nA in l_nA:
   # --------------------------------------------------------------------------
 
   fname = project.root + '/Files/Success ratios/rho/ER_nA={:d}_nRun={:d}.csv'.format(nA, nRun)
+
+  # Skip if already existing
+  if os.path.exists(fname) and not force: continue
 
   Nsub = np.linspace(0, nA, 11, dtype=int)
   Nsub[0] = 1

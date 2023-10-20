@@ -10,16 +10,16 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-dname = project.root + '/Files/Success ratios/nMeas_nodes_zeta/'
+dname = project.root + '/Files/Success ratios/nMeas_edges_nc/'
 
 # ==========================================================================
 
 # Regular expression
-p = re.compile("ER_nA=(.*)_zeta=(.*)_nRun=(.*)\.csv")
+p = re.compile("ER_nA=(.*)_nc=(.*)_nRun=(.*)\.csv")
 
 # --- Display
 
-fig, ax = plt.subplots()
+Z = []
 
 for fname in os.listdir(dname):
 
@@ -27,7 +27,7 @@ for fname in os.listdir(dname):
   res = p.search(fname)
   if res is not None:
     nA = int(res.group(1))
-    zeta = int(res.group(2))
+    nc = int(res.group(2))
     nRun = int(res.group(3))
 
   # --- Load data
@@ -42,8 +42,18 @@ for fname in os.listdir(dname):
   m = gamma.mean()
   s = gamma.std()
 
-  # Plot
-  ax.plot(rho, m, '.-', label=zeta)
+  Z.append((rho, m, nc))
+
+# Sort Z
+Z = [Z[i] for i in np.argsort([z[2] for z in Z])]
+
+# --- Display
+
+fig, ax = plt.subplots()
+ax.set_prop_cycle(plt.cycler(color=plt.cm.turbo(np.linspace(0,1,len(Z)+1))))
+
+for z in Z:
+  ax.plot(z[0], z[1], '.-', label=z[2])
 
 # --- Misc display
 

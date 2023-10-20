@@ -10,7 +10,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-dname = project.root + '/Files/Success ratios/Meas_nodes/'
+dname = project.root + '/Files/Success ratios/nMeas_nodes_zeta/'
 
 # ==========================================================================
 
@@ -58,7 +58,6 @@ for z in Z:
 # --- Misc display
 
 # Random matchings
-ax.axhline(y = 1/nA, color = 'w', linestyle = ':')
 
 ax.set_xlabel(r'subgraph ratio $\rho$')
 ax.set_xlim(0, 1)
