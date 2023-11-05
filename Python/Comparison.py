@@ -83,7 +83,7 @@ def scores(NetA, NetB, nIter=None,
       # Remapping in [-1, 1]
       Xc = Xc*2 - 1
 
-    case _:
+    case 'GASP':
 
       # --- Node attributes
       
@@ -115,7 +115,11 @@ def scores(NetA, NetB, nIter=None,
           else:
             # *** Non-measurable attributes
 
-            Xc *= np.equal.outer(wA, wB)
+            tmp = np.equal.outer(wA, wB).astype(float)
+            tmp[tmp==0] = 1/nA/nB
+            
+            # Xc *= np.equal.outer(wA, wB)
+            Xc *= tmp
         
         # --- Edge attributes
 
