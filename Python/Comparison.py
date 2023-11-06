@@ -328,7 +328,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=False, verbose=False, **k
           ns[d[1]][1] = m[d[0]][1]
           ns[d[0]][1] = m[d[1]][1]
 
-          if ns not in M:
+          if ns not in M and ns not in C:
             C.append(ns)
       
   else:
