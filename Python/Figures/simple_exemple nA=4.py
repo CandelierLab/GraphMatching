@@ -39,7 +39,7 @@ NetB.Adj[1,2] = True
 NetB.Adj[2,1] = True
 NetB.Adj[2,3] = True
 NetB.Adj[3,2] = True
-NetB.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0]})
+NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
 NetB.prepare()
 
 NetA.print()
@@ -55,28 +55,3 @@ print(f'{len(M)} Matchings:')
 
 for m in M:
   print(m)
-
-# # # R = np.zeros(nIterMax, dtype=int)
-
-# # # for i in range(nIterMax):
-
-# # #   M = matching(NetA, NetB, nIter=i+1)
-
-# # #   for k, m in enumerate(M):
-# # #      R[i] += int(m[1]!=M0[k][1])
-
-# # #   # Update reference
-# # #   M0 = M
-
-# # # # === Display =================================================================
-
-# # # plt.style.use('dark_background')
-
-# # # fig, ax = plt.subplots()
-
-# # # ax.plot(R, '.-')
-
-# # # ax.set_xlabel('Iterations')
-# # # ax.set_ylabel('Number of changes')
-
-# # # plt.show()

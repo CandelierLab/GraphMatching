@@ -267,9 +267,10 @@ def scores(NetA, NetB, nIter=None,
 
 
 # === Matching =============================================================
-def matching(NetA, NetB, threshold=None, all_solutions=False, verbose=False, **kwargs):
+def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbose=False, **kwargs):
 
-  # Get similarity measures
+  # --- Similarity scores
+
   if verbose:
     start = time.time()
 
@@ -281,19 +282,22 @@ def matching(NetA, NetB, threshold=None, all_solutions=False, verbose=False, **k
   if verbose:
     print('Scoring: {:.02f} ms'.format((time.time()-start)*1000), end=' - ')
 
-  # Threshold
+  # --- Emptyness check
+
+  if not X.size:
+    return ([], output) if 'i_function' in kwargs else []
+
+  # --- Threshold
+
   if threshold is not None:
     X[X<threshold] = -np.inf
 
-  # Hungarian algorithm (Jonker-Volgenant)
+  # --- Hungarian algorithm (Jonker-Volgenant)
+    
   if verbose:
     start = time.time()
 
-  if X.size:
-    I, J = linear_sum_assignment(X, maximize=True)
-  else:
-    I = []
-    J = []
+  I, J = linear_sum_assignment(X, maximize=True)
 
   if verbose:
     print('Matching: {:.02f} ms'.format((time.time()-start)*1000))
@@ -305,31 +309,61 @@ def matching(NetA, NetB, threshold=None, all_solutions=False, verbose=False, **k
     # Solution score
     s = np.sum([X[I[k], J[k]] for k in range(len(I))])
 
-    # Candidates
-    C = [[[I[k], J[k]] for k in range(len(I))]]
+    if brute:
 
-    # Solution container
-    M = []
+      # Candidates
+      C = [[[I[k], J[k]] for k in range(len(I))]]
 
-    # Loop over candidates
-    while C:
+      # Solution container
+      M = []
 
-      # Append solution
-      m = C.pop()
-      M.append(m)
+      # Loop over candidates
+      while C:
 
-      # Test all possible dual inversions
-      for d in combinations(range(len(m)), 2):
-        
-        if X[m[d[0]][0], m[d[0]][1]]+X[m[d[1]][0], m[d[1]][1]] == X[m[d[0]][0], m[d[1]][1]]+X[m[d[1]][0], m[d[0]][1]]:
+        # Append solution
+        m = C.pop()
+        M.append(m)
+
+        # Test all possible dual inversions
+        for d in combinations(range(len(m)), 2):
           
-          # New solution
-          ns = copy.deepcopy(m)
-          ns[d[1]][1] = m[d[0]][1]
-          ns[d[0]][1] = m[d[1]][1]
+          if X[m[d[0]][0], m[d[0]][1]]+X[m[d[1]][0], m[d[1]][1]] == X[m[d[0]][0], m[d[1]][1]]+X[m[d[1]][0], m[d[0]][1]]:
+            
+            # New solution
+            ns = copy.deepcopy(m)
+            ns[d[1]][1] = m[d[0]][1]
+            ns[d[0]][1] = m[d[1]][1]
 
-          if ns not in M and ns not in C:
-            C.append(ns)
+            if ns not in M and ns not in C:
+              C.append(ns)
+
+    else:
+      
+      # 1) Implémenter taille égale
+      # 2) Modif |V|>|U|
+      # 3) Modif |U|>|V|
+
+      s = -s
+      R = -X
+
+      R -= R[0,:] 
+
+      # R[:,2] += R[1,3] - R[1,2]
+
+      print(s, np.sum(-X[0,:]-R[0,:]) + np.sum(np.min(R, axis=1)))
+      pa.matrix(R)
+
+      U = np.min(R, axis=1)
+      V = -X[0,:]-R[0,:]
+
+      print(U,V)
+
+      Z = U[:,np.newaxis] + V[np.newaxis,:]
+
+      pa.matrix(Z==-X)
+
+      M = []
+
       
   else:
     M = [(I[k], J[k]) for k in range(len(I))]
