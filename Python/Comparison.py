@@ -343,24 +343,73 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       # 2) Modif |V|>|U|
       # 3) Modif |U|>|V|
 
+      # Closeness parameters
+      rtol = 1e-10
+      atol = 1e-8
+
       s = -s
       R = -X
 
       R -= R[0,:] 
 
+      while True:
+
+        # Bipartite graph weights
+        U = np.min(R, axis=1)
+        V = -X[0,:]-R[0,:]
+
+        # Current score
+        c = np.sum(U+V)
+
+        # Verbose
+        print(f'-- Target: {s}, current: {c}, diff: {s-c}')
+
+        pa.matrix(R)
+
+        # Termination check
+        if np.isclose(c, s, rtol=rtol, atol=atol):
+          break
+        else:
+          
+          # Domination dictionnary
+          d = {}
+
+          for i in range(R.shape[0]):
+
+            L = R[i,:].copy()
+            if np.sum(np.isclose(np.min(L), L, rtol=rtol, atol=atol))==1:
+
+              # First minimum
+              mi = np.argmin(L)
+              m = L[mi]
+
+              # Second minimum
+              L[mi] = np.inf
+              m2 = np.min(L)
+              
+              if mi not in d or d[mi]>m2-m:
+                d[mi] = m2-m
+          
+          K = list(d.keys())
+          k = K[np.argmin([abs(d[k]+c-s) for k in K])]
+          # k = max(d, key=d.get)
+
+          R[:,k] += d[k]
+          print(d, k)
+          
       # R[:,2] += R[1,3] - R[1,2]
 
-      print(s, np.sum(-X[0,:]-R[0,:]) + np.sum(np.min(R, axis=1)))
-      pa.matrix(R)
+      
+      
+      # pa.matrix(R)
 
-      U = np.min(R, axis=1)
-      V = -X[0,:]-R[0,:]
+      
 
-      print(U,V)
+      # print(U,V)
 
-      Z = U[:,np.newaxis] + V[np.newaxis,:]
+      # Z = U[:,np.newaxis] + V[np.newaxis,:]
 
-      pa.matrix(Z==-X)
+      # pa.matrix(Z==-X)
 
       M = []
 

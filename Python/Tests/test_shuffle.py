@@ -9,9 +9,11 @@ os.system('clear')
 # --- Parameters -----------------------------------------------------------
 
 nA = 5
-p = 0
+p = 0.2
 
 rho = 0.5
+
+algo = 'GASP'
 
 # --------------------------------------------------------------------------
 
@@ -24,12 +26,12 @@ Net.print()
 
 Met, Icor = Net.shuffle()
 
-print('Correspondence: ', Icor)
-Met.print()
+# print('Correspondence: ', Icor)
+# Met.print()
 
-M = matching(Net, Met, verbose=True)
+M = matching(Net, Met, normalization=1, algorithm=algo, all_solutions=True)
 
-print(M)
+print(f'{len(M)} Matchings:')
 
-# Correct matches
-print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/nA)
+for m in M:
+  print(m)
