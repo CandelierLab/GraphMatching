@@ -9,7 +9,7 @@ os.system('clear')
 # --- Parameters -----------------------------------------------------------
 
 nA = 5
-p = 0.2
+p = 0.1
 
 rho = 0.5
 
@@ -29,7 +29,7 @@ Met, Icor = Net.shuffle()
 # print('Correspondence: ', Icor)
 # Met.print()
 
-M = matching(Net, Met, normalization=1, algorithm=algo, all_solutions=True)
+M = matching(Net, Met, algorithm=algo, all_solutions=True)
 
 print(f'{len(M)} Matchings:')
 

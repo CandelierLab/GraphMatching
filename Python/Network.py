@@ -314,7 +314,8 @@ class Network:
       raise Exception(f"Subnetwork: The number of nodes in the subnet ({idx}) is greater than in the original network ({self.nNd})")
 
     # Indexes
-    I = idx if isinstance(idx, list) else random.sample(range(self.nNd), idx)
+    I = idx if isinstance(idx, list) else np.random.choice(range(self.nNd), idx, replace=False)
+    # I = idx if isinstance(idx, list) else random.sample(range(self.nNd), idx)
     K = np.ix_(I,I)
 
     # Adjacency matrix

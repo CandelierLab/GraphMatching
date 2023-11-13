@@ -352,23 +352,19 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
       R -= R[0,:] 
 
-      while True:
+      for ii in range(100):
 
         # Bipartite graph weights
         U = np.min(R, axis=1)
         V = -X[0,:]-R[0,:]
 
         # Current score
-        c = np.sum(U+V)
-
-        # Verbose
-        print(f'-- Target: {s}, current: {c}, diff: {s-c}')
-
-        pa.matrix(R)
+        c = np.sum(U)+np.sum(V)
 
         # Termination check
         if np.isclose(c, s, rtol=rtol, atol=atol):
           break
+
         else:
           
           # Domination dictionnary
@@ -392,24 +388,12 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
           
           K = list(d.keys())
           k = K[np.argmin([abs(d[k]+c-s) for k in K])]
-          # k = max(d, key=d.get)
 
           R[:,k] += d[k]
-          print(d, k)
-          
-      # R[:,2] += R[1,3] - R[1,2]
-
       
-      
-      # pa.matrix(R)
+      B = (U[:,np.newaxis] + V[np.newaxis,:])==-X
 
-      
-
-      # print(U,V)
-
-      # Z = U[:,np.newaxis] + V[np.newaxis,:]
-
-      # pa.matrix(Z==-X)
+      pa.matrix(B)
 
       M = []
 
