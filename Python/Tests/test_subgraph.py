@@ -12,7 +12,7 @@ os.system('clear')
 nA = 5
 p = 0.5
 
-rho = 3/nA
+rho = 1 #3/nA
 
 np.random.seed(seed=1)
 
@@ -23,20 +23,19 @@ Net.set_rand_edges('ER', p)
 # Net.add_edge_attr('rand', name='test')
 # Net.add_node_attr('rand', name='node_attr_1')
 
-Net.print()
+# Net.print()
 
 Sub, Icor = Net.subnet(round(nA*rho))
 
 # print('Correspondence: ', Icor)
-Sub.print()
+# Sub.print()
 
 # Purely structural scores
 # Xs = scores(Net, Sub, nIter=nIter)[0]
 
 # Structure & attribute scores
-X = scores(Net, Sub)[0]
-
-pa.matrix(X, title='X')
+# X = scores(Net, Sub)[0]
+# pa.matrix(X, title='X')
 
 M = matching(Net, Sub)
 
