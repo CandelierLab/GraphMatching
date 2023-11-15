@@ -3,7 +3,7 @@ import pprint
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
-from itertools import combinations
+import itertools
 import time
 import copy
 import paprint as pa
@@ -325,7 +325,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
         M.append(m)
 
         # Test all possible dual inversions
-        for d in combinations(range(len(m)), 2):
+        for d in itertools.combinations(range(len(m)), 2):
           
           if X[m[d[0]][0], m[d[0]][1]]+X[m[d[1]][0], m[d[1]][1]] == X[m[d[0]][0], m[d[1]][1]]+X[m[d[1]][0], m[d[0]][1]]:
             
@@ -338,62 +338,72 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
               C.append(ns)
 
     else:
-      
-      # 1) Implémenter taille égale
-      # 2) Modif |V|>|U|
-      # 3) Modif |U|>|V|
 
       # Closeness parameters
       rtol = 1e-10
       atol = 1e-8
 
-      s = -s
-      R = -X
+      # --- Pad with zeros (nA != nB)
 
-      R -= R[0,:] 
+      if X.shape[0] > X.shape[1]:
+        A0 = []
+        A1 = np.arange(X.shape[1], X.shape[0])
+        X = np.append(X, np.zeros((X.shape[0], A1.size)), axis=1)
 
-      for ii in range(100):
+      elif X.shape[0] < X.shape[1]:
+        A0 = np.arange(X.shape[0], X.shape[1])
+        A1 = []
+        X = np.append(X, np.zeros((A0.size, X.shape[1])), axis=0)
+
+      else:
+        A0 = []
+        A1 = []
+        
+      # --- Preparation
+
+      pa.matrix(X, title='X initial')
+
+      # Initial first line
+      X0 = X[0,:]
+
+      # Remove solution
+      for (i,j) in zip(I,J):
+        X[:,j] -= X[i,j]
+
+      pa.matrix(X, title='X prepared')
+
+      # --- Correction loop
+
+      for i in range(X.shape[0]):
 
         # Bipartite graph weights
-        U = np.min(R, axis=1)
-        V = -X[0,:]-R[0,:]
+        U = np.max(X, axis=1)
+        V = X0 - X[0,:]
 
         # Current score
         c = np.sum(U)+np.sum(V)
+
+        print(f'Diff: {s-c}')
 
         # Termination check
         if np.isclose(c, s, rtol=rtol, atol=atol):
           break
 
-        else:
-          
-          # Domination dictionnary
-          d = {}
+        L = X[i,:].copy()
 
-          for i in range(R.shape[0]):
+        # Where to remove ?
+        mi = np.argmax(L)
+        m = L[mi]
 
-            L = R[i,:].copy()
-            if np.sum(np.isclose(np.min(L), L, rtol=rtol, atol=atol))==1:
+        # How much to remove?
+        d = m-np.max(np.delete(L, mi))
 
-              # First minimum
-              mi = np.argmin(L)
-              m = L[mi]
+        # Remove
+        X[:,mi] -= d
 
-              # Second minimum
-              L[mi] = np.inf
-              m2 = np.min(L)
-              
-              if mi not in d or d[mi]>m2-m:
-                d[mi] = m2-m
-          
-          K = list(d.keys())
-          k = K[np.argmin([abs(d[k]+c-s) for k in K])]
+        print(f'Removing {d:.3f} from column {mi}.')
+        pa.matrix(X)
 
-          R[:,k] += d[k]
-      
-      B = (U[:,np.newaxis] + V[np.newaxis,:])==-X
-
-      pa.matrix(B)
 
       M = []
 
