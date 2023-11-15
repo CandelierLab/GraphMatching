@@ -420,3 +420,78 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 def allsolutions(S, I, J):
 
   pa.matrix(S)
+
+  # --- Preparation
+
+  n = len(I)
+
+  # Mask & score
+  s = 0
+  Mask = np.full((n,n), True)  
+  for (i,j) in zip(I,J):
+    s += S[i,j]
+    Mask[i,j] = False
+    
+  # Minimal vectors
+  mu = np.full(n, -np.inf)
+  mv = np.full(n, -np.inf)
+
+  # Maximal vectors
+  Mu = np.full(n, np.inf)
+  Mv = np.full(n, np.inf)
+
+  # Fixed value
+  mu[I[0]] = 0  
+  Mu[J[0]] = 0
+
+  ref = [I[0], J[0]]
+
+  # Fix value
+  mv[ref[1]] = S[ref[0],ref[1]] - mu[ref[0]]
+  Mv[ref[1]] = S[ref[0],ref[1]] - Mu[ref[0]]
+
+  for iter in range(4):
+
+    # Min values    
+    mu = np.maximum(mu, S[:,ref[1]] - mv[ref[1]])
+    mv = np.maximum(mv, S[ref[0],:] - mu[ref[0]])
+
+    # Max values    
+    for (i,j) in zip(I,J):
+      Mu[i] = S[i,j] - mv[i]
+      Mv[j] = S[i,j] - mu[i]
+
+    # Max sums
+    Muv = np.add.outer(Mu, Mv)
+
+    print('')
+    pa.line(f'Iteration {iter}')
+    print('Minimal:')
+    print(np.stack((mu, mv), axis=-1))  
+    print('Maximal:')
+    print(np.stack((Mu, Mv), axis=-1)) 
+    pa.matrix(Muv)
+
+    # New reference
+    tmp = np.nonzero(np.logical_and(Muv==S, Mask))
+    if not tmp[0].size:
+      assert s == np.sum(mu) + np.sum(mv)
+      break
+
+    ref = [tmp[0][0], tmp[1][0]]
+
+
+    print('Reference: ', ref)
+
+    # --- Updates
+
+    # Min vectors
+    mu[ref[0]] = Mu[ref[0]]
+    mv[ref[1]] = Mv[ref[1]]
+
+    # Mask
+    Mask[ref[0], ref[1]] = False
+
+  pa.matrix(np.logical_not(Mask))
+
+    
