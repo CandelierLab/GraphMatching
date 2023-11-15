@@ -405,3 +405,8 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
     return (M, output)
   else:
     return M
+  
+# ----------------------------------------------------------------------
+def allsolutions(S, I, J):
+
+  pa.matrix(S)

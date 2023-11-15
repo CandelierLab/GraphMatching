@@ -90,7 +90,8 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
     # Integers
     elif np.issubdtype(Sub.dtype, np.integer):
 
-      ms = int(np.ceil(np.max(1*(Sub<0) + np.log10(np.abs(Sub)))))
+      with np.errstate(divide='ignore'):
+        ms = int(np.ceil(np.max(1*(Sub<0) + np.log10(np.abs(Sub)))))
 
     # Floats
     elif np.issubdtype(Sub.dtype, np.floating):
