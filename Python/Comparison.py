@@ -339,70 +339,72 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
     else:
 
-      # Closeness parameters
-      rtol = 1e-10
-      atol = 1e-8
+      allsolutions(X, I, J)
 
-      # --- Pad with zeros (nA != nB)
+      # # Closeness parameters
+      # rtol = 1e-10
+      # atol = 1e-8
 
-      if X.shape[0] > X.shape[1]:
-        A0 = []
-        A1 = np.arange(X.shape[1], X.shape[0])
-        X = np.append(X, np.zeros((X.shape[0], A1.size)), axis=1)
+      # # --- Pad with zeros (nA != nB)
 
-      elif X.shape[0] < X.shape[1]:
-        A0 = np.arange(X.shape[0], X.shape[1])
-        A1 = []
-        X = np.append(X, np.zeros((A0.size, X.shape[1])), axis=0)
+      # if X.shape[0] > X.shape[1]:
+      #   A0 = []
+      #   A1 = np.arange(X.shape[1], X.shape[0])
+      #   X = np.append(X, np.zeros((X.shape[0], A1.size)), axis=1)
 
-      else:
-        A0 = []
-        A1 = []
+      # elif X.shape[0] < X.shape[1]:
+      #   A0 = np.arange(X.shape[0], X.shape[1])
+      #   A1 = []
+      #   X = np.append(X, np.zeros((A0.size, X.shape[1])), axis=0)
+
+      # else:
+      #   A0 = []
+      #   A1 = []
         
-      # --- Preparation
+      # # --- Preparation
 
-      pa.matrix(X, title='X initial')
+      # pa.matrix(X, title='X initial')
 
-      # Initial first line
-      X0 = X[0,:]
+      # # Initial first line
+      # X0 = X[0,:]
 
-      # Remove solution
-      for (i,j) in zip(I,J):
-        X[:,j] -= X[i,j]
+      # # Remove solution
+      # for (i,j) in zip(I,J):
+      #   X[:,j] -= X[i,j]
 
-      pa.matrix(X, title='X prepared')
+      # pa.matrix(X, title='X prepared')
 
-      # --- Correction loop
+      # # --- Correction loop
 
-      for i in range(X.shape[0]):
+      # for i in range(X.shape[0]):
 
-        # Bipartite graph weights
-        U = np.max(X, axis=1)
-        V = X0 - X[0,:]
+      #   # Bipartite graph weights
+      #   U = np.max(X, axis=1)
+      #   V = X0 - X[0,:]
 
-        # Current score
-        c = np.sum(U)+np.sum(V)
+      #   # Current score
+      #   c = np.sum(U)+np.sum(V)
 
-        print(f'Diff: {s-c}')
+      #   print(f'Diff: {s-c}')
 
-        # Termination check
-        if np.isclose(c, s, rtol=rtol, atol=atol):
-          break
+      #   # Termination check
+      #   if np.isclose(c, s, rtol=rtol, atol=atol):
+      #     break
 
-        L = X[i,:].copy()
+      #   L = X[i,:].copy()
 
-        # Where to remove ?
-        mi = np.argmax(L)
-        m = L[mi]
+      #   # Where to remove ?
+      #   mi = np.argmax(L)
+      #   m = L[mi]
 
-        # How much to remove?
-        d = m-np.max(np.delete(L, mi))
+      #   # How much to remove?
+      #   d = m-np.max(np.delete(L, mi))
 
-        # Remove
-        X[:,mi] -= d
+      #   # Remove
+      #   X[:,mi] -= d
 
-        print(f'Removing {d:.3f} from column {mi}.')
-        pa.matrix(X)
+      #   print(f'Removing {d:.3f} from column {mi}.')
+      #   pa.matrix(X)
 
 
       M = []
@@ -419,7 +421,8 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 # ----------------------------------------------------------------------
 def allsolutions(S, I, J):
 
-  pa.matrix(S)
+  pa.matrix(S, title='Scores')
+  print(I,J)
 
   # --- Preparation
 
@@ -427,10 +430,10 @@ def allsolutions(S, I, J):
 
   # Mask & score
   s = 0
-  Mask = np.full((n,n), True)  
+  Mask = np.full((n,n), False)  
   for (i,j) in zip(I,J):
     s += S[i,j]
-    Mask[i,j] = False
+    Mask[i,j] = True
     
   # Minimal vectors
   mu = np.full(n, -np.inf)
@@ -440,26 +443,24 @@ def allsolutions(S, I, J):
   Mu = np.full(n, np.inf)
   Mv = np.full(n, np.inf)
 
-  # Fixed value
-  mu[I[0]] = 0  
-  Mu[J[0]] = 0
-
   ref = [I[0], J[0]]
 
-  # Fix value
+  # Fix values
+  mu[ref[0]] = 0
+  Mu[ref[0]] = 0
   mv[ref[1]] = S[ref[0],ref[1]] - mu[ref[0]]
   Mv[ref[1]] = S[ref[0],ref[1]] - Mu[ref[0]]
 
-  for iter in range(4):
+  for iter in range(10):
 
     # Min values    
     mu = np.maximum(mu, S[:,ref[1]] - mv[ref[1]])
     mv = np.maximum(mv, S[ref[0],:] - mu[ref[0]])
 
     # Max values    
-    for (i,j) in zip(I,J):
-      Mu[i] = S[i,j] - mv[i]
-      Mv[j] = S[i,j] - mu[i]
+    for (i,j) in zip(I,J):        
+        Mu[i] = np.minimum(Mu[i], S[i,j] - mv[j])
+        Mv[j] = np.minimum(Mv[j], S[i,j] - mu[i])
 
     # Max sums
     Muv = np.add.outer(Mu, Mv)
@@ -470,11 +471,21 @@ def allsolutions(S, I, J):
     print(np.stack((mu, mv), axis=-1))  
     print('Maximal:')
     print(np.stack((Mu, Mv), axis=-1)) 
-    pa.matrix(Muv)
+    pa.matrix(Muv, highlight=Mask)
 
     # New reference
-    tmp = np.nonzero(np.logical_and(Muv==S, Mask))
+
+    # pa.matrix(Muv-S, highlight=Mask)
+
+    Z = Muv-S + Mask*np.max(Muv)
+    if np.min(Z)==0:
+      tmp = np.where(Z==0)
+    else:
+      tmp = np.where(Z == np.min(Z))
+    # tmp = np.nonzero(np.logical_and(Muv==S, Mask))
+    print(tmp)
     if not tmp[0].size:
+      print(s, np.sum(mu) + np.sum(mv))
       assert s == np.sum(mu) + np.sum(mv)
       break
 
@@ -490,7 +501,7 @@ def allsolutions(S, I, J):
     mv[ref[1]] = Mv[ref[1]]
 
     # Mask
-    Mask[ref[0], ref[1]] = False
+    Mask[ref[0], ref[1]] = True
 
   pa.matrix(np.logical_not(Mask))
 
