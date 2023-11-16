@@ -9,12 +9,12 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-nA = 2
+nA = 6
 p = 0.5
 
-rho = 1 #3/nA
+rho = 0.5 #3/nA
 
-np.random.seed(seed=1)
+np.random.seed(seed=5)
 
 # --------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ Net.set_rand_edges('ER', p)
 # Net.add_edge_attr('rand', name='test')
 # Net.add_node_attr('rand', name='node_attr_1')
 
-# Net.print()
+Net.print()
 
 Sub, Icor = Net.subnet(round(nA*rho))
 
@@ -37,7 +37,7 @@ Sub, Icor = Net.subnet(round(nA*rho))
 # X = scores(Net, Sub)[0]
 # pa.matrix(X, title='X')
 
-M = matching(Net, Sub)
+M = matching(Net, Sub, normalization=1)
 
 print(f'{len(M)} Matchings:')
 
