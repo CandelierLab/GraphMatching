@@ -304,7 +304,11 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
   # --- Output
 
-  if all_solutions:
+  if not all_solutions:
+    
+    M = [(I[k], J[k]) for k in range(len(I))]
+
+  else:
 
     # Solution score
     s = np.sum([X[I[k], J[k]] for k in range(len(I))])
@@ -339,7 +343,15 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
     else:
 
-      # --- STEP 1: BIPARTITE 
+      '''
+      We follow the procedure described in:
+      | Finding All Minimum-Cost Perfect Matchings in Bipartite Graphs
+      | K. Fukuda and T. Matsui, NETWORKS Vol.22 (1992)
+      | https://doi.org/10.1002/net.3230220504
+      with minor modifications to extend the algorithms to non square cost matrices.
+      '''
+
+      # --- Step 1: Admissible set -----------------------------------------
 
       # --- Preparation
 
@@ -388,7 +400,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       mv[ref[1]] = X[ref[0],ref[1]] - mu[ref[0]]
       Mv[ref[1]] = X[ref[0],ref[1]] - Mu[ref[0]]
 
-      # --- 
+      # --- Main loop 
 
       while True:
 
@@ -425,13 +437,20 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       # Debug display
       pa.matrix(X, highlight=Mask)
 
-      # ---
+      # --- Step 2: All perfect solutions of bipartite graph ---------------
 
+      '''
+      This step is faster with the algorithm described in:
+      | Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
+      | Uno, T. Algorithms and Computation, Lecture Notes in Computer Science, vol 1350 (1997)
+      | https://doi.org/10.1007/3-540-63890-3_11
+      '''
+
+
+      # Final output
       M = []
 
-      
-  else:
-    M = [(I[k], J[k]) for k in range(len(I))]
+  # --- Output
 
   if 'i_function' in kwargs:
     return (M, output)
