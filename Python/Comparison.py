@@ -1,5 +1,4 @@
 import time
-import pprint
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
@@ -12,7 +11,7 @@ from ctypes import CDLL, POINTER
 from ctypes import c_size_t, c_double
 
 # load the library
-GASP = CDLL("C/gasp.so")
+# GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 
@@ -175,16 +174,22 @@ def scores(NetA, NetB, nIter=None,
 
       case 'C':
 
-        # NB: Zager is not supported yet with the C++ implementation
+        '''
+        Not implemented
+        '''
 
-        # Prototypes
-        p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
-        p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
-        GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
-        GASP.scores.restype = None
+        pass
 
-        # Compute scores
-        GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, normalization, nIter)
+        # # # # NB: Zager is not supported yet with the C++ implementation
+
+        # # # # Prototypes
+        # # # p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
+        # # # p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
+        # # # GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
+        # # # GASP.scores.restype = None
+
+        # # # # Compute scores
+        # # # GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, normalization, nIter)
 
       case 'Python':
 
@@ -306,7 +311,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
   if not all_solutions:
     
-    M = [(I[k], J[k]) for k in range(len(I))]
+    M = [[[I[k], J[k]] for k in range(len(I))]]
 
   else:
 
@@ -357,22 +362,22 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
       # Pad with zeros (nA != nB)
       if X.shape[0] > X.shape[1]:
-        A0 = []
-        A1 = np.arange(X.shape[1], X.shape[0])
-        X = np.append(X, np.zeros((X.shape[0], A1.size)), axis=1)
+        Au = []
+        Av = np.arange(X.shape[1], X.shape[0])
+        X = np.append(X, np.zeros((X.shape[0], Av.size)), axis=1)
         I = np.append(I, np.setdiff1d(np.arange(X.shape[0]), I))
-        J = np.append(J, A1)
+        J = np.append(J, Av)
 
       elif X.shape[0] < X.shape[1]:
-        A0 = np.arange(X.shape[0], X.shape[1])
-        A1 = []
-        X = np.append(X, np.zeros((A0.size, X.shape[1])), axis=0)
-        I = np.append(I, A0)
+        Au = np.arange(X.shape[0], X.shape[1])
+        Av = []
+        X = np.append(X, np.zeros((Au.size, X.shape[1])), axis=0)
+        I = np.append(I, Au)
         J = np.append(J, np.setdiff1d(np.arange(X.shape[1]), J))
         
       else:
-        A0 = []
-        A1 = []
+        Au = []
+        Av = []
 
       # Square size
       n = X.shape[0]
@@ -444,11 +449,36 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       | Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
       | Uno, T. Algorithms and Computation, Lecture Notes in Computer Science, vol 1350 (1997)
       | https://doi.org/10.1007/3-540-63890-3_11
+
+      For this we use the package py-bipartite-matching (0.2.0) available at:
+        https://pypi.org/project/py-bipartite-matching/
       '''
 
+      import py_bipartite_matching as pbm
+      import networkx as nx
 
-      # Final output
+      # --- Bipartite graph
+
+      # Initialization
+      B = nx.Graph()
+
+      # Nodes
+      B.add_nodes_from(range(n), bipartite=0)
+      B.add_nodes_from(range(n, 2*n), bipartite=1)
+
+      # Edges
+      E = np.where(Mask)
+      for (i,j) in zip(*np.nonzero(Mask)):
+        B.add_edge(i, j+n)
+
+      # Find matchings and format output
       M = []
+      for matching in pbm.enum_perfect_matchings(B):
+        m = []
+        for (u,v) in matching.items():
+          if u not in Au and v-n not in Av:
+            m.append([u, v-n])
+        M.append(m)
 
   # --- Output
 
