@@ -309,6 +309,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
   # --- Output
 
+  # if not all_solutions or ('algorithm' in kwargs and kwargs['algorithm']!='GASP'):
   if not all_solutions:
     
     M = [[[I[k], J[k]] for k in range(len(I))]]
@@ -355,7 +356,8 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       | https://doi.org/10.1002/net.3230220504
       with minor modifications to extend the algorithms to non square cost matrices.
       '''
-
+      X /= 40
+      
       # --- Step 1: Admissible set -----------------------------------------
 
       # --- Preparation
@@ -423,6 +425,12 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
         # Stop condition
         Z = Muv - X + Mask*np.max(Muv)
+
+        pa.line()
+        print(mu, mv, Mu, Mv)
+        pa.matrix(Muv, highlight=Mask)
+        pa.matrix(Z, highlight=Mask)
+
         if not np.isclose(np.min(Z), 0):
           break
         
@@ -440,7 +448,9 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
         Mask[ref[0], ref[1]] = True
 
       # Debug display
-      pa.matrix(X, highlight=Mask)
+      if verbose:
+        print('')
+        pa.matrix(X, highlight=Mask)
 
       # --- Step 2: All perfect solutions of bipartite graph ---------------
 

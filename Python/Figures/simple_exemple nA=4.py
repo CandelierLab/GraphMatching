@@ -44,12 +44,7 @@ NetB.prepare()
 
 NetA.print()
 
-X, Y = scores(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo)
-
-print('Scores:')
-pa.matrix(X)
-
-M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, all_solutions=True)
+M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, verbose=True)
 
 print(f'{len(M)} Matchings:')
 
