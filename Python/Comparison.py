@@ -272,7 +272,13 @@ def scores(NetA, NetB, nIter=None,
 
 
 # === Matching =============================================================
-def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbose=False, **kwargs):
+def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, structural_check=True, verbose=False, **kwargs):
+
+  # --- Checks
+
+  # No structural check for the Zager algorithm
+  if 'algorithm' in kwargs and kwargs['algorithm']=='Zager':
+    structural_check = False
 
   # --- Similarity scores
 
@@ -405,8 +411,9 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
       # --- First step
 
-      ref = [I[0], J[0]]
-      Mask[I[0], J[0]] = True
+      i0 = np.argmin(X[I,J])
+      ref = [I[i0], J[i0]]
+      Mask[I[i0], J[i0]] = True
 
       # Fix values
       mu[ref[0]] = Mu[ref[0]] = 0
@@ -428,14 +435,15 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
         # Max sums
         Muv = np.add.outer(Mu, Mv)
 
+        # Stop condition
+        Z = Muv - X + Mask
+
         # --- Debug display ------------
         # pa.line()
         # print(mu, mv, Mu, Mv)
         # pa.matrix(Muv, highlight=Mask)
+        # pa.matrix(Z, highlight=Mask)
         # ------------------------------
-
-        # Stop condition
-        Z = Muv - X + Mask
 
         if np.isclose(np.min(Z), 0):
 
@@ -446,12 +454,14 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
         else:
 
           # Check the solution grid
-          w = np.argwhere(np.logical_and(Grid, np.logical_not(Mask)))
+          w = np.where(np.logical_and(Grid, np.logical_not(Mask)))
 
-          if len(w):
+          if len(w[0]):
+
+            mi = np.argmin(X[w[0], w[1]])
 
             # Set reference
-            ref = w[0]
+            ref = [w[0][mi], w[1][mi]]
 
             # Update max vectors
             Mu[ref[0]] = mu[ref[0]]
@@ -517,7 +527,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
   # --- Step 3: Discard structurally unsound matchings ---------------------
 
-  if 'algorithm' in kwargs and kwargs['algorithm']=='Zager':
+  if not structural_check:
 
     M_ = M
 

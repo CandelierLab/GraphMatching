@@ -28,7 +28,7 @@ NetA.Adj[1,2] = True
 NetA.Adj[2,1] = True
 NetA.Adj[2,3] = True
 NetA.Adj[3,2] = True
-NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
+NetA.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0]})
 NetA.prepare()
 
 NetB = Network(nB)
@@ -44,7 +44,7 @@ NetB.prepare()
 
 NetA.print()
 
-M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, verbose=True)
+M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, structural_check=False, verbose=True)
 
 print(f'{len(M)} Matchings:')
 
