@@ -384,10 +384,11 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       # Square size
       n = X.shape[0]
 
-      # Mask & score
-      Mask = np.full((n,n), False)  
+      # Mask & solution grid
+      Mask = np.full((n,n), False)
+      Grid = np.full((n,n), False)  
       for (i,j) in zip(I,J):
-        Mask[i,j] = True
+        Grid[i,j] = True
         
       # Minimal vectors
       mu = np.full(n, -np.inf)
@@ -400,6 +401,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       # --- First step
 
       ref = [I[0], J[0]]
+      Mask[I[0], J[0]] = True
 
       # Fix values
       mu[ref[0]] = 0
@@ -409,7 +411,8 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
       # --- Main loop 
 
-      while True:
+      # while True:
+      for iter in range(5):
 
         # Min values    
         mu = np.maximum(mu, X[:,ref[1]] - mv[ref[1]])
@@ -423,20 +426,29 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
         # Max sums
         Muv = np.add.outer(Mu, Mv)
 
-        # Stop condition
-        Z = Muv - X + Mask*np.max(Muv)
-
         pa.line()
         print(mu, mv, Mu, Mv)
         pa.matrix(Muv, highlight=Mask)
-        pa.matrix(Z, highlight=Mask)
 
+        # Stop condition
+        Z = Muv - X + Mask
         if not np.isclose(np.min(Z), 0):
-          break
+
+          # Check the solution grid
+          w = np.where(np.logical_and(Grid, np.logical_not(Mask)))
+          if len(w):
+            
+            continue
+
+          else:
+            # If the solution grid is full: stop
+            break
         
         # New reference
         tmp = np.where(Z==np.min(Z))
         ref = [tmp[0][0], tmp[1][0]]
+
+        print('Ref: ', ref)
 
         # --- Updates
 
@@ -450,7 +462,7 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       # Debug display
       if verbose:
         print('')
-        pa.matrix(X, highlight=Mask)
+        pa.matrix(X, highlight=Mask, title='final')
 
       # --- Step 2: All perfect solutions of bipartite graph ---------------
 
@@ -484,11 +496,15 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       # Find matchings and format output
       M = []
       for matching in pbm.enum_perfect_matchings(B):
+
         m = []
         for (u,v) in matching.items():
           if u not in Au and v-n not in Av:
             m.append([u, v-n])
-        M.append(m)
+        
+        # Append without duplicates
+        if m not in M:    
+          M.append(m)
 
   # --- Output
 
