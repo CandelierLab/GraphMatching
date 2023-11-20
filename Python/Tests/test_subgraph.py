@@ -11,9 +11,7 @@ os.system('clear')
 
 nA = 5
 p = 0.5
-
 rho = 0.5 #3/nA
-
 np.random.seed(seed=6)
 
 # --------------------------------------------------------------------------
@@ -27,9 +25,6 @@ Net.print()
 
 Sub, Icor = Net.subnet(round(nA*rho))
 
-print('Correspondence: ', Icor)
-Sub.print()
-
 # Purely structural scores
 # Xs = scores(Net, Sub, nIter=nIter)[0]
 
@@ -37,7 +32,7 @@ Sub.print()
 # X = scores(Net, Sub)[0]
 # pa.matrix(X, title='X')
 
-M = matching(Net, Sub, normalization=1, all_solutions=True)
+M = matching(Net, Sub, normalization=1, all_solutions=True, verbose=True)
 
 print(f'{len(M)} Matchings:')
 

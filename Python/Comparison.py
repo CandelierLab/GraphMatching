@@ -356,7 +356,6 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       | https://doi.org/10.1002/net.3230220504
       with minor modifications to extend the algorithms to non square cost matrices.
       '''
-      X /= 40
       
       # --- Step 1: Admissible set -----------------------------------------
 
@@ -390,6 +389,11 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       for (i,j) in zip(I,J):
         Grid[i,j] = True
         
+      # Display
+      if verbose:
+        print('')
+        pa.matrix(X, highlight=Grid, title='Initial solution')
+
       # Minimal vectors
       mu = np.full(n, -np.inf)
       mv = np.full(n, -np.inf)
@@ -404,15 +408,12 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
       Mask[I[0], J[0]] = True
 
       # Fix values
-      mu[ref[0]] = 0
-      Mu[ref[0]] = 0
-      mv[ref[1]] = X[ref[0],ref[1]] - mu[ref[0]]
-      Mv[ref[1]] = X[ref[0],ref[1]] - Mu[ref[0]]
+      mu[ref[0]] = Mu[ref[0]] = 0
+      mv[ref[1]] = Mv[ref[1]] = X[ref[0],ref[1]]
 
       # --- Main loop 
 
-      # while True:
-      for iter in range(5):
+      while True:
 
         # Min values    
         mu = np.maximum(mu, X[:,ref[1]] - mv[ref[1]])
@@ -426,40 +427,47 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
         # Max sums
         Muv = np.add.outer(Mu, Mv)
 
-        pa.line()
-        print(mu, mv, Mu, Mv)
-        pa.matrix(Muv, highlight=Mask)
+        # --- Debug display ------------
+        # pa.line()
+        # print(mu, mv, Mu, Mv)
+        # pa.matrix(Muv, highlight=Mask)
+        # ------------------------------
 
         # Stop condition
         Z = Muv - X + Mask
-        if not np.isclose(np.min(Z), 0):
+
+        if np.isclose(np.min(Z), 0):
+
+          # New reference
+          tmp = np.where(Z==np.min(Z))
+          ref = [tmp[0][0], tmp[1][0]]
+
+        else:
 
           # Check the solution grid
-          w = np.where(np.logical_and(Grid, np.logical_not(Mask)))
+          w = np.argwhere(np.logical_and(Grid, np.logical_not(Mask)))
+
           if len(w):
-            
-            continue
+
+            # Set reference
+            ref = w[0]
+
+            # Update max vectors
+            Mu[ref[0]] = mu[ref[0]]
+            Mv[ref[1]] = X[ref[0],ref[1]] - mu[ref[0]]
 
           else:
             # If the solution grid is full: stop
             break
-        
-        # New reference
-        tmp = np.where(Z==np.min(Z))
-        ref = [tmp[0][0], tmp[1][0]]
 
-        print('Ref: ', ref)
-
-        # --- Updates
-
-        # Min vectors
+        # Update min vectors
         mu[ref[0]] = Mu[ref[0]]
         mv[ref[1]] = X[ref[0],ref[1]] - Mu[ref[0]]
 
-        # Mask
+        # Update mask
         Mask[ref[0], ref[1]] = True
 
-      # Debug display
+      # Display
       if verbose:
         print('')
         pa.matrix(X, highlight=Mask, title='final')

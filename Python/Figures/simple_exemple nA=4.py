@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 
-import project
+import project 
 from Network import *
 from  Comparison import *
 import paprint as pa
