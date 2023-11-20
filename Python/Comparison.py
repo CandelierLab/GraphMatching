@@ -116,7 +116,7 @@ def scores(NetA, NetB, nIter=None,
 
             tmp = np.equal.outer(wA, wB).astype(float)
             tmp[tmp==0] = 1/nA/nB
-            
+
             # Xc *= np.equal.outer(wA, wB)
             Xc *= tmp
         
@@ -147,6 +147,8 @@ def scores(NetA, NetB, nIter=None,
 
               Yc *= np.equal.outer(wA, wB)
 
+  pa.matrix(Xc)
+  pa.matrix(Yc)
 
   # --- Computation --------------------------------------------------------
 
@@ -211,12 +213,8 @@ def scores(NetA, NetB, nIter=None,
                 X /= normalization
           
             case 'GASP':
-              X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T +1) * Xc
+              X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1) * Xc
               Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
-
-            case 'GASP2':
-              X = (1 + NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T) * Xc
-              Y = (1 + NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
           ''' === A note on operation order ===
 
