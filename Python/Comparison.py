@@ -351,9 +351,10 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
       '''
       We follow the procedure described in:
-      | Finding All Minimum-Cost Perfect Matchings in Bipartite Graphs
-      | K. Fukuda and T. Matsui, NETWORKS Vol.22 (1992)
-      | https://doi.org/10.1002/net.3230220504
+        Finding All Minimum-Cost Perfect Matchings in Bipartite Graphs
+        K. Fukuda and T. Matsui, NETWORKS Vol.22 (1992)
+        https://doi.org/10.1002/net.3230220504
+
       with minor modifications to extend the algorithms to non square cost matrices.
       '''
       
@@ -476,9 +477,9 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
 
       '''
       This step is faster with the algorithm described in:
-      | Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
-      | Uno, T. Algorithms and Computation, Lecture Notes in Computer Science, vol 1350 (1997)
-      | https://doi.org/10.1007/3-540-63890-3_11
+        Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
+        Uno, T. Algorithms and Computation, Lecture Notes in Computer Science, vol 1350 (1997)
+        https://doi.org/10.1007/3-540-63890-3_11
 
       For this we use the package py-bipartite-matching (0.2.0) available at:
         https://pypi.org/project/py-bipartite-matching/
@@ -514,92 +515,31 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, verbos
         if m not in M:    
           M.append(m)
 
-  # --- Output
+  # --- Step 3: Discard structurally unsound matchings ---------------------
+
+  if 'algorithm' in kwargs and kwargs['algorithm']=='Zager':
+
+    M_ = M
+
+  else:
+
+    # Initialization
+    M_ = []
+
+    for m in M:
+
+      # Matching matrix
+      Z = np.full((NetA.nNd, NetB.nNd), False)
+      for p in m:
+        Z[p[0], p[1]] = True
+
+      # Testing
+      if np.all(Z @ NetB.Adj == NetA.Adj @ Z):
+        M_.append(m)
+
+  # --- Output -------------------------------------------------------------
 
   if 'i_function' in kwargs:
-    return (M, output)
+    return (M_, output)
   else:
-    return M
-  
-# ----------------------------------------------------------------------
-def allsolutions(S, I, J):
-
-  S -= np.min(S)
-  pa.matrix(S, title='Scores')
-  print(I,J)
-
-  # --- Preparation
-
-  n = len(I)
-
-  # Mask & score
-  s = 0
-  Mask = np.full((n,n), False)  
-  for (i,j) in zip(I,J):
-    s += S[i,j]
-    Mask[i,j] = True
-    
-  # Minimal vectors
-  mu = np.full(n, -np.inf)
-  mv = np.full(n, -np.inf)
-
-  # Maximal vectors
-  Mu = np.full(n, np.inf)
-  Mv = np.full(n, np.inf)
-
-  ref = [I[0], J[0]]
-
-  # Fix values
-  mu[ref[0]] = 0
-  Mu[ref[0]] = 0
-  mv[ref[1]] = S[ref[0],ref[1]] - mu[ref[0]]
-  Mv[ref[1]] = S[ref[0],ref[1]] - Mu[ref[0]]
-
-  for iter in range(20):
-
-    # Min values    
-    mu = np.maximum(mu, S[:,ref[1]] - mv[ref[1]])
-    mv = np.maximum(mv, S[ref[0],:] - mu[ref[0]])
-
-    # Max values    
-    for (i,j) in zip(I,J):        
-        Mu[i] = np.minimum(Mu[i], S[i,j] - mv[j])
-        Mv[j] = np.minimum(Mv[j], S[i,j] - mu[i])
-
-    # Max sums
-    Muv = np.add.outer(Mu, Mv)
-
-    print('')
-    pa.line(f'Iteration {iter}')
-    print('Minimal:')
-    print(np.stack((mu, mv), axis=-1))  
-    print('Maximal:')
-    print(np.stack((Mu, Mv), axis=-1)) 
-    pa.matrix(Muv, highlight=Mask)
-    pa.matrix(Muv-S, highlight=Mask)
-
-    print('Scores diff:', s - (np.sum(mu) + np.sum(mv)))
-
-    # Stop condition
-    Z = Muv-S + Mask*np.max(Muv)
-    if not np.isclose(np.min(Z), 0):
-      break
-    
-    # New reference
-    tmp = np.where(Z == np.min(Z))
-    ref = [tmp[0][0], tmp[1][0]]
-
-    print('Reference: ', ref)
-
-    # --- Updates
-
-    # Min vectors
-    mu[ref[0]] = Mu[ref[0]]
-    mv[ref[1]] = S[ref[0],ref[1]] - Mu[ref[0]]
-
-    # Mask
-    Mask[ref[0], ref[1]] = True
-
-  pa.matrix(S, highlight=Mask, title='Final')
-
-    
+    return M_
