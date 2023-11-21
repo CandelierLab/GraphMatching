@@ -7,8 +7,6 @@ import time
 import copy
 import paprint as pa
 
-from  Matching import Matching
-
 # === Comparison ===========================================================
 
 def scores(NetA, NetB, nIter=None,
@@ -98,7 +96,8 @@ def scores(NetA, NetB, nIter=None,
           wB = NetB.node_attr[k]['values']
 
           if attr['measurable']:
-            # *** Measurable attributes
+
+            # --- Measurable attributes
 
             # Edge weights differences
             W = np.subtract.outer(wA, wB)
@@ -108,11 +107,8 @@ def scores(NetA, NetB, nIter=None,
               Xc *= np.exp(-W**2/2/sigma2)
 
           else:
-            # *** Non-measurable attributes
 
-            # tmp = np.equal.outer(wA, wB).astype(float)
-            # tmp[tmp==0] = 1/nA/nB
-            # Xc *= tmp
+            # --- Categorical attributes
 
             Xc *= np.equal.outer(wA, wB)
             
@@ -129,7 +125,8 @@ def scores(NetA, NetB, nIter=None,
             wB = NetB.edge_attr[k]['values']
 
             if attr['measurable']:
-              # *** Measurable attributes
+
+              # --- Measurable attributes
 
               # Edge weights differences
               W = np.subtract.outer(wA, wB)
@@ -139,7 +136,7 @@ def scores(NetA, NetB, nIter=None,
                 Yc *= np.exp(-W**2/2/sigma2)
 
             else:
-              # *** Non-measurable attributes
+              # --- Categorical attributes
 
               Yc *= np.equal.outer(wA, wB)
 
@@ -152,12 +149,11 @@ def scores(NetA, NetB, nIter=None,
 
   else:
 
-    # Preallocation
-    # X = np.ones((nA,nB))
-    # Y = np.ones((mA,mB))
-    X = Xc
-    Y = Yc
+    # Initialization
+    X = np.ones((nA,nB))
+    Y = np.ones((mA,mB))
 
+    # Iterative function settings
     if i_function is not None:
       i_param['NetA'] = NetA
       i_param['NetB'] = NetB
@@ -187,11 +183,16 @@ def scores(NetA, NetB, nIter=None,
             X /= normalization
       
         case 'GASP':
-          # X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1) * Xc
-          # Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
-          Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At)
-          X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1)
+          if i==0:
+
+            X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1) * Xc
+            Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+
+          else:
+          
+            X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1)
+            Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At)
 
       ''' === A note on operation order ===
 
@@ -521,12 +522,6 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, struct
       # Testing
       if np.all(Z @ NetB.Adj == NetA.Adj @ Z):
         M_.append(m)
-
-  W = Matching(NetA.nNd, NetB.nNd)
-  W.from_corr_list(M[0])
-  print(M[0])
-  print('W:', W.__dict__)
-
 
   # --- Output -------------------------------------------------------------
 
