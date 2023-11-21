@@ -26,7 +26,7 @@ NetA.Adj[0,1] = True
 NetA.Adj[0,2] = True
 NetA.Adj[1,3] = True
 NetA.Adj[2,4] = True
-NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0, 0]})
+NetA.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0, 0]})
 NetA.prepare()
 
 NetB = Network(nB)

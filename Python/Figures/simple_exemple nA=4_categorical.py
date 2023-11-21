@@ -44,7 +44,7 @@ NetB.prepare()
 
 NetA.print()
 
-M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, structural_check=False, verbose=True)
+M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, structural_check=True, verbose=True)
 
 print(f'{len(M)} Matchings:')
 
