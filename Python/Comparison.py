@@ -7,6 +7,7 @@ import time
 import copy
 import paprint as pa
 
+from  Matching import Matching
 from ctypes import CDLL, POINTER
 from ctypes import c_size_t, c_double
 
@@ -146,9 +147,6 @@ def scores(NetA, NetB, nIter=None,
               # *** Non-measurable attributes
 
               Yc *= np.equal.outer(wA, wB)
-
-  pa.matrix(Xc)
-  pa.matrix(Yc)
 
   # --- Computation --------------------------------------------------------
 
@@ -544,6 +542,12 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, struct
       # Testing
       if np.all(Z @ NetB.Adj == NetA.Adj @ Z):
         M_.append(m)
+
+  W = Matching(NetA.nNd, NetB.nNd)
+  W.from_corr_list(M[0])
+  print(M[0])
+  print('W:', W.__dict__)
+
 
   # --- Output -------------------------------------------------------------
 
