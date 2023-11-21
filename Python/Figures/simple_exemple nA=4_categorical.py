@@ -39,12 +39,12 @@ NetB.Adj[1,2] = True
 NetB.Adj[2,1] = True
 NetB.Adj[2,3] = True
 NetB.Adj[3,2] = True
-NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
+NetB.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0]})
 NetB.prepare()
 
 NetA.print()
 
-M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, structural_check=True, verbose=True)
+M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, verbose=True)
 
 print(f'{len(M)} Matchings:')
 

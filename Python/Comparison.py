@@ -8,16 +8,11 @@ import copy
 import paprint as pa
 
 from  Matching import Matching
-from ctypes import CDLL, POINTER
-from ctypes import c_size_t, c_double
-
-# load the library
-# GASP = CDLL("C/gasp.so")
 
 # === Comparison ===========================================================
 
 def scores(NetA, NetB, nIter=None,
-           algorithm='GASP', normalization=None, language='Python',
+           algorithm='GASP', normalization=None,
            i_function=None, i_param={}, initial_evaluation=False, measure_time=False):
   '''
   Comparison of two networks.
@@ -115,12 +110,12 @@ def scores(NetA, NetB, nIter=None,
           else:
             # *** Non-measurable attributes
 
-            tmp = np.equal.outer(wA, wB).astype(float)
-            tmp[tmp==0] = 1/nA/nB
+            # tmp = np.equal.outer(wA, wB).astype(float)
+            # tmp[tmp==0] = 1/nA/nB
+            # Xc *= tmp
 
-            # Xc *= np.equal.outer(wA, wB)
-            Xc *= tmp
-        
+            Xc *= np.equal.outer(wA, wB)
+            
         # --- Edge attributes
 
         # Base
@@ -158,8 +153,10 @@ def scores(NetA, NetB, nIter=None,
   else:
 
     # Preallocation
-    X = np.ones((nA,nB))
-    Y = np.ones((mA,mB))
+    # X = np.ones((nA,nB))
+    # Y = np.ones((mA,mB))
+    X = Xc
+    Y = Yc
 
     if i_function is not None:
       i_param['NetA'] = NetA
@@ -170,90 +167,72 @@ def scores(NetA, NetB, nIter=None,
     if i_function is not None and initial_evaluation:
       i_function(locals(), i_param, output)
 
-    match language:
+    # --- Iterations
+    
+    for i in range(nIter):
 
-      case 'C':
+      if measure_time:
+        start = time.time()
 
-        '''
-        Not implemented
-        '''
+      match algorithm:
 
-        pass
+        case 'Zager':
+          X = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
+          Y = NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At
 
-        # # # # NB: Zager is not supported yet with the C++ implementation
+          if normalization is None:
+            X /= np.mean(X)
+            Y /= np.mean(Y)
+          else:
+            X /= normalization
+      
+        case 'GASP':
+          # X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1) * Xc
+          # Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
 
-        # # # # Prototypes
-        # # # p_np_float = np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags="C")
-        # # # p_np_int = np.ctypeslib.ndpointer(dtype=np.int32, ndim=2, flags="C")
-        # # # GASP.scores.argtypes = [p_np_float, p_np_float, p_np_int, p_np_int, c_size_t, c_size_t, c_size_t, c_size_t, c_double]
-        # # # GASP.scores.restype = None
+          Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At)
+          X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1)
 
-        # # # # Compute scores
-        # # # GASP.scores(X, Y, NetA.edges, NetB.edges, nA, nB, mA, mB, normalization, nIter)
+      ''' === A note on operation order ===
 
-      case 'Python':
+      If all values of X are equal to the same value x, then updating Y gives
+      a homogeneous matrix with values 2x ; in this case the update of Y does
+      not give any additional information. However, when all Y are equal the 
+      update of X does not give an homogeneous matrix as some information 
+      about the network strutures is included.
 
-        for i in range(nIter):
+      So it is always preferable to start with the update of X.
+      '''
 
-          if measure_time:
-            start = time.time()
+      ''' === A note on normalization ===
 
-          match algorithm:
+      Normalization is useful for proving the convergence of the algorithm, 
+      but is not necessary in the computation since the scores are relative
+      and not absolute.
+      
+      So as long as the scores do not overflow the maximal float value, 
+      there is no need to normalize. But this can happen quite fast.
 
-            case 'Zager':
-              X = NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T
-              Y = NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At
+      A good approximation of the normalization factor is:
 
-              if normalization is None:
-                X /= np.mean(X)
-                Y /= np.mean(Y)
-              else:
-                X /= normalization
-          
-            case 'GASP':
-              X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1) * Xc
-              Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At) * Yc
+              f = 2 sqrt[ (mA*mB)/(nA*nB) ] = 2 sqrt[ (mA/nA)(mB/nB) ]
 
-          ''' === A note on operation order ===
+      for an ER network with a density of edges p, we have m = p.n^2 so:
+      
+              f = 2 sqrt(nA.nB.pA.pB)
 
-          If all values of X are equal to the same value x, then updating Y gives
-          a homogeneous matrix with values 2x ; in this case the update of Y does
-          not give any additional information. However, when all Y are equal the 
-          update of X does not give an homogeneous matrix as some information 
-          about the network strutures is included.
+      Nevertheless, if one needs normalization as defined in Zager et.al.,
+      it can be performed after the iterative procedure by dividing the final
+      score matrices X and Y by:
 
-          So it is always preferable to start with the update of X.
-          '''
+              f = np.sqrt(np.sum(X**2))
 
-          ''' === A note on normalization ===
+      This is more efficient than computing the normalization at each
+      iteration.
+      '''
 
-          Normalization is useful for proving the convergence of the algorithm, 
-          but is not necessary in the computation since the scores are relative
-          and not absolute.
-          
-          So as long as the scores do not overflow the maximal float value, 
-          there is no need to normalize. But this can happen quite fast.
-
-          A good approximation of the normalization factor is:
-
-                  f = 2 sqrt[ (mA*mB)/(nA*nB) ] = 2 sqrt[ (mA/nA)(mB/nB) ]
-
-          for an ER network with a density of edges p, we have m = p.n^2 so:
-          
-                  f = 2 sqrt(nA.nB.pA.pB)
-
-          Nevertheless, if one needs normalization as defined in Zager et.al.,
-          it can be performed after the iterative procedure by dividing the final
-          score matrices X and Y by:
-
-                  f = np.sqrt(np.sum(X**2))
-
-          This is much more efficient than computing the normalization at each
-          iteration.
-          '''
-
-          if i_function is not None:
-            i_function(locals(), i_param, output)
+      if i_function is not None:
+        i_function(locals(), i_param, output)
 
     # Final step
     if algorithm=='Zager':

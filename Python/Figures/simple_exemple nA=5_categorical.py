@@ -35,7 +35,7 @@ NetB.Adj[0,1] = True
 NetB.Adj[0,2] = True
 NetB.Adj[1,3] = True
 NetB.Adj[2,4] = True
-NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0, 0]})
+NetB.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0, 0]})
 NetB.prepare()
 
 
