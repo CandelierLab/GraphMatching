@@ -11,7 +11,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-n = 1000
+n = 100
 
 # Average number of edges per node
 l_nepn = [0.25, 0.5, 0.75, 1, 2, 3]
@@ -21,27 +21,26 @@ nIter = 10
 # === Functions ============================================================
 
 def probe(V, param, out):
-  
+
   # Local variables
   X = V['X']
 
   # Other parameters
   n = param['NetA'].nNd 
-  Icorr = param['Icorr']
+  Icor = param['Icor']
 
   # Matching
-  I, J = linear_sum_assignment(X, True)
-  M = [(I[k], J[k]) for k in range(len(I))]
+  M = matching(param['NetA'], param['NetB'], scores=X, max_solutions=1000)
 
-  # Correct matches
-  rho = np.count_nonzero([Icorr[J[k]]==I[k] for k in range(len(I))])/n
+  # Accuracy
+  M.compute_accuracy(Icor)
 
   # Output
-  out.append(rho)
+  out.append(M.accuracy)
 
 # ==========================================================================
 
-l_rho = []
+l_gamma = []
 
 for nepn in l_nepn:
 
@@ -53,14 +52,14 @@ for nepn in l_nepn:
   Net = Network(n)
   Net.set_rand_edges('ER', int(nepn*n))
 
-  Set, Icorr = Net.shuffle()
+  Set, Icor = Net.shuffle()
 
   # --- Convergence
 
   # Scores
-  X, Y, rho = compute_scores(Net, Set, nIter=nIter, i_function=probe, initial_evaluation=True, i_param={'Icorr': Icorr})
+  X, Y, gamma = compute_scores(Net, Set, nIter=nIter, i_function=probe, initial_evaluation=True, i_param={'Icor': Icor})
     
-  l_rho.append(rho)
+  l_gamma.append(gamma)
 
   print('{:.02f} sec'.format((time.time() - start)))
 
@@ -70,12 +69,12 @@ for nepn in l_nepn:
 
 fig, ax = plt.subplots()
 
-for i, rho in enumerate(l_rho):
+for i, gamma in enumerate(l_gamma):
 
-  ax.plot(rho, '.-', label=l_nepn[i])
+  ax.plot(gamma, '.-', label=l_nepn[i])
 
 ax.set_xlabel('Iteration')
-ax.set_ylabel(r'Ratio of correct matches $\rho$')
+ax.set_ylabel(r'Accuracy $\gamma$')
 ax.set_title('legend: average number of edge per node')
 
 # ax.set_xlim(0, max(l_nIter))

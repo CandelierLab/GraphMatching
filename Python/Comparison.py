@@ -250,7 +250,7 @@ def compute_scores(NetA, NetB, nIter=None,
 
 
 # === Matching =============================================================
-def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, brute=False, structural_check=True, verbose=False, **kwargs):
+def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_solutions=1000, structural_check=True, verbose=False, **kwargs):
 
   # --- Checks
 
@@ -295,7 +295,7 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, brute=
     print('Matching: {:.02f} ms'.format((time.time()-start)*1000))
 
   # --- Output
-
+  
   # if not all_solutions or ('algorithm' in kwargs and kwargs['algorithm']!='GASP'):
   if not all_solutions:
     
@@ -306,208 +306,211 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, brute=
     # Solution score
     s = np.sum([X[I[k], J[k]] for k in range(len(I))])
 
-    if brute:
+    # # if brute:
 
-      # Candidates
-      C = [[[I[k], J[k]] for k in range(len(I))]]
+    # #   # Candidates
+    # #   C = [[[I[k], J[k]] for k in range(len(I))]]
 
-      # Solution container
-      M = []
+    # #   # Solution container
+    # #   M = []
 
-      # Loop over candidates
-      while C:
+    # #   # Loop over candidates
+    # #   while C:
 
-        # Append solution
-        m = C.pop()
-        M.append(m)
+    # #     # Append solution
+    # #     m = C.pop()
+    # #     M.append(m)
 
-        # Test all possible dual inversions
-        for d in itertools.combinations(range(len(m)), 2):
+    # #     # Test all possible dual inversions
+    # #     for d in itertools.combinations(range(len(m)), 2):
           
-          if X[m[d[0]][0], m[d[0]][1]]+X[m[d[1]][0], m[d[1]][1]] == X[m[d[0]][0], m[d[1]][1]]+X[m[d[1]][0], m[d[0]][1]]:
+    # #       if X[m[d[0]][0], m[d[0]][1]]+X[m[d[1]][0], m[d[1]][1]] == X[m[d[0]][0], m[d[1]][1]]+X[m[d[1]][0], m[d[0]][1]]:
             
-            # New solution
-            ns = copy.deepcopy(m)
-            ns[d[1]][1] = m[d[0]][1]
-            ns[d[0]][1] = m[d[1]][1]
+    # #         # New solution
+    # #         ns = copy.deepcopy(m)
+    # #         ns[d[1]][1] = m[d[0]][1]
+    # #         ns[d[0]][1] = m[d[1]][1]
 
-            if ns not in M and ns not in C:
-              C.append(ns)
+    # #         if ns not in M and ns not in C:
+    # #           C.append(ns)
 
-    else:
+    '''
+    We follow the procedure described in:
+      Finding All Minimum-Cost Perfect Matchings in Bipartite Graphs
+      K. Fukuda and T. Matsui, NETWORKS Vol.22 (1992)
+      https://doi.org/10.1002/net.3230220504
 
-      '''
-      We follow the procedure described in:
-        Finding All Minimum-Cost Perfect Matchings in Bipartite Graphs
-        K. Fukuda and T. Matsui, NETWORKS Vol.22 (1992)
-        https://doi.org/10.1002/net.3230220504
+    with minor modifications to extend the algorithms to non square cost matrices.
+    '''
+    
+    # --- Step 1: Admissible set -----------------------------------------
+    
+    # --- Preparation
 
-      with minor modifications to extend the algorithms to non square cost matrices.
-      '''
+    # Pad with zeros (nA != nB)
+    if X.shape[0] > X.shape[1]:
+      Au = []
+      Av = np.arange(X.shape[1], X.shape[0])
+      X = np.append(X, np.zeros((X.shape[0], Av.size)), axis=1)
+      I = np.append(I, np.setdiff1d(np.arange(X.shape[0]), I))
+      J = np.append(J, Av)
+
+    elif X.shape[0] < X.shape[1]:
+      Au = np.arange(X.shape[0], X.shape[1])
+      Av = []
+      X = np.append(X, np.zeros((Au.size, X.shape[1])), axis=0)
+      I = np.append(I, Au)
+      J = np.append(J, np.setdiff1d(np.arange(X.shape[1]), J))
       
-      # --- Step 1: Admissible set -----------------------------------------
+    else:
+      Au = []
+      Av = []
 
-      # --- Preparation
+    # Square size
+    n = X.shape[0]
 
-      # Pad with zeros (nA != nB)
-      if X.shape[0] > X.shape[1]:
-        Au = []
-        Av = np.arange(X.shape[1], X.shape[0])
-        X = np.append(X, np.zeros((X.shape[0], Av.size)), axis=1)
-        I = np.append(I, np.setdiff1d(np.arange(X.shape[0]), I))
-        J = np.append(J, Av)
+    # Mask & solution grid
+    Mask = np.full((n,n), False)
+    Grid = np.full((n,n), False)  
+    for (i,j) in zip(I,J):
+      Grid[i,j] = True
+      
+    # Display
+    if verbose:
+      print('')
+      pa.matrix(X, highlight=Grid, title='Initial solution')
 
-      elif X.shape[0] < X.shape[1]:
-        Au = np.arange(X.shape[0], X.shape[1])
-        Av = []
-        X = np.append(X, np.zeros((Au.size, X.shape[1])), axis=0)
-        I = np.append(I, Au)
-        J = np.append(J, np.setdiff1d(np.arange(X.shape[1]), J))
-        
+    # Minimal vectors
+    mu = np.full(n, -np.inf)
+    mv = np.full(n, -np.inf)
+
+    # Maximal vectors
+    Mu = np.full(n, np.inf)
+    Mv = np.full(n, np.inf)
+
+    # --- First step
+
+    i0 = np.argmin(X[I,J])
+    ref = [I[i0], J[i0]]
+    Mask[I[i0], J[i0]] = True
+
+    # Fix values
+    mu[ref[0]] = Mu[ref[0]] = 0
+    mv[ref[1]] = Mv[ref[1]] = X[ref[0],ref[1]]
+
+    # --- Main loop 
+
+    while True:
+
+      # Min values    
+      mu = np.maximum(mu, X[:,ref[1]] - mv[ref[1]])
+      mv = np.maximum(mv, X[ref[0],:] - mu[ref[0]])
+
+      # Max values    
+      for (i,j) in zip(I,J):        
+          Mu[i] = np.minimum(Mu[i], X[i,j] - mv[j])
+          Mv[j] = np.minimum(Mv[j], X[i,j] - mu[i])
+
+      # Max sums
+      Muv = np.add.outer(Mu, Mv)
+
+      # Stop condition
+      Z = Muv - X + Mask
+
+      # --- Debug display ------------
+      # pa.line()
+      # print(mu, mv, Mu, Mv)
+      # pa.matrix(Muv, highlight=Mask)
+      # pa.matrix(Z, highlight=Mask)
+      # ------------------------------
+
+      if np.isclose(np.min(Z), 0):
+
+        # New reference
+        tmp = np.where(Z==np.min(Z))
+        ref = [tmp[0][0], tmp[1][0]]
+
       else:
-        Au = []
-        Av = []
 
-      # Square size
-      n = X.shape[0]
+        # Check the solution grid
+        w = np.where(np.logical_and(Grid, np.logical_not(Mask)))
 
-      # Mask & solution grid
-      Mask = np.full((n,n), False)
-      Grid = np.full((n,n), False)  
-      for (i,j) in zip(I,J):
-        Grid[i,j] = True
-        
-      # Display
-      if verbose:
-        print('')
-        pa.matrix(X, highlight=Grid, title='Initial solution')
+        if len(w[0]):
 
-      # Minimal vectors
-      mu = np.full(n, -np.inf)
-      mv = np.full(n, -np.inf)
+          mi = np.argmin(X[w[0], w[1]])
 
-      # Maximal vectors
-      Mu = np.full(n, np.inf)
-      Mv = np.full(n, np.inf)
+          # Set reference
+          ref = [w[0][mi], w[1][mi]]
 
-      # --- First step
-
-      i0 = np.argmin(X[I,J])
-      ref = [I[i0], J[i0]]
-      Mask[I[i0], J[i0]] = True
-
-      # Fix values
-      mu[ref[0]] = Mu[ref[0]] = 0
-      mv[ref[1]] = Mv[ref[1]] = X[ref[0],ref[1]]
-
-      # --- Main loop 
-
-      while True:
-
-        # Min values    
-        mu = np.maximum(mu, X[:,ref[1]] - mv[ref[1]])
-        mv = np.maximum(mv, X[ref[0],:] - mu[ref[0]])
-
-        # Max values    
-        for (i,j) in zip(I,J):        
-            Mu[i] = np.minimum(Mu[i], X[i,j] - mv[j])
-            Mv[j] = np.minimum(Mv[j], X[i,j] - mu[i])
-
-        # Max sums
-        Muv = np.add.outer(Mu, Mv)
-
-        # Stop condition
-        Z = Muv - X + Mask
-
-        # --- Debug display ------------
-        # pa.line()
-        # print(mu, mv, Mu, Mv)
-        # pa.matrix(Muv, highlight=Mask)
-        # pa.matrix(Z, highlight=Mask)
-        # ------------------------------
-
-        if np.isclose(np.min(Z), 0):
-
-          # New reference
-          tmp = np.where(Z==np.min(Z))
-          ref = [tmp[0][0], tmp[1][0]]
+          # Update max vectors
+          Mu[ref[0]] = mu[ref[0]]
+          Mv[ref[1]] = X[ref[0],ref[1]] - mu[ref[0]]
 
         else:
+          # If the solution grid is full: stop
+          break
 
-          # Check the solution grid
-          w = np.where(np.logical_and(Grid, np.logical_not(Mask)))
+      # Update min vectors
+      mu[ref[0]] = Mu[ref[0]]
+      mv[ref[1]] = X[ref[0],ref[1]] - Mu[ref[0]]
 
-          if len(w[0]):
+      # Update mask
+      Mask[ref[0], ref[1]] = True
 
-            mi = np.argmin(X[w[0], w[1]])
+    # Display
+    if verbose:
+      print('')
+      pa.matrix(X, highlight=Mask, title='final')
 
-            # Set reference
-            ref = [w[0][mi], w[1][mi]]
+    # --- Step 2: All perfect solutions of bipartite graph ---------------
 
-            # Update max vectors
-            Mu[ref[0]] = mu[ref[0]]
-            Mv[ref[1]] = X[ref[0],ref[1]] - mu[ref[0]]
+    '''
+    This step is faster with the algorithm described in:
+      Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
+      Uno, T. Algorithms and Computation, Lecture Notes in Computer Science, vol 1350 (1997)
+      https://doi.org/10.1007/3-540-63890-3_11
 
-          else:
-            # If the solution grid is full: stop
-            break
+    For this we use the package py-bipartite-matching (0.2.0) available at:
+      https://pypi.org/project/py-bipartite-matching/
+    '''
 
-        # Update min vectors
-        mu[ref[0]] = Mu[ref[0]]
-        mv[ref[1]] = X[ref[0],ref[1]] - Mu[ref[0]]
+    import py_bipartite_matching as pbm
+    import networkx as nx
 
-        # Update mask
-        Mask[ref[0], ref[1]] = True
+    # --- Bipartite graph
 
-      # Display
-      if verbose:
-        print('')
-        pa.matrix(X, highlight=Mask, title='final')
+    # Initialization
+    B = nx.Graph()
 
-      # --- Step 2: All perfect solutions of bipartite graph ---------------
+    # Nodes
+    B.add_nodes_from(range(n), bipartite=0)
+    B.add_nodes_from(range(n, 2*n), bipartite=1)
 
-      '''
-      This step is faster with the algorithm described in:
-        Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
-        Uno, T. Algorithms and Computation, Lecture Notes in Computer Science, vol 1350 (1997)
-        https://doi.org/10.1007/3-540-63890-3_11
+    # Edges
+    E = np.where(Mask)
+    for (i,j) in zip(*np.nonzero(Mask)):
+      B.add_edge(i, j+n)
 
-      For this we use the package py-bipartite-matching (0.2.0) available at:
-        https://pypi.org/project/py-bipartite-matching/
-      '''
+    # Find matchings and format output
+    M = []
 
-      import py_bipartite_matching as pbm
-      import networkx as nx
+    for matching in pbm.enum_perfect_matchings(B):
 
-      # --- Bipartite graph
+      # Maximum number of solutions
+      if max_solutions is not None:
+        if len(M)==max_solutions: break
 
-      # Initialization
-      B = nx.Graph()
-
-      # Nodes
-      B.add_nodes_from(range(n), bipartite=0)
-      B.add_nodes_from(range(n, 2*n), bipartite=1)
-
-      # Edges
-      E = np.where(Mask)
-      for (i,j) in zip(*np.nonzero(Mask)):
-        B.add_edge(i, j+n)
-
-      # Find matchings and format output
-      M = []
-      for matching in pbm.enum_perfect_matchings(B):
-
-        m = []
-        for (u,v) in matching.items():
-          if u not in Au and v-n not in Av:
-            m.append([u, v-n])
-        
-        # Append without duplicates
-        if m not in M:    
-          M.append(m)
+      m = []
+      for (u,v) in matching.items():
+        if u not in Au and v-n not in Av:
+          m.append([u, v-n])
+      
+      # Append without duplicates
+      if m not in M:    
+        M.append(m)
 
   # --- Step 3: Discard structurally unsound matchings ---------------------
-
+  
   # Build matching set
   MS = MatchingSet(NetA, NetB, M)
 
