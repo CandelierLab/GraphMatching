@@ -13,9 +13,6 @@ os.system('clear')
 nA = 4
 nB = 4
 
-nIter = 3
-
-# algo = 'Zager'
 algo = 'GASP'
 
 # ==========================================================================
@@ -39,13 +36,16 @@ NetB.Adj[1,2] = True
 NetB.Adj[2,1] = True
 NetB.Adj[2,3] = True
 NetB.Adj[3,2] = True
-NetB.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0]})
+NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
 NetB.prepare()
 
-NetA.print()
+# --- Matching
 
-M = matching(NetA, NetB, nIter=nIter, normalization=1, algorithm=algo, verbose=True)
+M = matching(NetA, NetB, algorithm=algo)
 
+# --- Output
+
+pa.line(os.path.basename(__file__))
 print(f'{len(M)} Matchings:')
 
 for m in M:

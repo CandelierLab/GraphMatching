@@ -7,6 +7,8 @@ import time
 import copy
 import paprint as pa
 
+from Matching import *
+
 # === Comparison ===========================================================
 
 def scores(NetA, NetB, nIter=None,
@@ -503,25 +505,35 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, struct
 
   # --- Step 3: Discard structurally unsound matchings ---------------------
 
-  if not structural_check:
+  # --- Convert correspondences into Matchings
+  
+  M_ = []
+  for m in M:
+    tmp = Matching(NetA, NetB)
+    tmp.from_corr_list(m)
+    M_.append(tmp)
 
-    M_ = M
+  # --- Structural checks
 
-  else:
+  if structural_check:
 
-    # Initialization
-    M_ = []
+    scorr = np.array([m.structural_correspondence for m in M_])
+    I = np.where(scorr==np.max(scorr))[0]
+    M_ = [M_[i] for i in I]
 
-    for m in M:
+    # # Initialization
+    # M_ = []
 
-      # Matching matrix
-      Z = np.full((NetA.nNd, NetB.nNd), False)
-      for p in m:
-        Z[p[0], p[1]] = True
+    # for m in M:
 
-      # Testing
-      if np.all(Z @ NetB.Adj == NetA.Adj @ Z):
-        M_.append(m)
+    #   # Matching matrix
+    #   Z = np.full((NetA.nNd, NetB.nNd), False)
+    #   for p in m:
+    #     Z[p[0], p[1]] = True
+
+    #   # Testing
+    #   if np.all(Z @ NetB.Adj == NetA.Adj @ Z):
+    #     M_.append(m)
 
   # --- Output -------------------------------------------------------------
 
