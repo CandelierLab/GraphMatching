@@ -41,8 +41,7 @@ M = matching(NetA, NetB, algorithm=algo)
 
 # --- Output
 
-pa.line(os.path.basename(__file__))
-print(f'{len(M)} Matchings:')
+# M.compute_accuracy(range(nA))
 
-for m in M:
-  print(m)
+pa.line(os.path.basename(__file__))
+print(M)

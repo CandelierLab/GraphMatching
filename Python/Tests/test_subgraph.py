@@ -25,19 +25,13 @@ Net.print()
 
 Sub, Icor = Net.subnet(round(nA*rho))
 
-# Purely structural scores
-# Xs = scores(Net, Sub, nIter=nIter)[0]
+Sub.print()
 
-# Structure & attribute scores
-# X = scores(Net, Sub)[0]
-# pa.matrix(X, title='X')
+print(Icor)
 
 M = matching(Net, Sub, normalization=1, all_solutions=True, verbose=True)
-
-print(f'{len(M)} Matchings:')
-
-for m in M:
-  print(m)
+M.compute_accuracy(Icor)
+print(M)
 
 
 # Correct matches

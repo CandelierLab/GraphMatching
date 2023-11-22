@@ -58,8 +58,7 @@ for nepn in l_nepn:
   # --- Convergence
 
   # Scores
-  X, Y, rho = scores(Net, Set, nIter=nIter, i_function=probe, initial_evaluation=True,
-                     i_param={'Icorr': Icorr})
+  X, Y, rho = compute_scores(Net, Set, nIter=nIter, i_function=probe, initial_evaluation=True, i_param={'Icorr': Icorr})
     
   l_rho.append(rho)
 

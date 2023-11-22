@@ -65,7 +65,4 @@ M = matching(NetA, NetB, algorithm=algo)
 # --- Output
 
 pa.line(os.path.basename(__file__))
-print(f'{len(M)} Matchings:')
-
-for m in M:
-  print(m)
+print(M)

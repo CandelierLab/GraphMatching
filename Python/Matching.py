@@ -1,11 +1,11 @@
 import numpy as np
 
+# === MATCHING =============================================================
+
 class Matching:
   '''
   Matching objects
   '''
-    
-  # === CONSTRUCTOR ========================================================
 
   def __init__(self, NetA, NetB):
 
@@ -60,4 +60,52 @@ class Matching:
     # Compute structural correspondence
     self.structural_correspondence = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
 
-        
+# === MATCHING SET =========================================================
+
+class MatchingSet:
+  '''
+  Set of matchings.
+  '''
+
+  def __init__(self, NetA, NetB, M):
+
+    self.NetA = NetA
+    self.NetB = NetB
+
+    self.matchings = []
+    for m in M:
+      tmp = Matching(self.NetA, self.NetB)
+      tmp.from_corr_list(m)
+      self.matchings.append(tmp)
+
+    # Accuracy
+    self.accuracy = None
+
+  def __str__(self):
+    
+    s = f'{len(self.matchings)} Matchings:\n'
+
+    for m in self.matchings:
+      s += m.__str__() + '\n'
+
+    # --- Accuracy
+    if self.accuracy is not None:
+      s += f'\nSet accuracy: {self.accuracy}\n'
+
+    return s
+  
+  def compute_accuracy(self, Icor):
+    '''
+    Compute the matching set accuracy based on the set correspondence
+    '''
+
+    count = 0
+    total = 0
+    for m in self.matchings:
+      for (i,j) in enumerate(m.J):
+        if j is not None:
+          total += 1
+          if Icor[j]==i:
+            count += 1
+
+    self.accuracy = count/total

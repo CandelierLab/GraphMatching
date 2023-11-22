@@ -11,7 +11,7 @@ from Matching import *
 
 # === Comparison ===========================================================
 
-def scores(NetA, NetB, nIter=None,
+def compute_scores(NetA, NetB, nIter=None,
            algorithm='GASP', normalization=None,
            i_function=None, i_param={}, initial_evaluation=False, measure_time=False):
   '''
@@ -250,7 +250,7 @@ def scores(NetA, NetB, nIter=None,
 
 
 # === Matching =============================================================
-def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, structural_check=True, verbose=False, **kwargs):
+def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, brute=False, structural_check=True, verbose=False, **kwargs):
 
   # --- Checks
 
@@ -263,10 +263,13 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, struct
   if verbose:
     start = time.time()
 
-  if 'i_function' in kwargs:
-    (X, Y, output) = scores(NetA, NetB, **kwargs)
+  if scores is None:
+    if 'i_function' in kwargs:
+      (X, Y, output) = compute_scores(NetA, NetB, **kwargs)
+    else:
+      X = compute_scores(NetA, NetB, **kwargs)[0]
   else:
-    X = scores(NetA, NetB, **kwargs)[0]
+    X = scores
 
   if verbose:
     print('Scoring: {:.02f} ms'.format((time.time()-start)*1000), end=' - ')
@@ -505,39 +508,20 @@ def matching(NetA, NetB, threshold=None, all_solutions=True, brute=False, struct
 
   # --- Step 3: Discard structurally unsound matchings ---------------------
 
-  # --- Convert correspondences into Matchings
-  
-  M_ = []
-  for m in M:
-    tmp = Matching(NetA, NetB)
-    tmp.from_corr_list(m)
-    M_.append(tmp)
+  # Build matching set
+  MS = MatchingSet(NetA, NetB, M)
 
   # --- Structural checks
 
   if structural_check:
 
-    scorr = np.array([m.structural_correspondence for m in M_])
+    scorr = np.array([m.structural_correspondence for m in MS.matchings])
     I = np.where(scorr==np.max(scorr))[0]
-    M_ = [M_[i] for i in I]
-
-    # # Initialization
-    # M_ = []
-
-    # for m in M:
-
-    #   # Matching matrix
-    #   Z = np.full((NetA.nNd, NetB.nNd), False)
-    #   for p in m:
-    #     Z[p[0], p[1]] = True
-
-    #   # Testing
-    #   if np.all(Z @ NetB.Adj == NetA.Adj @ Z):
-    #     M_.append(m)
-
+    MS.matchings = [MS.matchings[i] for i in I]
+    
   # --- Output -------------------------------------------------------------
 
   if 'i_function' in kwargs:
-    return (M_, output)
+    return (MS, output)
   else:
-    return M_
+    return MS
