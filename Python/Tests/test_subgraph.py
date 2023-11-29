@@ -9,10 +9,15 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-nA = 200
-p = 0.25
-rho = 1 #3/nA
-np.random.seed(seed=0)
+nA = 10
+
+# ER edge ratio
+p = 0.1
+
+# Subgraph ratio
+rho = 0.5
+
+# np.random.seed(seed=1)
 
 # --------------------------------------------------------------------------
 
@@ -31,12 +36,10 @@ Sub, Icor = Net.subnet(round(nA*rho))
 
 pa.line(f'mA = {Net.nEd}')
 
-X = compute_scores(Net, Sub, normalization=1, nIter=1)
+M = matching(Net, Sub, verbose=True)
 
-M = matching(Net, Sub, normalization=1, nIter=1)
-
-# M.compute_accuracy(Icor)
-# print(M)
+M.compute_accuracy(Icor)
+print(M)
 
 
 # Correct matches

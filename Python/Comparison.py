@@ -249,7 +249,7 @@ def compute_scores(NetA, NetB, nIter=None,
 
 
 # === Matching =============================================================
-def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_solutions=1000, structural_check=True, verbose=False, **kwargs):
+def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_solutions=None, structural_check=True, verbose=False, **kwargs):
 
   # --- Checks
 
@@ -314,34 +314,14 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
     '''
     
     # --- Step 1: Admissible set -----------------------------------------
-    
-    # --- Preparation
-
-    # Pad with zeros (nA != nB)
-    if X.shape[0] > X.shape[1]:
-      Au = []
-      Av = np.arange(X.shape[1], X.shape[0])
-      X = np.append(X, np.zeros((X.shape[0], Av.size)), axis=1)
-      I = np.append(I, np.setdiff1d(np.arange(X.shape[0]), I))
-      J = np.append(J, Av)
-
-    elif X.shape[0] < X.shape[1]:
-      Au = np.arange(X.shape[0], X.shape[1])
-      Av = []
-      X = np.append(X, np.zeros((Au.size, X.shape[1])), axis=0)
-      I = np.append(I, Au)
-      J = np.append(J, np.setdiff1d(np.arange(X.shape[1]), J))
-      
-    else:
-      Au = []
-      Av = []
 
     # Square size
-    n = X.shape[0]
+    nA = X.shape[0]
+    nB = X.shape[1]
 
     # Mask & solution grid
-    Mask = np.full((n,n), False)
-    Grid = np.full((n,n), False)  
+    Mask = np.full((nA,nB), False)
+    Grid = np.full((nA,nB), False)  
     for (i,j) in zip(I,J):
       Grid[i,j] = True
       
@@ -351,12 +331,12 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
       pa.matrix(X, highlight=Grid, title='Initial solution')
 
     # Minimal vectors
-    mu = np.full(n, -np.inf)
-    mv = np.full(n, -np.inf)
+    mu = np.full(nA, -np.inf)
+    mv = np.full(nB, -np.inf)
 
     # Maximal vectors
-    Mu = np.full(n, np.inf)
-    Mv = np.full(n, np.inf)
+    Mu = np.full(nA, np.inf)
+    Mv = np.full(nB, np.inf)
 
     # --- First step
 
@@ -433,7 +413,7 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
       pa.matrix(X, highlight=Mask, title='final')
 
     # --- Step 2: All perfect solutions of bipartite graph ---------------
-
+    
     '''
     This step is faster with the algorithm described in:
       Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
@@ -453,31 +433,29 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
     B = nx.Graph()
 
     # Nodes
-    B.add_nodes_from(range(n), bipartite=0)
-    B.add_nodes_from(range(n, 2*n), bipartite=1)
+    B.add_nodes_from(range(nA), bipartite=0)
+    B.add_nodes_from(range(nA, nA+nB), bipartite=1)
 
     # Edges
-    E = np.where(Mask)
     for (i,j) in zip(*np.nonzero(Mask)):
-      B.add_edge(i, j+n)
+      B.add_edge(i, j+nA)
 
     # Find matchings and format output
     M = []
 
-    for matching in pbm.enum_perfect_matchings(B):
+    for matching in pbm.enum_maximum_matchings(B):
 
       # Maximum number of solutions
       if max_solutions is not None:
         if len(M)==max_solutions: break
 
-      m = []
-      for (u,v) in matching.items():
-        if u not in Au and v-n not in Av:
-          m.append([u, v-n])
+      # Format matching
+      m = [[u, v-nA] for (u,v) in matching.items()]
       
       # Append without duplicates
-      if m not in M:    
-        M.append(m)
+      # if m not in M:    
+      #   M.append(m)
+      M.append(m)
 
   # --- Step 3: Discard structurally unsound matchings ---------------------
   
@@ -491,6 +469,9 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
     scorr = np.array([m.structural_correspondence for m in MS.matchings])
     I = np.where(scorr==np.max(scorr))[0]
     MS.matchings = [MS.matchings[i] for i in I]
+
+    if verbose:
+      print(f'Structural check: keeping {len(I)}/{len(M)} matchings.')
 
   # --- Output -------------------------------------------------------------
 
