@@ -20,7 +20,7 @@ rho = 0.5
 # --------------------------------------------------------------------------
 
 Net = Network(nA)
-Net.set_rand_edges('ER', p)
+Net.set_rand_edges('ER', p_edges=p)
 # Net.add_edge_attr('rand', name='test')
 # Net.add_node_attr('rand', name='node_attr_1')
 

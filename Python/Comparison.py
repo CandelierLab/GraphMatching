@@ -143,6 +143,12 @@ def compute_scores(NetA, NetB, nIter=None,
 
   # --- Computation --------------------------------------------------------
 
+  # Iterative function settings
+  if i_function is not None:
+    i_param['NetA'] = NetA
+    i_param['NetB'] = NetB
+    output = []
+
   if not mA or not mB:
 
     X = Xc
@@ -153,12 +159,6 @@ def compute_scores(NetA, NetB, nIter=None,
     # Initialization
     X = np.ones((nA,nB))
     Y = np.ones((mA,mB))
-
-    # Iterative function settings
-    if i_function is not None:
-      i_param['NetA'] = NetA
-      i_param['NetB'] = NetB
-      output = []
 
     # Initial evaluation
     if i_function is not None and initial_evaluation:

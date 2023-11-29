@@ -106,20 +106,29 @@ class Network:
   #                          Random structure
   # ------------------------------------------------------------------------
 
-  def set_rand_edges(self, method='ERG', p=0.5):
-    
+  def set_rand_edges(self, method='ERG', n_edges=None, p_edges=None, n_epn=None):
+    '''
+    NB: the parameter p can be either the number of edges n_edges (int), the 
+    proportion of edges p_edges (float, in [0,1]) or the number of edges
+    per node n_epn (float).
+    '''
+
     A = np.random.rand(self.nNd, self.nNd)
 
     match method:
 
       case 'Erdös-Rényi' | 'ER':
         # In the ER model, the number of edges is guaranteed.
-        # NB: the parameter p can be either the number of edges (int)
-        #   or a proportion of edges (float, in [0,1])
 
-        # In case p is a proportion, convert it to an integer
-        if isinstance(p, float):
-          p = int(np.round(p*self.nNd**2))
+        # --- Define p as a number of edges
+        if n_edges is not None:
+          p = n_edges
+        elif p_edges is not None:
+          p = int(np.round(p_edges*self.nNd**2))
+        elif n_epn is not None:
+          p = int(np.round(n_epn*self.nNd))
+        else:
+          raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
 
         if p==self.nNd**2:
           self.Adj = np.full((self.nNd,self.nNd), True)
@@ -129,6 +138,16 @@ class Network:
       case 'Erdös-Rényi-Gilbert' | 'ERG':
         # In the ERG the edges are drawn randomly so the exact number of 
         # edges is not guaranteed.
+
+        # --- Define p as a proportion of edges
+        if n_edges is not None:
+          p = n_edges/self.nNd**2
+        elif p_edges is not None:
+          p = p_edges
+        elif n_epn is not None:
+          p = n_epn/self.nNd
+        else:
+          raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
 
         self.Adj = A < p
 

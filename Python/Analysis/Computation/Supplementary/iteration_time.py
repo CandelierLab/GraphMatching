@@ -11,7 +11,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-n = 1000
+n = 1
 
 # Average number of edges per node
 l_nepn = [1]
@@ -25,6 +25,7 @@ l_t = []
 for nepn in l_nepn:
 
   print('Nepn {:.01f} ...'.format(nepn), end='')
+  start = time.time()
   
   # --- Network
 
@@ -39,9 +40,9 @@ for nepn in l_nepn:
 
   for nIter in l_nIter:
 
-    start = time.time()
+    tref = time.perf_counter_ns()
     M = matching(Net, Set, nIter=nIter)
-    t.append(time.time() - start)
+    t.append((time.perf_counter_ns() - tref)*1e-9)
 
   l_t.append(t)
 

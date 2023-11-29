@@ -1,5 +1,4 @@
 import os
-import numpy as np
 import time
 import matplotlib.pyplot as plt
 
@@ -14,9 +13,9 @@ os.system('clear')
 n = 100
 
 # Average number of edges per node
-l_nepn = [0.25, 0.5, 0.75, 1, 2, 3]
+l_nepn = [3] #[0.25, 0.5, 0.75, 1, 2, 3]
 
-nIter = 10
+nIterMax = 5
 
 # === Functions ============================================================
 
@@ -30,7 +29,7 @@ def probe(V, param, out):
   Icor = param['Icor']
 
   # Matching
-  M = matching(param['NetA'], param['NetB'], scores=X, max_solutions=1000)
+  M = matching(param['NetA'], param['NetB'], scores=X)
 
   # Accuracy
   M.compute_accuracy(Icor)
@@ -50,14 +49,14 @@ for nepn in l_nepn:
   # --- Network
 
   Net = Network(n)
-  Net.set_rand_edges('ER', int(nepn*n))
+  Net.set_rand_edges('ER', n_epn=nepn)
 
   Set, Icor = Net.shuffle()
 
   # --- Convergence
 
   # Scores
-  X, Y, gamma = compute_scores(Net, Set, nIter=nIter, i_function=probe, initial_evaluation=True, i_param={'Icor': Icor})
+  X, Y, gamma = compute_scores(Net, Set, nIter=nIterMax, i_function=probe, initial_evaluation=True, i_param={'Icor': Icor})
     
   l_gamma.append(gamma)
 
