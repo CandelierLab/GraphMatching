@@ -9,10 +9,10 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-nA = 5
-p = 0.5
-rho = 0.5 #3/nA
-np.random.seed(seed=6)
+nA = 200
+p = 0.25
+rho = 1 #3/nA
+np.random.seed(seed=0)
 
 # --------------------------------------------------------------------------
 
@@ -21,17 +21,22 @@ Net.set_rand_edges('ER', p)
 # Net.add_edge_attr('rand', name='test')
 # Net.add_node_attr('rand', name='node_attr_1')
 
-Net.print()
+# Net.print()
 
 Sub, Icor = Net.subnet(round(nA*rho))
 
-Sub.print()
+# Sub.print()
 
-print(Icor)
+# print(Icor)
 
-M = matching(Net, Sub, normalization=1, all_solutions=True, verbose=True)
-M.compute_accuracy(Icor)
-print(M)
+pa.line(f'mA = {Net.nEd}')
+
+X = compute_scores(Net, Sub, normalization=1, nIter=1)
+
+M = matching(Net, Sub, normalization=1, nIter=1)
+
+# M.compute_accuracy(Icor)
+# print(M)
 
 
 # Correct matches

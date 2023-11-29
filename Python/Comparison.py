@@ -2,9 +2,8 @@ import time
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
-import itertools
+from scipy import sparse
 import time
-import copy
 import paprint as pa
 
 from Matching import *
@@ -195,7 +194,7 @@ def compute_scores(NetA, NetB, nIter=None,
           
             X = (NetA.As @ Y @ NetB.As.T + NetA.At @ Y @ NetB.At.T + 1)
             Y = (NetA.As.T @ X @ NetB.As + NetA.At.T @ X @ NetB.At)
-
+            
       ''' === A note on operation order ===
 
       If all values of X are equal to the same value x, then updating Y gives
@@ -287,16 +286,15 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
   # --- Hungarian algorithm (Jonker-Volgenant)
     
   if verbose:
-    start = time.time()
+    tref = time.perf_counter_ns()
 
   I, J = linear_sum_assignment(X, maximize=True)
 
   if verbose:
-    print('Matching: {:.02f} ms'.format((time.time()-start)*1000))
+    print('Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
 
   # --- Output
   
-  # if not all_solutions or ('algorithm' in kwargs and kwargs['algorithm']!='GASP'):
   if not all_solutions:
     
     M = [[[I[k], J[k]] for k in range(len(I))]]
@@ -305,34 +303,6 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
 
     # Solution score
     s = np.sum([X[I[k], J[k]] for k in range(len(I))])
-
-    # # if brute:
-
-    # #   # Candidates
-    # #   C = [[[I[k], J[k]] for k in range(len(I))]]
-
-    # #   # Solution container
-    # #   M = []
-
-    # #   # Loop over candidates
-    # #   while C:
-
-    # #     # Append solution
-    # #     m = C.pop()
-    # #     M.append(m)
-
-    # #     # Test all possible dual inversions
-    # #     for d in itertools.combinations(range(len(m)), 2):
-          
-    # #       if X[m[d[0]][0], m[d[0]][1]]+X[m[d[1]][0], m[d[1]][1]] == X[m[d[0]][0], m[d[1]][1]]+X[m[d[1]][0], m[d[0]][1]]:
-            
-    # #         # New solution
-    # #         ns = copy.deepcopy(m)
-    # #         ns[d[1]][1] = m[d[0]][1]
-    # #         ns[d[0]][1] = m[d[1]][1]
-
-    # #         if ns not in M and ns not in C:
-    # #           C.append(ns)
 
     '''
     We follow the procedure described in:
@@ -521,7 +491,7 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
     scorr = np.array([m.structural_correspondence for m in MS.matchings])
     I = np.where(scorr==np.max(scorr))[0]
     MS.matchings = [MS.matchings[i] for i in I]
-    
+
   # --- Output -------------------------------------------------------------
 
   if 'i_function' in kwargs:

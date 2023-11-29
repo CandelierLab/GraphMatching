@@ -1,41 +1,55 @@
 import os
-import project
+import time
+from scipy import sparse
 
+import project
 from Network import *
-from  Comparison import *
+import paprint as pa
 
 os.system('clear')
 
-nA = 3
-nB = 4
+# --- Parameters -----------------------------------------------------------
 
-nIter = 10
-f = 1
+n = 200
+p = 0.1
 
-NetA = Network(nA)
-NetA.Adj = np.zeros((nA, nA))
-NetA.Adj[1,0] = True
-NetA.Adj[0,2] = True
-NetA.nEd = 2
-NetA.prepare()
+np.random.seed(seed=0)
 
-NetB = Network(nB)
-NetB.Adj = np.zeros((nB, nB))
-NetB.Adj[1,0] = True
-NetB.Adj[0,2] = True
-NetB.Adj[0,3] = True
-NetB.nEd = 3
-NetB.prepare()
+# --------------------------------------------------------------------------
 
-NetA.print()
-NetB.print()
+Net = Network(n)
+Net.set_rand_edges('ER', p)
+m = Net.nEd
 
-for iter in range(0, nIter):
+As = Net.As
+Y = np.ones((m,m))
 
-  # Structure & attribute scores
-  X, Y = scores(NetA, NetA, nIter=iter+1, normalization=f)
+# --- Conversion to sparse
 
-  print('---------------------------------------')
-  print(X, X/np.mean(X))
-  print('')
-  print(Y, Y/np.mean(Y))
+# tref = time.perf_counter_ns()
+
+# As_ = sparse.csr_matrix(As)
+
+# print('{:.03f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
+
+# tref = time.perf_counter_ns()
+
+# Y_ = sparse.csr_matrix(Y)
+
+# print('{:.03f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
+
+# --- Direct multiplication
+
+tref = time.perf_counter_ns()
+
+Z = As @ Y
+
+print('{:.03f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
+
+# --- Sparse multiplication
+
+# tref = time.perf_counter_ns()
+
+# Z = As_ @ Y
+
+# print('{:.03f} ms'.format((time.perf_counter_ns()-tref)*1e-6))

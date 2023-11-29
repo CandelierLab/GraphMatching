@@ -1,7 +1,8 @@
-import random
 import copy
 import numpy as np
+from scipy import sparse
 import networkx as nx
+
 import paprint as pa
 
 class Network:
@@ -239,7 +240,8 @@ class Network:
     # Edge list
     self.edges = np.zeros((self.nEd,2), dtype=np.int32)
 
-    # Source-edge and terminus-edge matrices
+    # --- Source-edge and terminus-edge matrices
+
     self.As = np.zeros((self.nNd, self.nEd))
     self.At = np.zeros((self.nNd, self.nEd))
 
@@ -249,6 +251,13 @@ class Network:
       self.edges[i,:] = [I[0][i], I[1][i]]
       self.As[I[0][i], i] = 1
       self.At[I[1][i], i] = 1
+
+    # Conversion to sparse
+    # Strangely slows down when there are several matrix multiplications
+    # self.As = sparse.csr_matrix(self.As)
+    # self.At = sparse.csr_matrix(self.At)
+
+    # --- Other measurements
 
     if self.nEd>0:
       
