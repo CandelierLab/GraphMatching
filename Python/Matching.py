@@ -67,26 +67,38 @@ class MatchingSet:
   Set of matchings.
   '''
 
-  def __init__(self, NetA, NetB, M):
+  def __init__(self, NetA, NetB, M, all_matchings=False):
 
+    # Definitions
     self.NetA = NetA
     self.NetB = NetB
 
+    # Total undetermination case
+    self.all_matchings = all_matchings
+
+    # Matching list
     self.matchings = []
-    for m in M:
-      tmp = Matching(self.NetA, self.NetB)
-      tmp.from_corr_list(m)
-      self.matchings.append(tmp)
+    if not self.all_matchings:      
+      for m in M:
+        tmp = Matching(self.NetA, self.NetB)
+        tmp.from_corr_list(m)
+        self.matchings.append(tmp)
 
     # Accuracy
     self.accuracy = None
 
   def __str__(self):
     
-    s = f'{len(self.matchings)} Matchings:\n'
+    if self.all_matchings:
 
-    for m in self.matchings:
-      s += m.__str__() + '\n'
+      s = 'All possible matching (total undetermination).\n'
+
+    else:
+
+      s = f'{len(self.matchings)} Matchings:\n'
+
+      for m in self.matchings:
+        s += m.__str__() + '\n'
 
     # --- Accuracy
     if self.accuracy is not None:
@@ -99,13 +111,19 @@ class MatchingSet:
     Compute the matching set accuracy based on the set correspondence
     '''
 
-    count = 0
-    total = 0
-    for m in self.matchings:
-      for (i,j) in enumerate(m.J):
-        if j is not None:
-          total += 1
-          if Icor[j]==i:
-            count += 1
+    if self.all_matchings:
 
-    self.accuracy = count/total
+      self.accuracy = 1/min(self.NetA.nNd, self.NetB.nNd)
+
+    else:
+
+      count = 0
+      total = 0
+      for m in self.matchings:
+        for (i,j) in enumerate(m.J):
+          if j is not None:
+            total += 1
+            if Icor[j]==i:
+              count += 1
+
+      self.accuracy = count/total

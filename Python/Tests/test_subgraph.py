@@ -9,15 +9,13 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-nA = 10
+nA = 20
 
 # ER edge ratio
-p = 0.1
+p = 0.01
 
 # Subgraph ratio
 rho = 0.5
-
-# np.random.seed(seed=1)
 
 # --------------------------------------------------------------------------
 
@@ -36,11 +34,10 @@ Sub, Icor = Net.subnet(round(nA*rho))
 
 pa.line(f'mA = {Net.nEd}')
 
-M = matching(Net, Sub, verbose=True)
+M = matching(Net, Sub)
 
 M.compute_accuracy(Icor)
 print(M)
-
 
 # Correct matches
 # print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/Sub.nNd)

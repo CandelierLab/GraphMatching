@@ -301,6 +301,34 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
 
   else:
 
+    # --- Total undetermination
+    '''
+    Sometimes the score matrix may be full of the same value. This can happend 
+    when only one iteration is performed or if the graph is empty or full of 
+    edges. This case result in a total indetermination and the number of 
+    solutions rapidly explodes with min(nA,nB)! equivalent matchings.
+
+    For computational reasons, in this case the returned MatchingSet object
+    has an empty list of matchings and the flag property 'all_matchings' is
+    set to True. The subsequent accuracy is then computed with the 
+    theoretical value 1/min(nA,nB), not with the real list.
+    '''
+
+    if np.all(X==X[0]):
+      
+      # Display
+      if verbose:
+        print("Total undetermination: raising the 'all_matching' flag.")
+
+      # Full matching set
+      MS = MatchingSet(NetA, NetB, [], all_matchings=True)
+
+      # Output
+      if 'i_function' in kwargs:
+        return (MS, output)
+      else:
+        return MS
+
     # Solution score
     s = np.sum([X[I[k], J[k]] for k in range(len(I))])
 
