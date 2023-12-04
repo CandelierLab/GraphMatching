@@ -9,18 +9,18 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-nA = 20
+nA = 10
 
 # ER edge ratio
 p = 0.01
 
 # Subgraph ratio
-rho = 0.5
+rho = 1
 
 # --------------------------------------------------------------------------
 
 Net = Network(nA)
-Net.set_rand_edges('ER', p_edges=p)
+Net.set_rand_edges('ER', n_epn=0.5)
 # Net.add_edge_attr('rand', name='test')
 # Net.add_node_attr('rand', name='node_attr_1')
 

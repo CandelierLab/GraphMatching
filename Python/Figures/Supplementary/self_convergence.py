@@ -10,12 +10,13 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-n = 100
+# n = 1000
+n = 50
 
 # Average number of edges per node
 l_nepn = [3] #[0.25, 0.5, 0.75, 1, 2, 3]
 
-nIterMax = 5
+nIterMax = 1
 
 # === Functions ============================================================
 
@@ -50,6 +51,8 @@ for nepn in l_nepn:
 
   Net = Network(n)
   Net.set_rand_edges('ER', n_epn=nepn)
+
+  print(Net)
 
   Set, Icor = Net.shuffle()
 
