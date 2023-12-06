@@ -18,4 +18,3 @@ np.random.seed(seed=0)
 B = np.random.rand(5,5)>0.5
 
 pa.matrix(B)
-
