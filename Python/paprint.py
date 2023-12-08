@@ -106,8 +106,12 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
     # === Column headers ===================================================
 
     # Row/column header max symbol
-    rms = int(max(1,np.ceil(np.log10(Sub.shape[0]))))
-    cms = int(max(1,np.ceil(np.log10(Sub.shape[1]))))
+    if M.size:
+      rms = int(max(1,np.ceil(np.log10(Sub.shape[0]))))
+      cms = int(max(1,np.ceil(np.log10(Sub.shape[1]))))
+    else:
+      rms = 0
+      cms = 0
 
     # Row or column format?
     rowf = cms<=ms
