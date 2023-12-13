@@ -10,7 +10,9 @@ os.system('clear')
 
 a = 5
 
-q = 22
+q = 20
+
+np.random.seed(0)
 
 # ==========================================================================
 
@@ -34,7 +36,18 @@ np.random.shuffle(J)
 for idx in J[0:q-2*a]:
   A[idx%a, idx//a] = True
 
+# A = np.ones((a,a)) - np.eye(a) >0
+
+
+# --- Reorganize matrix
+
 pa.matrix(A)
+
+A = A[:,np.argsort(np.sum(A, axis=0))]
+A = A[np.argsort(np.sum(A, axis=1)),:]
+
+pa.matrix(A)
+
 
 # --- Count number of solutions (brute force)
 
