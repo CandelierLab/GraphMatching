@@ -1,6 +1,7 @@
 import os
 import time
 import numpy as np
+import sparse
 
 import project
 from Network import *
@@ -60,9 +61,9 @@ while True:
   I = np.delete(I, I_)
   J = np.delete(J, J_)
     
-  pa.matrix(A)
-  print(sm)
-  print(I, J)
+  # pa.matrix(A)
+  # print(sm)
+  # print(I, J)
 
   # --- Columns
 
@@ -87,17 +88,13 @@ while True:
   I = np.delete(I, I_)
   J = np.delete(J, J_)
 
-  pa.matrix(A)
-  print(sm)
-  print(I, J)
-
 pa.matrix(A)
-print(sm)
-print(I, J)
+print('Sure matches:', sm)
+# print(I, J)
 
 # --- Separate in blocks
 
-pa.line()
+pa.line('Block separation')
 
 # Initialization
 U = np.array([0], dtype=int)
@@ -121,3 +118,5 @@ while True:
   no_rows = not U_.size
   if no_rows and no_cols: break
   U = np.hstack((U, U_))
+
+print(U)
