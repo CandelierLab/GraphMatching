@@ -8,9 +8,14 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-a = 5
+# a = 5
+# q = 15
 
-q = 20
+# a = 3
+# q = 7
+
+a = 4
+q = 9
 
 np.random.seed(0)
 
@@ -36,18 +41,13 @@ np.random.shuffle(J)
 for idx in J[0:q-2*a]:
   A[idx%a, idx//a] = True
 
-# A = np.ones((a,a)) - np.eye(a) >0
-
-
 # --- Reorganize matrix
 
 pa.matrix(A)
 
-A = A[:,np.argsort(np.sum(A, axis=0))]
-A = A[np.argsort(np.sum(A, axis=1)),:]
-
-pa.matrix(A)
-
+# A = A[:,np.argsort(np.sum(A, axis=0))]
+# A = A[np.argsort(np.sum(A, axis=1)),:]
+# pa.matrix(A)
 
 # --- Count number of solutions (brute force)
 
@@ -77,5 +77,57 @@ def get_subs(M, base=[], idx=None):
 # List all solutions
 S = get_subs(A)
 
-print(len(S))
+print('Number of solutions:', len(S))
+pa.line()
 
+# === Count solutions ======================================================
+
+from scipy.sparse import coo_array
+
+I0, J0 = np.where(A)
+U = np.empty(0, dtype=int)
+V = np.empty(0, dtype=int)
+
+for j in range(a):
+  for i in range(a):
+
+    if not A[i,j]: continue
+
+    # Targets
+    if j==a-1:
+      K = np.logical_and(i!=I0, J0==0)
+    else:
+      K = np.logical_and(i!=I0, j+1==J0)
+
+    U = np.concatenate((U, np.full(np.count_nonzero(K), fill_value=i+j*a)))
+    V = np.concatenate((V, I0[K] + a*J0[K]))
+
+# --- Big sparse matrix
+    
+B = coo_array((np.ones(U.size, dtype=int), (U,V)), shape=(a**2, a**2)).tocsr()
+
+# # Symmetrify
+# rows, cols = B.nonzero()
+# B[cols, rows] = B[rows, cols]
+
+# # Convert to csr
+# B = B.tocsr()
+
+print(B)
+
+# Find solutions
+
+I = np.arange(a**2, dtype=int)
+
+C = B.copy()
+
+for i in range(a-1):
+
+  C = C @ B
+  
+  pa.line(f'{i}')
+  print(C)
+  
+print(C.diagonal())
+
+print('Number of solutions:', C.diagonal().sum())
