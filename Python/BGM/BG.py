@@ -2,6 +2,8 @@
 import numpy as np
 from scipy.sparse import coo_array
 
+import paprint as pa
+
 # ==========================================================================
 
 class BinaryGraph:
@@ -27,6 +29,25 @@ class BinaryGraph:
     
 
 # ==========================================================================
+
+class Phi:
+
+  def __init__(self, keys=None, values=None):
+
+    self.k = np.array([], dtype=int) if keys is None else keys
+    self.v = np.ones(self.k.shape[0], dtype=int) if values is None else values
+
+  def __str__(self):
+
+    s = f'\n--- Keys:\n{self.k}\n\n---Values:\n{self.v}'
+
+    return s
+  
+  def nu(self):
+    return self.v.size
+  
+  def mu(self):
+    return np.sum(self.v)
 
 class Block:
   '''
@@ -78,35 +99,68 @@ class Block:
     
   def Uno(self):
 
-
     pass
 
   def RC(self):
 
     # --- Define phi_1
 
-    phi = np.array([np.insert(np.setdiff1d(range(self.beta), i), 0, i) for i in range(self.beta)])
+    phi = Phi(np.array([np.insert(np.setdiff1d(range(self.beta), i), 0, i) for i in range(self.beta)]))
 
     # --- Iterations
 
-    print(phi)
+    nOp = 0
 
-    for eta in range(1):
+    # Display
+    disp = lambda x : print(f'nu={x.nu()} ; mu={x.mu()}')
+    disp(phi)
+
+    for eta in range(1, self.alpha):
+
+      # pa.line(f'eta = {eta}')
 
       # --- Relaxation
 
-      tmp = [phi]
-      for k in range(1, self.beta-eta-1):
-        tmp.append(np.hstack((phi[:,0:k], phi[:,k+1:], phi[:,[k]])))
+      if eta==self.alpha-1:
 
-      phi_ = np.vstack(tmp)
+        # On the last step, there is nothing left to relax
+        phi_ = phi
+
+      else:
+
+        key = [phi.k]
+
+        for u in range(1, self.beta-eta):
+          key.append(np.hstack((phi.k[:,0:u], phi.k[:,u+1:], phi.k[:,[u]])))
+          if u==1:
+            val = np.concatenate((phi.v, phi.v))
+          else:
+            val = np.concatenate((val, phi.v))
+
+
+        phi_ = Phi(np.vstack(key), val)
 
       # --- Compression
 
-      # Transition matrix
-      M = 
+      nOp += phi_.nu()
 
-      print(len(phi))
+      z = {}
 
+      for i, k in enumerate(phi_.k):
+
+        if self.A[eta-1,k[0]] and self.A[eta,k[-1]]:
+
+          t = tuple(np.concatenate(([k[-1]], k[1:-1])))
+
+          if t in z:
+            z[t] += phi_.v[i]
+          else:
+            z[t] = phi_.v[i]
+
+      phi = Phi(keys=np.array(list(z.keys())), values=np.array(list(z.values()), dtype=int))
+
+      disp(phi)
+      
+    return np.sum(phi.v), nOp
 
 
