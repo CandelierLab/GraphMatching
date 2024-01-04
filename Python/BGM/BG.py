@@ -113,7 +113,7 @@ class Block:
 
     # Display
     disp = lambda x : print(f'nu={x.nu()} ; mu={x.mu()}')
-    disp(phi)
+    # disp(phi)
 
     for eta in range(1, self.alpha):
 
@@ -159,7 +159,7 @@ class Block:
 
       phi = Phi(keys=np.array(list(z.keys())), values=np.array(list(z.values()), dtype=int))
 
-      disp(phi)
+      # disp(phi)
       
     return np.sum(phi.v), nOp
 
