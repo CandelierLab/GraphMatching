@@ -2,7 +2,6 @@ import time
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
-from scipy import sparse
 import time
 import paprint as pa
 
