@@ -1,7 +1,7 @@
-
+import math
 import numpy as np
-from scipy.sparse import coo_array
 
+import project
 import paprint as pa
 
 # ==========================================================================
@@ -163,4 +163,167 @@ class Block:
       
     return np.sum(phi.v), nOp
 
+  def elimination(self):
 
+    # Find unmatched pairs
+    I, J = np.where(self.A==0)
+
+    # Initial path array
+    P = np.ones(self.A.shape, dtype=int)*math.factorial(self.beta-1)
+
+    # Iterate through unmatched pairs
+    for i,j in zip(I,J):
+
+      # Define new array
+      Q = np.full(self.A.shape, -1)
+      Q[np.where(P==0)] = 0
+      Q[i,:] = P[i,:]
+      Q[:,j] = P[:,j]
+      Q[i,j] = 0
+      
+      # New col/row sum
+      s = np.sum(Q[i,:])
+
+      # Find variables
+      U,V = np.where(Q<0)
+
+      nVar = self.beta**2
+      X = np.empty((0,nVar), dtype=int)
+      C = np.empty((0,1), dtype=int)
+      
+      # === Contraints =====================================================
+
+      # --- Row constraints -------------------------------
+
+      # Rows already equalized
+      rae = []
+
+      for u in range(self.beta):
+
+        # --- Row sum
+
+        x = np.zeros(nVar, dtype=int)
+        c = s
+
+        for v in range(self.beta):
+          if Q[u,v]>=0:
+            c -= Q[u,v]
+          else:
+            x[u+v*self.beta] = 1
+
+        # Check relevance
+        if np.all(x==0): continue        
+
+        # Add constraint
+        X = np.vstack((X, x))
+        C = np.vstack((C, c))
+
+        # --- Row equalities
+
+        if u not in rae:
+
+          for u_ in range(u+1, self.beta):
+
+            if np.array_equal(Q[u,:], Q[u_,:]):
+
+              rae.append(u_)
+
+              for v in range(self.beta):
+
+                if Q[u,v]<0:
+
+                  x = np.zeros(nVar, dtype=int)
+                  x[u+v*self.beta] = 1
+                  x[u_+v*self.beta] = -1
+
+                  # Add constraint
+                  X = np.vstack((X, x))
+                  C = np.vstack((C, 0))
+
+      # --- Columns constraints
+
+      # Columns already equalized
+      cae = []
+
+      for v in range(self.beta):
+
+        # --- Row sum
+
+        x = np.zeros(nVar, dtype=int)
+        c = s
+
+        for u in range(self.beta):
+          if Q[u,v]>=0:
+            c -= Q[u,v]
+          else:
+            x[u+v*self.beta] = 1
+
+        # Check relevance
+        if np.all(x==0): continue       
+
+        # Add constraint
+        X = np.vstack((X, x))
+        C = np.vstack((C, c))
+
+        # --- Column equalities
+
+        if v not in cae:
+
+          for v_ in range(v+1, self.beta):
+
+            if np.array_equal(Q[:,v], Q[:,v_]):
+
+              cae.append(v_)
+
+              for u in range(self.beta):
+
+                if Q[u,v]<0:
+
+                  x = np.zeros(nVar, dtype=int)
+                  x[u+v*self.beta] = 1
+                  x[u+v_*self.beta] = -1
+
+                  # Add constraint
+                  X = np.vstack((X, x))
+                  C = np.vstack((C, 0))
+
+
+      # === Solution =======================================================
+
+      # NB: For np.linalg.solve the input matrix must be square and all rows linearly independent. This is not obvious to achieve -_-'
+
+      R = np.linalg.lstsq(X,C, rcond=None)
+
+      for idx, r in enumerate(R[0]):
+        if r>0.5:
+          Q[idx%self.beta, idx//self.beta] = r.round()
+
+      # Update the matrix of paths
+      P = Q
+
+      # --- Display
+
+      print('--- Sum:', s)
+      pa.matrix(Q, highlight=Q==0)    
+      
+      # print()
+
+      # print(X)
+      # print(C)
+
+      # print(np.round(R[0]))
+      # print(R[1])
+
+
+      # break
+
+
+      # === Checks =========================================================
+
+      # Check that all rows and columns have the right sum
+
+      assert np.all(np.sum(P, axis=0)==s)
+      assert np.all(np.sum(P, axis=1)==s)
+
+
+    

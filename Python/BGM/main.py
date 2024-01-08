@@ -10,9 +10,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-a = 10
+a = 4
 
-# np.random.seed(0)
+np.random.seed(0)
 
 # ==========================================================================
 
@@ -31,7 +31,7 @@ Block matrices have at least 2 elements on each row and each column.
 
 # --- Randomly filled
 
-q = a*3
+q = a*2
 
 # Base matrix
 A = (np.eye(a) + np.diag(np.ones(a-1), 1))>0
@@ -54,26 +54,54 @@ pa.matrix(B.A)
 
 # --- Brute force
 
-# pa.line('Brute force')
+pa.line('Brute force')
 
-# nS_BF = B.brute_force()[1]
+nS_BF = B.brute_force()[1]
 
-# print('Number of solutions:', nS_BF)
-# print()
+print('\n', 'Number of solutions:', nS_BF)
+print()
 
 # --- Uno
 
 # --- RC algorithm
-'''
-Relaxaton-Compression algorithm
-'''
+# '''
+# Relaxaton-Compression algorithm
+# '''
 
-pa.line('RC algorithm')
+# pa.line('RC algorithm')
 
-nS_RC, nOp = B.RC()
+# nS_RC, nOp = B.RC()
 
-pa.line()
-print('Number of solutions:', nS_RC)
-print('Number of operations:', nOp)
-print('Ryser (theoretical): ', a*2**(a-1))
+# pa.line()
+# print('Number of solutions:', nS_RC)
+# print('Number of operations:', nOp)
+# print('Ryser (theoretical): ', a*2**(a-1))
+# print()
+
+# --- Elimination
+# '''
+# Elimination algorithm
+# '''
+
+pa.line('Elimination algorithm')
+
 print()
+
+B.elimination()
+
+# pa.line()
+# print('Number of solutions:', nS_RC)
+# print('Number of operations:', nOp)
+# print('Ryser (theoretical): ', a*2**(a-1))
+# print()
+
+# X = [[0,1,-1], [1,2,3], [3,2,1], [0,-1,1]]
+# C = [0,0,18, 0]
+
+# X = [[1,2,3], [3,2,1]]
+# C = [0,18]
+
+
+# R = np.linalg.lstsq(X,C, rcond=None)
+# print(R[0])
+# print(R[1])
