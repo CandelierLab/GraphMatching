@@ -85,22 +85,24 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
 
     # Booleans
     if np.issubdtype(Sub.dtype, np.bool_):
+      
       ms = max(len(cTrue), len(cFalse))
 
     # Integers
     elif np.issubdtype(Sub.dtype, np.integer):
-
+      
       with np.errstate(divide='ignore'):
-        ms = int(np.ceil(np.max(1*(Sub<0) + np.log10(np.abs(Sub)))))
+        ms = max(1, int(np.ceil(np.max(1*(Sub<0) + np.log10(np.abs(Sub))))))
 
     # Floats
     elif np.issubdtype(Sub.dtype, np.floating):
-
+      
       msi = int(np.ceil(np.max(1*(Sub[Sub!=0]<0) + np.maximum(1, np.log10(np.abs(Sub[Sub!=0])))))) + 1
       prec = max(4-msi, 0) if precision is None else precision
       ms = msi + prec - (prec==0)
 
     else:
+      
       raise TypeError(f'{__name__} > matrix : dtype {Sub.dtype!r} is not recognized')
 
     # === Column headers ===================================================
@@ -112,6 +114,8 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
     else:
       rms = 0
       cms = 0
+
+    print(cms, ms)
 
     # Row or column format?
     rowf = cms<=ms
