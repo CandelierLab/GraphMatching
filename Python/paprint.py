@@ -115,8 +115,6 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
       rms = 0
       cms = 0
 
-    print(cms, ms)
-
     # Row or column format?
     rowf = cms<=ms
 

@@ -10,9 +10,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-a = 4
+a = 6
 
-np.random.seed(0)
+np.random.seed(2)
 
 # ==========================================================================
 
@@ -31,7 +31,7 @@ Block matrices have at least 2 elements on each row and each column.
 
 # --- Randomly filled
 
-q = a*2
+q = a*5
 
 # Base matrix
 A = (np.eye(a) + np.diag(np.ones(a-1), 1))>0
