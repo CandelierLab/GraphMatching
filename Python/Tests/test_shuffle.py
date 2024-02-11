@@ -11,27 +11,29 @@ os.system('clear')
 nA = 5
 p = 0.1
 
-rho = 0.5
-
 algo = 'GASP'
+
+np.random.seed(0)
 
 # --------------------------------------------------------------------------
 
-Net = Network(nA)
-Net.set_rand_edges('ER', p)
-Net.add_edge_attr('rand', name='test_edge')
-Net.add_node_attr('rand', name='test_node')
+Ga = Network(nA)
+Ga.set_rand_edges('ER', p_edges=p)
+# Ga.add_edge_attr('rand', name='test_edge')
+# Ga.add_node_attr('rand', name='test_node')
 
-Net.print()
+Ga.print()
 
-Met, Icor = Net.shuffle()
+Gb, Icor = Ga.shuffle()
 
-# print('Correspondence: ', Icor)
-# Met.print()
+print('Correspondence: ', Icor)
+Gb.print()
 
-M = matching(Net, Met, algorithm=algo, all_solutions=True)
+M = matching(Ga, Gb, algorithm=algo, all_solutions=True)
 
-print(f'{len(M)} Matchings:')
+print(M)
 
-for m in M:
-  print(m)
+# print(f'{len(M)} Matchings:')
+
+# for m in M:
+#   print(m)

@@ -300,7 +300,7 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
 
   else:
 
-    # --- Total undetermination
+    # --- Total undetermination --------------------------------------------
     '''
     Sometimes the score matrix may be full of the same value. This can happend 
     when only one iteration is performed or if the graph is empty or full of 
@@ -327,6 +327,8 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
         return (MS, output)
       else:
         return MS
+
+    # --- Other cases (non-total undetermination) --------------------------
 
     # Solution score
     s = np.sum([X[I[k], J[k]] for k in range(len(I))])
@@ -442,7 +444,9 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
     # --- Step 2: All perfect solutions of bipartite graph ---------------
     
     '''
-    This step is faster with the algorithm described in:
+    First, admissible set is decomposed in blocks.
+    Then for each block all the solutions are computed. This step is faster 
+    with the algorithm described in:
       Algorithms for enumerating all perfect, maximum and maximal matchings in bipartite graphs.
       Uno, T. Algorithms and Computation, Lecture Notes in Computer Science, vol 1350 (1997)
       https://doi.org/10.1007/3-540-63890-3_11
@@ -483,6 +487,8 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
       # if m not in M:    
       #   M.append(m)
       M.append(m)
+
+    print('Number of solutions', len(M))
 
   # --- Step 3: Discard structurally unsound matchings ---------------------
   

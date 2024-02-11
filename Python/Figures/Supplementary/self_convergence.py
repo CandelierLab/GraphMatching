@@ -11,7 +11,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 # n = 1000
-n = 50
+n = 30
 
 # Average number of edges per node
 l_nepn = [3] #[0.25, 0.5, 0.75, 1, 2, 3]
@@ -32,11 +32,15 @@ def probe(V, param, out):
   # Matching
   M = matching(param['NetA'], param['NetB'], scores=X)
 
+  # print(M)
+
   # Accuracy
-  M.compute_accuracy(Icor)
+  # M.compute_accuracy(Icor)
 
   # Output
-  out.append(M.accuracy)
+  # out.append(M.accuracy)
+  out.append(0)
+
 
 # ==========================================================================
 
@@ -69,19 +73,19 @@ for nepn in l_nepn:
 
 # plt.style.use('dark_background')
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 
-for i, gamma in enumerate(l_gamma):
+# for i, gamma in enumerate(l_gamma):
 
-  ax.plot(gamma, '.-', label=l_nepn[i])
+#   ax.plot(gamma, '.-', label=l_nepn[i])
 
-ax.set_xlabel('Iteration')
-ax.set_ylabel(r'Accuracy $\gamma$')
-ax.set_title('legend: average number of edge per node')
+# ax.set_xlabel('Iteration')
+# ax.set_ylabel(r'Accuracy $\gamma$')
+# ax.set_title('legend: average number of edge per node')
 
-# ax.set_xlim(0, max(l_nIter))
-ax.xaxis.grid(True)
-ax.set_ylim(0,1)
-ax.legend()
+# # ax.set_xlim(0, max(l_nIter))
+# ax.xaxis.grid(True)
+# ax.set_ylim(0,1)
+# ax.legend()
 
-plt.show()
+# plt.show()

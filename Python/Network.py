@@ -121,6 +121,7 @@ class Network:
         # In the ER model, the number of edges is guaranteed.
 
         # --- Define p as a number of edges
+
         if n_edges is not None:
           p = n_edges
         elif p_edges is not None:
