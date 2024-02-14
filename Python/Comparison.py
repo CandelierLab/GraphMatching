@@ -246,9 +246,9 @@ def compute_scores(NetA, NetB, nIter=None,
   else:
     return(X, Y, output)
 
+# === Matching OLD =========================================================
 
-# === Matching =============================================================
-def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_solutions=None, structural_check=True, verbose=False, **kwargs):
+def matching_old(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_solutions=None, structural_check=True, verbose=False, **kwargs):
 
   # --- Checks
 
@@ -512,3 +512,208 @@ def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_so
     return (MS, output)
   else:
     return MS
+
+# === Matching =============================================================
+
+def matching(NetA, NetB, scores=None, threshold=None, all_solutions=True, max_solutions=None, structural_check=True, verbose=False, **kwargs):
+
+  # --- Checks
+
+  # No structural check for the Zager algorithm
+  if 'algorithm' in kwargs and kwargs['algorithm']=='Zager':
+    structural_check = False
+
+  # --- Similarity scores --------------------------------------------------
+
+  if verbose:
+    start = time.time()
+
+  if scores is None:
+    if 'i_function' in kwargs:
+      (X, Y, output) = compute_scores(NetA, NetB, **kwargs)
+    else:
+      X = compute_scores(NetA, NetB, **kwargs)[0]
+  else:
+    X = scores
+
+  if verbose:
+    print('Scoring: {:.02f} ms'.format((time.time()-start)*1000), end=' - ')
+
+  # --- Emptyness check ----------------------------------------------------
+
+  if not X.size:
+    return ([], output) if 'i_function' in kwargs else []
+
+  # --- Threshold
+
+  if threshold is not None:
+    X[X<threshold] = -np.inf
+
+  # --- Hungarian algorithm (Jonker-Volgenant)
+    
+  if verbose:
+    tref = time.perf_counter_ns()
+
+  I, J = linear_sum_assignment(X, maximize=True)
+
+  if verbose:
+    print('Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
+
+  # --- Output
+  
+  if not all_solutions:
+    
+    M = [[[I[k], J[k]] for k in range(len(I))]]
+
+  else:
+
+    # --- Total undetermination --------------------------------------------
+    '''
+    Sometimes the score matrix may be full of the same value. This can happend 
+    when only one iteration is performed or if the graph is empty or full of 
+    edges. This case result in a total indetermination and the number of 
+    solutions rapidly explodes with min(nA,nB)! equivalent matchings.
+
+    For computational reasons, in this case the returned MatchingSet object
+    has an empty list of matchings and the flag property 'all_matchings' is
+    set to True. The subsequent accuracy is then computed with the 
+    theoretical value 1/min(nA,nB), not with the real list.
+    '''
+
+    if np.all(X==X[0]):
+      
+      # Display
+      if verbose:
+        print("Total undetermination: raising the 'all_matching' flag.")
+
+      # Full matching set
+      MS = MatchingSet(NetA, NetB, [], all_matchings=True)
+
+      # Output
+      if 'i_function' in kwargs:
+        return (MS, output)
+      else:
+        return MS
+
+    # --- Other cases (non-total undetermination) --------------------------
+
+    # Solution score
+    s = np.sum([X[I[k], J[k]] for k in range(len(I))])
+
+    '''
+    We follow the procedure described in:
+      Finding All Minimum-Cost Perfect Matchings in Bipartite Graphs
+      K. Fukuda and T. Matsui, NETWORKS Vol.22 (1992)
+      https://doi.org/10.1002/net.3230220504
+
+    with minor modifications to extend the algorithms to non-square cost matrices.
+    '''
+    
+    # --- Step 1: Admissible set -----------------------------------------
+
+    # Sizes
+    nA = X.shape[0]
+    nB = X.shape[1]
+
+    # Mask & solution grid
+    Mask = np.full((nA,nB), False)
+    Grid = np.full((nA,nB), False)  
+    for (i,j) in zip(I,J):
+      Grid[i,j] = True
+      
+    # Display
+    if verbose:
+      print('')
+      pa.matrix(X, highlight=Grid, title='Initial solution')
+
+    # Minimal vectors
+    mu = np.full(nA, -np.inf)
+    mv = np.full(nB, -np.inf)
+
+    # Maximal vectors
+    Mu = np.full(nA, np.inf)
+    Mv = np.full(nB, np.inf)
+
+    # --- First step
+
+    i0 = np.argmin(X[I,J])
+    ref = [I[i0], J[i0]]
+    Mask[I[i0], J[i0]] = True
+
+    # Fix values
+    mu[ref[0]] = Mu[ref[0]] = 0
+    mv[ref[1]] = Mv[ref[1]] = X[ref[0],ref[1]]
+
+    # --- Main loop 
+
+    while True:
+
+      # Min values    
+      mu = np.maximum(mu, X[:,ref[1]] - mv[ref[1]])
+      mv = np.maximum(mv, X[ref[0],:] - mu[ref[0]])
+
+      # Max values    
+      for (i,j) in zip(I,J):        
+          Mu[i] = np.minimum(Mu[i], X[i,j] - mv[j])
+          Mv[j] = np.minimum(Mv[j], X[i,j] - mu[i])
+
+      # Max sums
+      Muv = np.add.outer(Mu, Mv)
+
+      # Stop condition
+      Z = Muv - X + Mask
+
+      # --- Debug display ------------
+      # pa.line()
+      # print(mu, mv, Mu, Mv)
+      # pa.matrix(Muv, highlight=Mask)
+      # pa.matrix(Z, highlight=Mask)
+      # ------------------------------
+
+      if np.isclose(np.min(Z), 0):
+
+        # New reference
+        tmp = np.where(Z==np.min(Z))
+        ref = [tmp[0][0], tmp[1][0]]
+
+      else:
+
+        # Check the solution grid
+        w = np.where(np.logical_and(Grid, np.logical_not(Mask)))
+
+        if len(w[0]):
+
+          mi = np.argmin(X[w[0], w[1]])
+
+          # Set reference
+          ref = [w[0][mi], w[1][mi]]
+
+          # Update max vectors
+          Mu[ref[0]] = mu[ref[0]]
+          Mv[ref[1]] = X[ref[0],ref[1]] - mu[ref[0]]
+
+        else:
+          # If the solution grid is full: stop
+          break
+
+      # Update min vectors
+      mu[ref[0]] = Mu[ref[0]]
+      mv[ref[1]] = X[ref[0],ref[1]] - Mu[ref[0]]
+
+      # Update mask
+      Mask[ref[0], ref[1]] = True
+
+    # Display
+    if verbose:
+      print('')
+      pa.matrix(X, highlight=Mask, title='final')
+
+    # --- Step 2: ---------------
+    
+
+
+
+
+  # --- Output -------------------------------------------------------------
+
+  return (None, output) if 'i_function' in kwargs else None

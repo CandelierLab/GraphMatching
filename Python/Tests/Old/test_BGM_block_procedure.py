@@ -11,7 +11,7 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-np.random.seed(seed=0)
+# np.random.seed(seed=0)
 
 a = 20
 b = a
@@ -27,7 +27,7 @@ pa.matrix(A)
 
 # --- Recursive ones assignation
 
-# Sure matches
+# Sure matches 
 sm = np.full(a, None)
 
 I = np.arange(a)
