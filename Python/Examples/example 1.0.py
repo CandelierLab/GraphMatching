@@ -1,6 +1,6 @@
 import os
-import matplotlib.pyplot as plt
 
+from test_suite import *
 import project 
 from Network import *
 from  Comparison import *
@@ -17,33 +17,37 @@ algo = 'Zager'
 
 # ==========================================================================
 
-NetA = Network(nA)
-NetA.Adj = np.zeros((nA,nA), dtype=bool)
-NetA.Adj[0,1] = True
-NetA.Adj[1,0] = True
-NetA.Adj[1,2] = True
-NetA.Adj[2,1] = True
-NetA.Adj[2,3] = True
-NetA.Adj[3,2] = True
-NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
-NetA.prepare()
+T = test_suite()
 
-NetB = Network(nB)
-NetB.Adj = np.zeros((nB,nB), dtype=bool)
-NetB.Adj[0,1] = True
-NetB.Adj[1,0] = True
-NetB.Adj[1,2] = True
-NetB.Adj[2,1] = True
-NetB.Adj[2,3] = True
-NetB.Adj[3,2] = True
-NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
-NetB.prepare()
+print(T)
 
-# --- Matching
+# NetA = Network(nA)
+# NetA.Adj = np.zeros((nA,nA), dtype=bool)
+# NetA.Adj[0,1] = True
+# NetA.Adj[1,0] = True
+# NetA.Adj[1,2] = True
+# NetA.Adj[2,1] = True
+# NetA.Adj[2,3] = True
+# NetA.Adj[3,2] = True
+# NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
+# NetA.prepare()
 
-M = matching(NetA, NetB, algorithm=algo)
+# NetB = Network(nB)
+# NetB.Adj = np.zeros((nB,nB), dtype=bool)
+# NetB.Adj[0,1] = True
+# NetB.Adj[1,0] = True
+# NetB.Adj[1,2] = True
+# NetB.Adj[2,1] = True
+# NetB.Adj[2,3] = True
+# NetB.Adj[3,2] = True
+# NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
+# NetB.prepare()
 
-# --- Output
+# # --- Matching
 
-pa.line(os.path.basename(__file__))
-print(M)
+# M = matching(NetA, NetB, algorithm=algo)
+
+# # --- Output
+
+# pa.line(os.path.basename(__file__))
+# print(M)
