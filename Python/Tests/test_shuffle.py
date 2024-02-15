@@ -9,7 +9,7 @@ os.system('clear')
 # --- Parameters -----------------------------------------------------------
 
 nA = 5
-p = 0.1
+p = 0.5
 
 algo = 'GASP'
 
@@ -26,10 +26,10 @@ Ga.print()
 
 Gb, Icor = Ga.shuffle()
 
-print('Correspondence: ', Icor)
-Gb.print()
+# print('Correspondence: ', Icor)
+# Gb.print()
 
-M = matching(Ga, Gb, algorithm=algo, all_solutions=True)
+M = matching(Ga, Gb, verbose=True)
 
 print(M)
 
