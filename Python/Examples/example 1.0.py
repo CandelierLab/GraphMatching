@@ -13,41 +13,48 @@ os.system('clear')
 nA = 4
 nB = 4
 
-algo = 'Zager'
+algo = 'GASP'
 
 # ==========================================================================
 
-T = test_suite()
+# T = test_suite()
 
-print(T)
+# print(T)
 
-# NetA = Network(nA)
-# NetA.Adj = np.zeros((nA,nA), dtype=bool)
-# NetA.Adj[0,1] = True
-# NetA.Adj[1,0] = True
-# NetA.Adj[1,2] = True
-# NetA.Adj[2,1] = True
-# NetA.Adj[2,3] = True
-# NetA.Adj[3,2] = True
-# NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
-# NetA.prepare()
+NetA = Network(nA)
+NetA.Adj = np.zeros((nA,nA), dtype=bool)
+NetA.Adj[0,1] = True
+NetA.Adj[1,0] = True
+NetA.Adj[1,2] = True
+NetA.Adj[2,1] = True
+NetA.Adj[2,3] = True
+NetA.Adj[3,2] = True
+NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
+NetA.prepare()
 
-# NetB = Network(nB)
-# NetB.Adj = np.zeros((nB,nB), dtype=bool)
-# NetB.Adj[0,1] = True
-# NetB.Adj[1,0] = True
-# NetB.Adj[1,2] = True
-# NetB.Adj[2,1] = True
-# NetB.Adj[2,3] = True
-# NetB.Adj[3,2] = True
-# NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
-# NetB.prepare()
+NetB = Network(nB)
+NetB.Adj = np.zeros((nB,nB), dtype=bool)
+NetB.Adj[0,1] = True
+NetB.Adj[1,0] = True
+NetB.Adj[1,2] = True
+NetB.Adj[2,1] = True
+NetB.Adj[2,3] = True
+NetB.Adj[3,2] = True
+NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
+NetB.prepare()
 
-# # --- Matching
+# --- Matching
+
+X, Y = compute_scores(NetA, NetB, algorithm=algo)
+
+pa.matrix(X)
+
+pa.matrix(Y)
 
 # M = matching(NetA, NetB, algorithm=algo)
 
-# # --- Output
+
+# --- Output
 
 # pa.line(os.path.basename(__file__))
 # print(M)
