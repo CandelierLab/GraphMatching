@@ -1,11 +1,18 @@
+import os
 import numpy as np
 
 # === MATCHING =============================================================
 
 class Matching:
   '''
-  Matching objects
+  Matching object
   '''
+
+  # ========================================================================
+  # |                                                                      |
+  # |                          Constructor                                 |
+  # |                                                                      |
+  # ========================================================================
 
   def __init__(self, NetA, NetB):
 
@@ -16,49 +23,149 @@ class Matching:
     self.nB = NetB.nNd
 
     # Matching
-    self.J = np.full((self.nA), fill_value=None)
+    self.idxA = np.empty(0)
+    self.idxB = np.empty(0)
 
     # Measures
-    self.structural_correspondence = None
+    self.structural_quality = None
+
+  # ========================================================================
+  # |                                                                      |
+  # |                             Display                                  |
+  # |                                                                      |
+  # ========================================================================
 
   def __str__(self):
     '''
     Print function
     '''
 
-    s = np.array2string(self.J)
-    s += f'\t| SC: {self.structural_correspondence}'
+    # --- Parameters
+
+    # max caracters per line 
+    mcpl = os.get_terminal_size()[0]
+
+    # Maximum number of correspondences to display
+    kmax = 100
+
+    s = '╒══ Matching ' + '═'*(mcpl-13) + '\n'
+    
+    s += '│\n'
+  
+    # --- Number of correspondences to display
+
+    km = self.idxA.size
+
+    if not km:
+
+      s += '│ Empty list of correspondences.\n'
+      
+    else:
+
+      if km > kmax:
+        km = kmax
+        suff = f'│ ... and {self.idxA.size-kmax} more.\n'
+      else:
+        suff = ''
+
+      # --- Display correspondences
+      
+      l0 = '│ '
+      l1 = '│ '
+      l2 = '│ '
+
+      for k in range(km):
+
+        # --- Buffers
+
+        bl = len(f'{max(self.idxA[k], self.idxB[k])}')
+
+        b0 = f' \033[7m {self.idxA[k]:{bl}d} \033[0m'
+        b1 = f'  {self.idxB[k]:{bl}d} '
+        b2 = '─'*(bl+3)
+
+        if len(l1+b1)<mcpl:
+
+          l0 += b0
+          l1 += b1
+          l2 += b2
+
+        else:
+
+          # Flush
+          s += l0 + '\n'
+          s += l1 + '\n'
+          s += l2 + '─\n'
+
+          # Restart
+          l0 = '│ ' + b0 
+          l1 = '│ ' + b1
+          l2 = '│ ' + b2
+
+      # Flush
+      s += l0 + '\n'
+      s += l1 + '\n'
+
+      s += suff
+
+    s += '╘' + '═'*(mcpl-1) + '\n'
 
     return s
 
-  def from_corr_list(self, L):
-    '''
-    Define the matchinbg based on a correspondence list.
-    
-    Examples of correspondence lists:
-      [[0,0], [1,1], [2,2]]
-      [(0,0), (1,1), (2,2)]
-    '''
+  # ========================================================================
+  # |                                                                      |
+  # |                             Imports                                  |
+  # |                                                                      |
+  # ========================================================================
 
-    for c in L:
-      self.J[c[0]] = c[1]
-
-    # Compute structural correspondence
-    self.get_structural_correspondence()
-
-  def get_structural_correspondence(self):
+  def from_lists(self, idxA, idxB, sort=True, initialization=True):
     '''
-    Compute structural correspondence
+    Define the matching based on two lists of indices.
     '''
 
-    # Matching matrix
-    Z = np.full((self.nA, self.nB), False)
-    for i,j in enumerate(self.J):
-      if j is not None:
-        Z[i,j] = True
+    self.idxA = np.array(idxA) if isinstance(idxA, list) else idxA
+    self.idxB = np.array(idxB) if isinstance(idxB, list) else idxB
 
-    # Compute structural correspondence
-    self.structural_correspondence = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
+    # Sort
+    if sort:
+      I = self.idxA.argsort()
+      self.idxA = self.idxA[I]
+      self.idxB = self.idxB[I]
+
+    # Initialization
+    if initialization:
+      self.initialize()
+
+  # ========================================================================
+  # |                                                                      |
+  # |                        Initialization                                |
+  # |                                                                      |
+  # ========================================================================
+
+  def initialize(self):
+    '''
+    Initialization
+    '''
+
+    # Structural quality of the matching
+    if self.structural_quality is None:
+      self.compute_structural_quality()
+
+
+  def compute_structural_quality(self):
+    '''
+    Compute the structural quality of the matching
+    '''
+
+    pass
+    # # Matching matrix
+    # Z = np.full((self.nA, self.nB), False)
+    # for i,j in enumerate(self.J):
+    #   if j is not None:
+    #     Z[i,j] = True
+
+    # # Compute structural correspondence
+    # self.structural_correspondence = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
 
 # === MATCHING SET =========================================================
 
@@ -67,63 +174,5 @@ class MatchingSet:
   Set of matchings.
   '''
 
-  def __init__(self, NetA, NetB, M, all_matchings=False):
-
-    # Definitions
-    self.NetA = NetA
-    self.NetB = NetB
-
-    # Total undetermination case
-    self.all_matchings = all_matchings
-
-    # Matching list
-    self.matchings = []
-    if not self.all_matchings:      
-      for m in M:
-        tmp = Matching(self.NetA, self.NetB)
-        tmp.from_corr_list(m)
-        self.matchings.append(tmp)
-
-    # Accuracy
-    self.accuracy = None
-
-  def __str__(self):
-    
-    if self.all_matchings:
-
-      s = 'All possible matching (total undetermination).\n'
-
-    else:
-
-      s = f'{len(self.matchings)} Matchings:\n'
-
-      for m in self.matchings:
-        s += m.__str__() + '\n'
-
-    # --- Accuracy
-    if self.accuracy is not None:
-      s += f'\nSet accuracy: {self.accuracy}\n'
-
-    return s
-  
-  def compute_accuracy(self, Icor):
-    '''
-    Compute the matching set accuracy based on the set correspondence
-    '''
-
-    if self.all_matchings:
-
-      self.accuracy = 1/min(self.NetA.nNd, self.NetB.nNd)
-
-    else:
-
-      count = 0
-      total = 0
-      for m in self.matchings:
-        for (i,j) in enumerate(m.J):
-          if j is not None:
-            total += 1
-            if Icor[j]==i:
-              count += 1
-
-      self.accuracy = count/total
+  def __init__(self):
+    pass

@@ -54,10 +54,9 @@ M = C.get_matching()
 # --- Output
 
 pa.line(os.path.basename(__file__))
-
 print()
-pa.matrix(C.X, title='Node scores')
 
+# pa.matrix(C.X, title='Node scores')
 # pa.matrix(C.Y)
 
 print(M)

@@ -17,7 +17,7 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def __init__(self, NetA, NetB, algorithm='GASM'):
+  def __init__(self, NetA, NetB, algorithm='GASM', verbose=False):
     '''
     Comparison of two networks.
 
@@ -42,6 +42,10 @@ class Comparison:
 
     self.X = None
     self.Y = None
+
+    # --- Misc
+
+    self.verbose = verbose
 
   # ========================================================================
   # |                                                                      |
@@ -281,14 +285,15 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def get_matching(self, randomize_exploration=True, verbose=False, **kwargs):
+  def get_matching(self, randomize_exploration=True, **kwargs):
     ''' Compute one matching '''
 
     # --- Similarity scores --------------------------------------------------
 
     if self.X is None:
 
-      if verbose:
+      if self.verbose:
+        print('* No score matrix found, computing the score matrices.')
         start = time.time()
 
       if 'i_function' in kwargs:
@@ -296,77 +301,95 @@ class Comparison:
       else:
         self.compute_scores(**kwargs)
 
-      if verbose:
-        print('Scoring: {:.02f} ms'.format((time.time()-start)*1000), end=' - ')
+      if self.verbose:
+        print('* Scoring: {:.02f} ms'.format((time.time()-start)*1000))
 
     # --- Emptyness check ----------------------------------------------------
 
     if not self.X.size:
       return ([], output) if 'i_function' in kwargs else []
 
+    # Prepare output
+    M = Matching(self.NetA, self.NetB)
+
     match self.algorithm:
 
       case 'Zager':
 
-        if verbose:
+        if self.verbose:
           tref = time.perf_counter_ns()
 
         # Jonker-Volgenant reoslution of the LAP
-        I, J = linear_sum_assignment(self.X, maximize=True)
+        idxA, idxB = linear_sum_assignment(self.X, maximize=True)
 
-        if verbose:
-          print('Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
-
-        # Output      
-        M = [[[I[k], J[k]] for k in range(len(I))]]
+        if self.verbose:
+          print('* Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
 
       case 'GASM':
 
+        # Matching indices
+        idxA = []
+        idxB = []
+
+        # Symmetrized adjacency matrices
         AA = np.logical_or(self.NetA.Adj, self.NetA.Adj.T)
         AB = np.logical_or(self.NetB.Adj, self.NetB.Adj.T)
 
-        M = np.full(self.NetA.nNd, -1, dtype=int)
-
         # --- Initial matchup seed
         
-        ''' Maybe randomize if equality ? '''
-        i0, j0 = np.unravel_index(np.argmax(self.X), self.X.shape)
-        if randomize_exploration:
-          pass
-
-        M[i0] = j0
+        i0, j0 = get_max_from_array(self.X, randomize_exploration)
+        idxA.append(i0)
+        idxB.append(j0)
 
         # --- Greedy matching 
 
         while True:
 
-          # Matched nodes from both graphs
-          I = np.argwhere(M>=0).flatten()
-          J = M[I]
+          # Candidates
+          cdd = []
+          csc = []
 
-          # Get all neighbors from both graphs not yet assigned
-          I_ = np.setdiff1d(np.argwhere(np.sum(AA[I,:], axis=0)).flatten(), I)
-          J_ = np.setdiff1d(np.argwhere(np.sum(AB[J,:], axis=0)).flatten(), J)
+          for k in range(len(idxA)):
 
-          if not I_.size or not J_.size:
+            # Get all neighbors from both graphs not yet assigned
+            I_ = np.setdiff1d(np.argwhere(AA[idxA[k],:]).flatten(), idxA)
+            J_ = np.setdiff1d(np.argwhere(AB[idxB[k],:]).flatten(), idxB)
+
+            if I_.size and J_.size:
+
+              # Sub-matrix
+              Sub = self.X[np.ix_(I_, J_)]
+              i_, j_ = get_max_from_array(Sub, randomize_exploration)
+
+              cdd.append([I_[i_], J_[j_]])
+              csc.append(Sub[i_, j_])
+
+          if not len(csc):
             break
 
-          # Sub-matrix
-          Sub = self.X[np.ix_(I_, J_)]
+          k = get_max_from_array(csc, randomize_exploration)[0]
 
-          ''' Maybe randomize if equality ? '''
-          i_, j_ = np.unravel_index(np.argmax(Sub), Sub.shape)
-          i = I_[i_]
-          j = J_[j_]
+          idxA.append(cdd[k][0])
+          idxB.append(cdd[k][1])
 
-          M[i] = j
+        # Initialize matching object
+        M.from_lists(idxA, idxB)
 
     # --- Output
-        
+    
     return (M, output) if 'i_function' in kwargs else M
 
+# === Usefull functions ====================================================
+  
+def get_max_from_array(X, randomize=True):
 
+  if randomize:
+    tmp = np.argwhere(X == np.max(X))
+    ij = tmp[np.random.randint(tmp.shape[0])]    
+  else:
+    ij = np.unravel_index(np.argmax(X), X.shape)
 
+  return ij
 
 # === Matching OLD =========================================================
 
