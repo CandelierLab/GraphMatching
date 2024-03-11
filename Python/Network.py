@@ -10,7 +10,7 @@ class Network:
     
   # === CONSTRUCTOR ========================================================
 
-  def __init__(self, nNode=0):
+  def __init__(self, nNode=0, directed=True):
 
     # Numbers
     self.nNd = nNode
@@ -18,7 +18,8 @@ class Network:
     self.nEd = 0
     self.nEa = 0
 
-    # Edge list
+    # Edges
+    self.directed = directed
     self.edges = None
 
     # Adjacency matrix
@@ -254,6 +255,11 @@ class Network:
 
   def prepare(self, force=False):
 
+    # Symmetrize adjacency matric for undirected graphs
+    if not self.directed:
+      self.Adj = np.logical_or(self.Adj, self.Adj.T)
+
+    # Count edges
     if self.nEd==0:
       self.nEd = np.count_nonzero(self.Adj)
 

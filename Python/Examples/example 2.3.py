@@ -41,14 +41,14 @@ C = Comparison(NetA, NetB, algorithm=algo)
 
 # C.compute_scores()
 
-M = C.get_matching()
+M = C.get_matching(force_perfect=True)
 
 # --- Output
 
 pa.line(os.path.basename(__file__))
 print()
 
-# pa.matrix(C.X, title='Node scores')
+pa.matrix(C.X, title='Node scores')
 # pa.matrix(C.Y)
 
 print(M)

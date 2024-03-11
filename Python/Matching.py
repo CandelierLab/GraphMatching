@@ -27,6 +27,7 @@ class Matching:
     self.idxB = np.empty(0)
 
     # Measures
+    self.score = None
     self.structural_quality = None
 
   # ========================================================================
@@ -40,7 +41,7 @@ class Matching:
     Print function
     '''
 
-    # --- Parameters
+    # --- Parameters -------------------------------------------------------
 
     # max caracters per line 
     mcpl = os.get_terminal_size()[0]
@@ -51,7 +52,21 @@ class Matching:
     s = '╒══ Matching ' + '═'*(mcpl-13) + '\n'
     
     s += '│\n'
+    param_suff = ''
   
+    # Matching score
+    if self.score is not None:
+      s += f'│ Matching score: {self.score:.03f}\n'
+      param_suff = '│\n'
+
+    if self.structural_quality is not None:
+      s += f'│ Structural quality: {self.structural_quality:.03f}\n'
+      param_suff = '│\n'
+
+    s += param_suff
+ 
+    # --- Correspondences --------------------------------------------------
+
     # --- Number of correspondences to display
 
     km = self.idxA.size
@@ -147,7 +162,7 @@ class Matching:
     Initialization
     '''
 
-    # Structural quality of the matching
+    # Structural quality
     if self.structural_quality is None:
       self.compute_structural_quality()
 
@@ -157,15 +172,21 @@ class Matching:
     Compute the structural quality of the matching
     '''
 
-    pass
-    # # Matching matrix
-    # Z = np.full((self.nA, self.nB), False)
-    # for i,j in enumerate(self.J):
-    #   if j is not None:
-    #     Z[i,j] = True
+    # Matching matrix
+    Z = np.full((self.nA, self.nB), False)
+    for (i,j) in zip(self.idxA, self.idxB):
+      if j is not None:
+        Z[i,j] = True
 
-    # # Compute structural correspondence
-    # self.structural_correspondence = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
+    # Compute structural correspondence
+    self.structural_quality = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
+
+  def compute_score(self, X):
+    '''
+    Compute the matching score
+    '''
+
+    self.score = np.sum(X[self.idxA, self.idxB])
 
 # === MATCHING SET =========================================================
 

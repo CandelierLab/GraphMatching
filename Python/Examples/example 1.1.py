@@ -17,25 +17,19 @@ algo = 'GASM'
 
 # ==========================================================================
 
-NetA = Network(nA)
+NetA = Network(nA, directed=False)
 NetA.Adj = np.zeros((nA,nA), dtype=bool)
 NetA.Adj[0,1] = True
-NetA.Adj[1,0] = True
 NetA.Adj[1,2] = True
-NetA.Adj[2,1] = True
 NetA.Adj[2,3] = True
-NetA.Adj[3,2] = True
 NetA.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0]})
 NetA.prepare()
 
-NetB = Network(nB)
+NetB = Network(nB, directed=False)
 NetB.Adj = np.zeros((nB,nB), dtype=bool)
 NetB.Adj[0,1] = True
-NetB.Adj[1,0] = True
 NetB.Adj[1,2] = True
-NetB.Adj[2,1] = True
 NetB.Adj[2,3] = True
-NetB.Adj[3,2] = True
 NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0]})
 NetB.prepare()
 

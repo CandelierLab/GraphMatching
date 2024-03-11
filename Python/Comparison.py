@@ -17,7 +17,7 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def __init__(self, NetA, NetB, algorithm='GASM', verbose=False):
+  def __init__(self, NetA, NetB, algorithm='GASM', randomize_exploration=True, verbose=False):
     '''
     Comparison of two networks.
 
@@ -35,8 +35,12 @@ class Comparison:
     self.NetA = NetA
     self.NetB = NetB
 
+    # --- Algorithms
+
     self.algorithm = algorithm
     ''' The algorithm can be: "Zager", "GASM". '''
+
+    self.randomize_exploration = randomize_exploration
 
     # --- Scores
 
@@ -285,7 +289,7 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def get_matching(self, randomize_exploration=True, **kwargs):
+  def get_matching(self, force_perfect=True, **kwargs):
     ''' Compute one matching '''
 
     # --- Similarity scores --------------------------------------------------
@@ -309,6 +313,11 @@ class Comparison:
     if not self.X.size:
       return ([], output) if 'i_function' in kwargs else []
 
+    # --- Solution search ---------------------------------------------------
+
+    if self.verbose:
+        tref = time.perf_counter_ns()
+
     # Prepare output
     M = Matching(self.NetA, self.NetB)
 
@@ -316,68 +325,143 @@ class Comparison:
 
       case 'Zager':
 
-        if self.verbose:
-          tref = time.perf_counter_ns()
-
         # Jonker-Volgenant reoslution of the LAP
         idxA, idxB = linear_sum_assignment(self.X, maximize=True)
 
-        if self.verbose:
-          print('* Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
-
       case 'GASM':
 
-        # Matching indices
-        idxA = []
-        idxB = []
+        idxA, idxB = self.greedy_matching()
 
-        # Symmetrized adjacency matrices
-        AA = np.logical_or(self.NetA.Adj, self.NetA.Adj.T)
-        AB = np.logical_or(self.NetB.Adj, self.NetB.Adj.T)
-
-        # --- Initial matchup seed
+        # --- Forcing perfect matchings
         
-        i0, j0 = get_max_from_array(self.X, randomize_exploration)
-        idxA.append(i0)
-        idxB.append(j0)
+        if force_perfect:
 
-        # --- Greedy matching 
+          # Perfect matching cardinality
+          pmc = min(self.NetA.nNd, self.NetB.nNd)
 
-        while True:
+          while len(idxA)<pmc:
+            
+            I = np.setdiff1d(np.arange(pmc), idxA)
+            J = np.setdiff1d(np.arange(pmc), idxB)
 
-          # Candidates
-          cdd = []
-          csc = []
+            Ia, Jb = self.greedy_matching(I, J)
 
-          for k in range(len(idxA)):
+            # Concatenation
+            idxA = np.concatenate((idxA, I[Ia]))
+            idxB = np.concatenate((idxB, J[Jb]))
 
-            # Get all neighbors from both graphs not yet assigned
-            I_ = np.setdiff1d(np.argwhere(AA[idxA[k],:]).flatten(), idxA)
-            J_ = np.setdiff1d(np.argwhere(AB[idxB[k],:]).flatten(), idxB)
-
-            if I_.size and J_.size:
-
-              # Sub-matrix
-              Sub = self.X[np.ix_(I_, J_)]
-              i_, j_ = get_max_from_array(Sub, randomize_exploration)
-
-              cdd.append([I_[i_], J_[j_]])
-              csc.append(Sub[i_, j_])
-
-          if not len(csc):
-            break
-
-          k = get_max_from_array(csc, randomize_exploration)[0]
-
-          idxA.append(cdd[k][0])
-          idxB.append(cdd[k][1])
-
-        # Initialize matching object
+        # --- Initialize matching object
+            
         M.from_lists(idxA, idxB)
+        M.compute_score(self.X)
+
+    if self.verbose:
+      print('* Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
 
     # --- Output
     
     return (M, output) if 'i_function' in kwargs else M
+
+  # === Greedy matching sub-method =========================================
+
+  def greedy_matching(self, Isub=None, Jsub=None):
+
+    # Subgraph delimitation
+    if Isub is None:
+      X = self.X
+      AA = self.NetA.Adj
+      AB = self.NetB.Adj
+
+    else:
+      X = self.X[np.ix_(Isub, Jsub)]
+      AA = self.NetA.Adj[np.ix_(Isub, Jsub)]
+      AB = self.NetB.Adj[np.ix_(Isub, Jsub)]
+
+    # Matching indices
+    idxA = []
+    idxB = []
+
+    # --- Initial matchup seed
+    
+    i0, j0 = get_max_from_array(X, self.randomize_exploration)
+    idxA.append(i0)
+    idxB.append(j0)
+
+    # --- Greedy matching 
+
+    while True:
+
+      # Candidates
+      cdd = []
+      csc = []
+
+      for k in range(len(idxA)):
+
+        # Get all neighbors from both graphs not yet assigned
+        if self.NetA.directed:
+
+          I_in = np.setdiff1d(np.argwhere(AA[:,idxA[k]]).flatten(), idxA)
+          I_out = np.setdiff1d(np.argwhere(AA[idxA[k],:]).flatten(), idxA)
+
+          if not self.NetB.directed:
+            I_ = np.concatenate((I_in, I_out))
+
+        else:
+          I_ = np.setdiff1d(np.argwhere(AA[idxA[k],:]).flatten(), idxA)
+
+        if self.NetB.directed:
+
+          J_in = np.setdiff1d(np.argwhere(AB[:,idxB[k]]).flatten(), idxB)
+          J_out = np.setdiff1d(np.argwhere(AB[idxB[k],:]).flatten(), idxB)
+
+          if not self.NetA.directed:
+            J_ = np.concatenate((J_in, J_out))
+
+        else:
+          J_ = np.setdiff1d(np.argwhere(AB[idxB[k],:]).flatten(), idxB)
+
+        if self.NetA.directed and self.NetB.directed:
+
+          # Ingoing links
+          if I_in.size and J_in.size:
+
+            # Sub-matrix
+            Sub = X[np.ix_(I_in, J_in)]
+            i_, j_ = get_max_from_array(Sub, self.randomize_exploration)
+
+            cdd.append([I_in[i_], J_in[j_]])
+            csc.append(Sub[i_, j_])
+
+          # Outgoing links
+          if I_out.size and J_out.size:
+
+            # Sub-matrix
+            Sub = X[np.ix_(I_out, J_out)]
+            i_, j_ = get_max_from_array(Sub, self.randomize_exploration)
+
+            cdd.append([I_out[i_], J_out[j_]])
+            csc.append(Sub[i_, j_])
+
+        else:
+
+          if I_.size and J_.size:
+
+            # Sub-matrix
+            Sub = X[np.ix_(I_, J_)]
+            i_, j_ = get_max_from_array(Sub, self.randomize_exploration)
+
+            cdd.append([I_[i_], J_[j_]])
+            csc.append(Sub[i_, j_])
+
+      if not len(csc):
+        break
+
+      k = get_max_from_array(csc, self.randomize_exploration)[0]
+
+      idxA.append(cdd[k][0])
+      idxB.append(cdd[k][1])
+
+    return (idxA, idxB)
 
 # === Usefull functions ====================================================
   
