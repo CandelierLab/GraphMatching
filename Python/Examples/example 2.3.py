@@ -48,7 +48,14 @@ M = C.get_matching(force_perfect=True)
 pa.line(os.path.basename(__file__))
 print()
 
-pa.matrix(C.X, title='Node scores')
+pa.matrix(C.X.astype(int), title='Node scores')
 # pa.matrix(C.Y)
+
+print(M)
+
+M.idxA = np.array([0, 1, 2, 3, 4])
+M.idxB = np.array([0, 1, 2, 4, 3])
+M.compute_score(C.X)
+M.compute_structural_quality()
 
 print(M)

@@ -13,7 +13,7 @@ os.system('clear')
 nA = 4
 nB = 4
 
-algo = 'GASP'
+algo = 'GASM'
 
 # ==========================================================================
 
@@ -21,42 +21,36 @@ algo = 'GASP'
 
 # print(T)
 
-NetA = Network(nA)
+NetA = Network(nA, directed=False)
 NetA.Adj = np.zeros((nA,nA), dtype=bool)
 NetA.Adj[0,1] = True
-NetA.Adj[1,0] = True
 NetA.Adj[1,2] = True
-NetA.Adj[2,1] = True
 NetA.Adj[2,3] = True
-NetA.Adj[3,2] = True
-NetA.Adj[0,3] = True
 NetA.Adj[3,0] = True
 NetA.prepare()
 
-NetB = Network(nB)
+NetB = Network(nB, directed=False)
 NetB.Adj = np.zeros((nB,nB), dtype=bool)
 NetB.Adj[0,1] = True
-NetB.Adj[1,0] = True
 NetB.Adj[1,2] = True
-NetB.Adj[2,1] = True
 NetB.Adj[2,3] = True
-NetB.Adj[3,2] = True
-NetB.Adj[0,3] = True
 NetB.Adj[3,0] = True
 NetB.prepare()
 
 # --- Matching
 
-X, Y = compute_scores(NetA, NetB, algorithm=algo)
+C = Comparison(NetA, NetB, algorithm=algo)
 
-pa.matrix(X)
+# C.compute_scores()
 
-pa.matrix(Y)
-
-# M = matching(NetA, NetB, algorithm=algo)
-
+M = C.get_matching()
 
 # --- Output
 
-# pa.line(os.path.basename(__file__))
-# print(M)
+pa.line(os.path.basename(__file__))
+print()
+
+pa.matrix(C.X, title='Node scores')
+# pa.matrix(C.Y)
+
+print(M)

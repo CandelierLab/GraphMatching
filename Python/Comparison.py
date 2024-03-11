@@ -1,4 +1,5 @@
 import time
+import warnings
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
@@ -350,10 +351,14 @@ class Comparison:
             idxA = np.concatenate((idxA, I[Ia]))
             idxB = np.concatenate((idxB, J[Jb]))
 
-        # --- Initialize matching object
-            
-        M.from_lists(idxA, idxB)
-        M.compute_score(self.X)
+      case _:
+
+        warnings.warn(f'Algorithm {self.algorithm} not found.')
+
+    # --- Initialize matching object
+        
+    M.from_lists(idxA, idxB)
+    M.compute_score(self.X)
 
     if self.verbose:
       print('* Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))

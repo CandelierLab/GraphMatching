@@ -13,7 +13,7 @@ os.system('clear')
 nA = 7
 nB = 7
 
-algo = 'GASP'
+algo = 'GASM'
 
 # ==========================================================================
 
@@ -43,16 +43,18 @@ NetB.prepare()
 
 # --- Matching
 
-X, Y = compute_scores(NetA, NetB, algorithm=algo)
+C = Comparison(NetA, NetB, algorithm=algo)
 
-pa.matrix(X)
+# C.compute_scores()
 
-pa.matrix(Y)
-
-# M = matching(NetA, NetB, algorithm=algo)
-
+M = C.get_matching()
 
 # --- Output
 
-# pa.line(os.path.basename(__file__))
-# print(M)
+pa.line(os.path.basename(__file__))
+print()
+
+pa.matrix(C.X, title='Node scores')
+# pa.matrix(C.Y)
+
+print(M)

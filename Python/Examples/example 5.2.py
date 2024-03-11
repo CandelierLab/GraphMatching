@@ -13,11 +13,11 @@ os.system('clear')
 nA = 5
 nB = 5
 
-algo = 'GASP'
+algo = 'GASM'
 
 # ==========================================================================
 
-NetA = Network(nA)
+NetA = Network(nA, directed=False)
 NetA.Adj = np.zeros((nA,nA), dtype=bool)
 NetA.Adj[0,2] = True
 NetA.Adj[0,3] = True
@@ -25,20 +25,13 @@ NetA.Adj[0,4] = True
 NetA.Adj[1,2] = True
 NetA.Adj[1,3] = True
 NetA.Adj[1,4] = True
-NetA.Adj[2,0] = True
-NetA.Adj[2,1] = True
+NetA.Adj[2,3] = True
 NetA.Adj[2,4] = True
-NetA.Adj[3,0] = True
-NetA.Adj[3,1] = True
 NetA.Adj[3,4] = True
-NetA.Adj[4,0] = True
-NetA.Adj[4,1] = True
-NetA.Adj[4,2] = True
-NetA.Adj[4,3] = True
 NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0, 0]})
 NetA.prepare()
 
-NetB = Network(nB)
+NetB = Network(nB, directed=False)
 NetB.Adj = np.zeros((nB,nB), dtype=bool)
 NetB.Adj[0,2] = True
 NetB.Adj[0,3] = True
@@ -46,25 +39,26 @@ NetB.Adj[0,4] = True
 NetB.Adj[1,2] = True
 NetB.Adj[1,3] = True
 NetB.Adj[1,4] = True
-NetB.Adj[2,0] = True
-NetB.Adj[2,1] = True
 NetB.Adj[2,3] = True
 NetB.Adj[2,4] = True
-NetB.Adj[3,0] = True
-NetB.Adj[3,1] = True
-NetB.Adj[3,2] = True
 NetB.Adj[3,4] = True
-NetB.Adj[4,0] = True
-NetB.Adj[4,1] = True
-NetB.Adj[4,2] = True
-NetB.Adj[4,3] = True
 NetB.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0, 0]})
 NetB.prepare()
+
 # --- Matching
 
-M = matching(NetA, NetB, algorithm=algo)
+C = Comparison(NetA, NetB, algorithm=algo)
+
+# C.compute_scores()
+
+M = C.get_matching()
 
 # --- Output
 
 pa.line(os.path.basename(__file__))
+print()
+
+pa.matrix(C.X, title='Node scores')
+# pa.matrix(C.Y)
+
 print(M)
