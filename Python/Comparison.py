@@ -18,13 +18,15 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def __init__(self, NetA, NetB, algorithm='GASM', randomize_exploration=True, verbose=False):
+  def __init__(self, NetA, NetB, randomize_exploration=True, verbose=False,
+               algorithm='GASM', SMOG_sf=0.1):
     '''
     Comparison of two networks.
 
     The algorithm parameters can be:
     - 'Zager', as in [1]
-    - 'GASM' (default)
+    - 'SMOG', Stochastic Matching Of Graphs
+    - 'GASM', Graph Attribute and Structure Matching (default)
 
     [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
         Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
@@ -36,12 +38,21 @@ class Comparison:
     self.NetA = NetA
     self.NetB = NetB
 
-    # --- Algorithms
+    # --- Algorithm and parameters
 
+    # Algorithm
     self.algorithm = algorithm
-    ''' The algorithm can be: "Zager", "GASM". '''
+    ''' The algorithm can be: "Zager", "SMOG", "GASM". '''
 
     self.randomize_exploration = randomize_exploration
+
+    # Algorithm-dependant parameters
+    match self.algorithm:
+
+      case 'SMOG':
+
+        # Stochasticity factor
+        self.SMOG_sf = SMOG_sf
 
     # --- Scores
 
@@ -115,7 +126,7 @@ class Comparison:
         # Remapping in [-1, 1]
         Xc = Xc*2 - 1
 
-      case 'GASM':
+      case 'SMOG' | 'GASM':
 
         # --- Node attributes
         
@@ -128,6 +139,11 @@ class Comparison:
 
           # Base
           Xc = np.ones((nA,nB))/normalization
+
+          # Random initial fluctuations
+          if self.algorithm is 'SMOG':
+            Xc += (np.random.rand(nA, nB)*2-1)*self.SMOG_sf
+
 
           for k, attr in enumerate(self.NetA.node_attr):
 
@@ -221,8 +237,8 @@ class Comparison:
               self.Y /= np.mean(self.Y)
             else:
               self.X /= normalization
-        
-          case 'GASM':
+
+          case 'SMOG' | 'GASM':
 
             if i==0:
 
@@ -324,7 +340,7 @@ class Comparison:
 
     match self.algorithm:
 
-      case 'Zager':
+      case 'Zager' | 'SMOG':
 
         # Jonker-Volgenant reoslution of the LAP
         idxA, idxB = linear_sum_assignment(self.X, maximize=True)

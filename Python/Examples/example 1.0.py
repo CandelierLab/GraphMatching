@@ -13,7 +13,7 @@ os.system('clear')
 nA = 4
 nB = 4
 
-algo = 'GASM'
+algo = 'SMOG'
 
 # ==========================================================================
 
@@ -50,7 +50,7 @@ M = C.get_matching(force_perfect=False)
 pa.line(os.path.basename(__file__))
 print()
 
-# pa.matrix(C.X, title='Node scores')
+pa.matrix(C.X, title='Node scores')
 # pa.matrix(C.Y)
 
 print(M)
