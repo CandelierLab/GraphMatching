@@ -1,5 +1,6 @@
 import time
 import warnings
+from collections import Counter
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
@@ -19,7 +20,7 @@ class Comparison:
   # ========================================================================
 
   def __init__(self, NetA, NetB, randomize_exploration=True, verbose=False,
-               algorithm='GASM', eta=0.1):
+               algorithm='GASM', eta=1e-5):
     '''
     Comparison of two networks.
 
@@ -109,7 +110,7 @@ class Comparison:
 
         # Base
         Xc = np.ones((nA,nB))
-
+        
         for k, attr in enumerate(self.NetA.node_attr):
 
           bttr = self.NetB.node_attr[k]
@@ -125,6 +126,10 @@ class Comparison:
         # Remapping in [-1, 1]
         Xc = Xc*2 - 1
 
+        # --- Edge attributes
+        
+        Yc = np.ones((mA,mB))
+
       case 'GASM':
 
         # --- Node attributes
@@ -137,10 +142,10 @@ class Comparison:
         else:
 
           # Base
-          Xc = np.ones((nA,nB))/normalization
+          Xc = np.ones((nA,nB), dtype=complex)/normalization
 
           # Random initial fluctuations
-          Xc += (np.random.rand(nA, nB)*2-1)*self.eta
+          Xc += (Xc + np.random.rand(nA, nB)*self.eta)*1j
 
           for k, attr in enumerate(self.NetA.node_attr):
 
@@ -202,7 +207,7 @@ class Comparison:
 
     if not mA or not mB:
 
-      self.X = Xc
+      self.X = np.real(Xc)
       self.Y = Yc
 
     else:
@@ -288,9 +293,27 @@ class Comparison:
         if i_function is not None:
           i_function(locals(), i_param, output)
 
-      # Final step
-      if self.algorithm=='Zager':
-        self.X = self.X * Xc
+      # --- Post-processing
+      match self.algorithm:
+        
+        case 'Zager':
+
+          self.X = self.X * Xc
+
+        case 'GASM':
+
+          X = np.real(self.X)
+
+          for i in range(nA):
+            
+            # Duplicates
+            dup = [item for item, count in Counter(X[i,:]).items() if count > 1]            
+
+            for d in dup:   
+              J = np.where(X[i,:]==d)[0]
+              X[i,J] = np.imag(self.X[i,J])
+
+          self.X = X
 
     # --- Output
 

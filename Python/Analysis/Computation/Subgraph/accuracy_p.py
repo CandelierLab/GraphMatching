@@ -50,7 +50,7 @@ for p in l_p:
       # Correct matches
       g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
 
-      gamma[n] = g
+    gamma[n] = g
 
     print('{:.02f} sec'.format((time.time() - start)))
 

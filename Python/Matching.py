@@ -28,6 +28,7 @@ class Matching:
 
     # Measures
     self.score = None
+    self.accuracy = None
     self.structural_quality = None
 
   # ========================================================================
@@ -59,6 +60,12 @@ class Matching:
       s += f'│ Matching score: {self.score:.03f}\n'
       param_suff = '│\n'
 
+    # Accuracy
+    if self.accuracy is not None:
+      s += f'│ Accuracy: {self.accuracy:.03f}\n'
+      param_suff = '│\n'
+
+    # Structural quality
     if self.structural_quality is not None:
       s += f'│ Structural quality: {self.structural_quality:.03f}\n'
       param_suff = '│\n'
@@ -153,7 +160,7 @@ class Matching:
 
   # ========================================================================
   # |                                                                      |
-  # |                        Initialization                                |
+  # |                          Computations                                |
   # |                                                                      |
   # ========================================================================
 
@@ -180,6 +187,13 @@ class Matching:
 
     # Compute structural correspondence
     self.structural_quality = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
+
+  def compute_accuracy(self, Idx):
+    '''
+    Compute the matching accuracy
+    '''
+
+    self.accuracy= np.count_nonzero(Idx[self.idxB]==self.idxA)/self.idxA.size
 
   def compute_score(self, X):
     '''
