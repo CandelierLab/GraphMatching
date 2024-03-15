@@ -10,7 +10,7 @@ class Network:
     
   # === CONSTRUCTOR ========================================================
 
-  def __init__(self, nNode=0, directed=True):
+  def __init__(self, nNode=0, directed=True, nx=None):
 
     # Numbers
     self.nNd = nNode
@@ -29,16 +29,38 @@ class Network:
     self.edge_attr = []
     self.node_attr = []
 
-    # --- Networkx
-
-    self.G = None
-
     # Connected
     self.isconnected = None
 
     # Diameter
     self.d = None
 
+    # --- Networkx
+
+    if nx is None:
+      self.G = None
+    else:
+      self.import_from_networkx(nx)
+
+
+  # ========================================================================
+  #                             DISPLAY
+  # ========================================================================
+
+  # ------------------------------------------------------------------------
+  #                             Display
+  # ------------------------------------------------------------------------
+
+  def display(self):
+    ''' Display with matplotlib '''
+
+    import matplotlib.pyplot as plt
+    nx.draw(self.G)
+    plt.show()
+
+  # ------------------------------------------------------------------------
+  #                          Console print
+  # ------------------------------------------------------------------------
 
   # === PRINT ==============================================================
 
@@ -98,6 +120,30 @@ class Network:
     print('')
     pa.line()
     print('')
+
+  # ========================================================================
+  #                             IMPORT
+  # ========================================================================
+
+  def import_from_networkx(self, G):
+
+    # Networkx graph
+    self.G = G
+
+    # Number of nodes
+    self.nNd = self.G.number_of_nodes()
+
+    # Adjacency matrix
+    self.Adj = np.full((self.nNd, self.nNd), False)
+    
+    E = np.array([e for e in self.G.edges])
+    self.Adj[E[:,0], E[:,1]] = True
+      
+    # Update number of edges
+    self.nEd = np.count_nonzero(self.Adj)
+
+    # Preparation
+    self.prepare()
 
   # ========================================================================
   #                             GENERATION
@@ -253,7 +299,7 @@ class Network:
   #                             PREPARATION
   # ========================================================================
 
-  def prepare(self, force=False):
+  def prepare(self):
 
     # Symmetrize adjacency matric for undirected graphs
     if not self.directed:

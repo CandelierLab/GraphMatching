@@ -11,25 +11,28 @@ os.system('clear')
 nA = 5
 p = 0.5
 
-algo = 'GASP'
+algo = 'GASM'
 
 np.random.seed(0)
 
 # --------------------------------------------------------------------------
 
-Ga = Network(nA)
-Ga.set_rand_edges('ER', p_edges=p)
-# Ga.add_edge_attr('rand', name='test_edge')
-# Ga.add_node_attr('rand', name='test_node')
+# --- Random graphs
 
-Ga.print()
+# Ga = Network(nA)
+# Ga.set_rand_edges('ER', p_edges=p)
+# # Ga.add_edge_attr('rand', name='test_edge')
+# # Ga.add_node_attr('rand', name='test_node')
 
-Gb, Icor = Ga.shuffle()
+#  --- Balanced trees
 
-# print('Correspondence: ', Icor)
-# Gb.print()
+Ga = Network(nx=nx.balanced_tree(2, 3))
 
-M = matching(Ga, Gb, verbose=True)
+Gb, Idx = Ga.shuffle()
+
+C = Comparison(Ga, Gb, algorithm=algo)
+M = C.get_matching()
+M.compute_accuracy(Idx)
 
 print(M)
 
