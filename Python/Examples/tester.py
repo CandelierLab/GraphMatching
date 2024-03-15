@@ -3,7 +3,7 @@ from Examples.Example import *
 
 algo = 'GASM'
 
-Ex = Example(5.0)
+Ex = Example(1.0)
 
 # --- Matching
 

@@ -19,13 +19,12 @@ class Comparison:
   # ========================================================================
 
   def __init__(self, NetA, NetB, randomize_exploration=True, verbose=False,
-               algorithm='GASM', SMOG_sf=0.1):
+               algorithm='GASM', eta=0.1):
     '''
     Comparison of two networks.
 
     The algorithm parameters can be:
     - 'Zager', as in [1]
-    - 'SMOG', Stochastic Matching Of Graphs
     - 'GASM', Graph Attribute and Structure Matching (default)
 
     [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
@@ -42,17 +41,17 @@ class Comparison:
 
     # Algorithm
     self.algorithm = algorithm
-    ''' The algorithm can be: "Zager", "SMOG", "GASM". '''
+    ''' The algorithm can be: "Zager", "GASM". '''
 
     self.randomize_exploration = randomize_exploration
 
     # Algorithm-dependant parameters
     match self.algorithm:
 
-      case 'SMOG':
+      case 'GASM':
 
         # Stochasticity factor
-        self.SMOG_sf = SMOG_sf
+        self.eta = eta
 
     # --- Scores
 
@@ -126,7 +125,7 @@ class Comparison:
         # Remapping in [-1, 1]
         Xc = Xc*2 - 1
 
-      case 'SMOG' | 'GASM':
+      case 'GASM':
 
         # --- Node attributes
         
@@ -141,9 +140,7 @@ class Comparison:
           Xc = np.ones((nA,nB))/normalization
 
           # Random initial fluctuations
-          if self.algorithm is 'SMOG':
-            Xc += (np.random.rand(nA, nB)*2-1)*self.SMOG_sf
-
+          Xc += (np.random.rand(nA, nB)*2-1)*self.eta
 
           for k, attr in enumerate(self.NetA.node_attr):
 
@@ -238,7 +235,7 @@ class Comparison:
             else:
               self.X /= normalization
 
-          case 'SMOG' | 'GASM':
+          case 'GASM':
 
             if i==0:
 
@@ -338,38 +335,41 @@ class Comparison:
     # Prepare output
     M = Matching(self.NetA, self.NetB)
 
-    match self.algorithm:
+    # Jonker-Volgenant resolution of the LAP
+    idxA, idxB = linear_sum_assignment(self.X, maximize=True)
 
-      case 'Zager' | 'SMOG':
+    # match self.algorithm:
 
-        # Jonker-Volgenant reoslution of the LAP
-        idxA, idxB = linear_sum_assignment(self.X, maximize=True)
+    #   case 'Zager' | 'SMOG':
 
-      case 'GASM':
+    #     # Jonker-Volgenant resolution of the LAP
+    #     idxA, idxB = linear_sum_assignment(self.X, maximize=True)
 
-        idxA, idxB = self.greedy_matching()
+    #   case 'GASM':
 
-        # --- Forcing perfect matchings
+    #     idxA, idxB = self.greedy_matching()
+
+    #     # --- Forcing perfect matchings
         
-        if force_perfect:
+    #     if force_perfect:
 
-          # Perfect matching cardinality
-          pmc = min(self.NetA.nNd, self.NetB.nNd)
+    #       # Perfect matching cardinality
+    #       pmc = min(self.NetA.nNd, self.NetB.nNd)
 
-          while len(idxA)<pmc:
+    #       while len(idxA)<pmc:
             
-            I = np.setdiff1d(np.arange(pmc), idxA)
-            J = np.setdiff1d(np.arange(pmc), idxB)
+    #         I = np.setdiff1d(np.arange(pmc), idxA)
+    #         J = np.setdiff1d(np.arange(pmc), idxB)
 
-            Ia, Jb = self.greedy_matching(I, J)
+    #         Ia, Jb = self.greedy_matching(I, J)
 
-            # Concatenation
-            idxA = np.concatenate((idxA, I[Ia]))
-            idxB = np.concatenate((idxB, J[Jb]))
+    #         # Concatenation
+    #         idxA = np.concatenate((idxA, I[Ia]))
+    #         idxB = np.concatenate((idxB, J[Jb]))
 
-      case _:
+    #   case _:
 
-        warnings.warn(f'Algorithm {self.algorithm} not found.')
+    #     warnings.warn(f'Algorithm {self.algorithm} not found.')
 
     # --- Initialize matching object
         
