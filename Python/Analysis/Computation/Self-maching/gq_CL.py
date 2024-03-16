@@ -1,3 +1,7 @@
+'''
+Balanced tree: average gamma and q
+'''
+
 import os
 import numpy as np
 import pandas as pd
@@ -11,23 +15,25 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 20
-l_p = np.linspace(0,1,41)
-l_eta = np.logspace(-17, -7, 10)
-nRun = 100
+l_n = np.arange(2, 20)
+l_eta = np.logspace(-6, -14, 5)
+
+nRun = 10
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Self-matching/p/ER_nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Self-matching/CL/CL.csv'
 
 # Creating dataframe
-df = pd.DataFrame(columns=['p', 'eta', 'g_Zager', 'g_GASM', 'q_Zager', 'q_GASM', 'g_Zager_std', 'g_GASM_std', 'q_Zager_std', 'q_GASM_std'])
+df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_Zager', 'g_GASM', 'q_Zager', 'q_GASM', 'g_Zager_std', 'g_GASM_std', 'q_Zager_std', 'q_GASM_std'])
 
 k = 0
 
-for p in l_p:
+for n in l_n:
 
-  print(f'p={p:0.2f}')
+  print(f'n={n:d}')
+
+  NetA = Network(nx=nx.circular_ladder_graph(n))
 
   for eta in l_eta:
 
@@ -41,8 +47,6 @@ for p in l_p:
 
     for i in range(nRun):
 
-      NetA = Network(nA)
-      NetA.set_rand_edges('ER', p_edges=p)
       NetB, Idx = NetA.shuffle()
 
       # --- Zager
@@ -66,7 +70,7 @@ for p in l_p:
     # --- Store
       
     # Parameters
-    df.loc[k, 'p'] = p
+    df.loc[k, 'n'] = n
     df.loc[k, 'eta'] = eta
 
     # Mean values

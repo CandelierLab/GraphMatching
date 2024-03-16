@@ -11,6 +11,6 @@ os.system('clear')
 
 # --------------------------------------------------------------------------
 
-Net = Network(nx=nx.balanced_tree(2, 5))
+Net = Network(nx=nx.circular_ladder_graph(3))
 
 Net.display()
