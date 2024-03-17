@@ -21,7 +21,7 @@ l_h = np.arange(2,10)
 # r = 3
 # l_h = np.arange(2,8)
 
-l_eta = np.logspace(-6, -14, 5)
+l_eta = [1e-10] #np.logspace(-6, -14, 5)
 
 # ==========================================================================
 
@@ -39,7 +39,7 @@ for h in l_h:
   NetA = Network(nx=nx.balanced_tree(r, h))
 
   # Number of runs
-  nRun = int(np.ceil(2**(8-h)))
+  nRun = int(np.ceil(2.0**(10-h)))
 
   for eta in l_eta:
 

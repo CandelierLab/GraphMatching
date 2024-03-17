@@ -28,6 +28,8 @@ if os.path.exists(fname):
   l_p = np.unique(df.p)
   l_eta = np.unique(df.eta)
 
+l_eta = np.array([l_eta[5]])
+
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')

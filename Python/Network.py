@@ -5,6 +5,10 @@ import networkx as nx
 
 import paprint as pa
 
+# ##########################################################################
+#                          Generic Network class
+# ##########################################################################
+
 class Network:
   ''' Generic class for networks '''
     
@@ -202,7 +206,7 @@ class Network:
 
     # Prepare structure
     self.prepare()
-    
+
   # ------------------------------------------------------------------------
   #                              Attributes
   # ------------------------------------------------------------------------
@@ -503,3 +507,37 @@ class Network:
     Det.prepare()
 
     return (Det, Jcor)
+
+# ##########################################################################
+#                        Graph generation functions
+# ##########################################################################
+  
+# ------------------------------------------------------------------------
+#                           Star-branched-graph
+# ------------------------------------------------------------------------
+  
+
+def star_branched(k, n, directed=False):
+  '''
+  Define the star-branched graph with k branches made of linear paths of length n.
+  By default the graph is undirected.
+
+  The total number of nodes is k*n+1.
+  The central node index is 0.
+  '''
+
+  G = Network(k*n+1, directed=directed)
+  G.Adj = np.full((G.nNd, G.nNd), False)
+
+  z = 0
+  for ki in range(k):
+    z+=1
+    G.Adj[0,z] = True
+    for ni in range(n-1):
+      G.Adj[z,z+1] = True
+      z+=1
+      
+  G.prepare()
+
+  return G
+    

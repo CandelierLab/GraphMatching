@@ -1,5 +1,5 @@
 '''
-Balanced tree: average gamma and q
+Star-branched graph: average gamma and q
 '''
 
 import os
@@ -15,11 +15,11 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-r = 2
+nRun = 1000
 
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/Self-matching/BT/r={r:d}.csv'
+fname = project.root + f'/Files/Self-matching/SB/nRun={nRun:d}.csv'
 
 # ==========================================================================
 
@@ -28,9 +28,10 @@ if os.path.exists(fname):
   # Load data
   df = pd.read_csv(fname)
 
-  # Retrieve l_h l_eta
+  # Retrieve l_k, l_n and l_eta
 
-  l_h = np.unique(df.h)
+  l_k = np.unique(df.k)
+  l_n = np.unique(df.n)
   l_eta = np.unique(df.eta)
 
 # --- Display --------------------------------------------------------------
@@ -39,38 +40,30 @@ plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2, figsize=(12,6))
 
 # Colors
-# cm = plt.cm.rainbow(np.linspace(0, 1, l_eta.size))
+cm = plt.cm.rainbow(np.linspace(0, 1, l_k.size))
 
-# --- Accuracy
+# --- Plots
 
-g_Zager = np.zeros(l_h.size)
-q_Zager = np.zeros(l_h.size)
+for ki, k in enumerate(l_k):
 
-for i, eta in enumerate(l_eta):
+  g_Zager = np.zeros(l_n.size)
+  q_Zager = np.zeros(l_n.size)
 
-  data = df.loc[df['eta'] == eta]
+  data = df.loc[df['k'] == k]
 
-  # Accuracy
-  g_Zager += data.g_Zager.to_list()
-  ax[0].plot(data.h, data.g_GASM, '-', label=f'$\eta = {eta:g}$')
+  # Accuracy    
+  ax[0].plot(data.n, data.g_GASM, '-', color=cm[ki], label=f'GASM $k = {k:d}$')
+  ax[0].plot(data.n, data.g_Zager, '--', color=cm[ki], label=f'Zager $k = {k:d}$')
 
-  # Structural quality
-  q_Zager += data.q_Zager.to_list()
-  ax[1].plot(data.h, data.q_GASM, '-', label=f'$\eta = {eta:g}$')
-
-ax[0].plot(l_h, g_Zager/l_eta.size, '-', label='Zager')
-ax[1].plot(l_h, q_Zager/l_eta.size, '-', label='Zager')
-
-ax[0].plot(l_h, np.exp(-l_h/2), '--', label='Th')
-
-
-ax[0].set_yscale('log')
+  # Structural quality  
+  ax[1].plot(data.n, data.q_GASM, '-', color=cm[ki], label=f'GASM $k = {k:d}$')
+  ax[1].plot(data.n, data.q_Zager, '--', color=cm[ki], label=f'Zager $k = {k:d}$')
 
 ax[0].set_ylim([0,1.01])
 ax[1].set_ylim([0, 1.01])
 
-ax[0].set_xlabel('h')
-ax[1].set_xlabel('h')
+ax[0].set_xlabel('n')
+ax[1].set_xlabel('n')
 
 ax[0].set_ylabel('$\gamma$')
 ax[1].set_ylabel('$q$')

@@ -1,5 +1,5 @@
 '''
-Balanced tree: average gamma and q
+Circular ladder graph: average gamma and q
 '''
 
 import os
@@ -15,10 +15,10 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-l_n = np.arange(2, 20)
-l_eta = np.logspace(-6, -14, 5)
+l_n = np.arange(1, 26)
+l_eta = [1e-10] #np.logspace(-6, -14, 3)
 
-nRun = 10
+nRun = 10000
 
 # ==========================================================================
 
