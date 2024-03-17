@@ -129,6 +129,7 @@ class Network:
 
     # Networkx graph
     self.G = G
+    self.directed = self.G.is_directed()  
 
     # Number of nodes
     self.nNd = self.G.number_of_nodes()
@@ -139,9 +140,6 @@ class Network:
     E = np.array([e for e in self.G.edges])
     self.Adj[E[:,0], E[:,1]] = True
       
-    # Update number of edges
-    self.nEd = np.count_nonzero(self.Adj)
-
     # Preparation
     self.prepare()
 

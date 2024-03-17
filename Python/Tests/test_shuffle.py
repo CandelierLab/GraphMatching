@@ -4,6 +4,8 @@ import project
 from Network import *
 from  Comparison import *
 
+import paprint as pa
+
 os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
@@ -13,7 +15,7 @@ p = 0.5
 
 algo = 'GASM'
 
-np.random.seed(0)
+# np.random.seed(0)
 
 # --------------------------------------------------------------------------
 
@@ -26,7 +28,7 @@ np.random.seed(0)
 
 #  --- Balanced trees
 
-Ga = Network(nx=nx.balanced_tree(2, 3))
+Ga = Network(nx=nx.circular_ladder_graph(5))
 
 Gb, Idx = Ga.shuffle()
 
@@ -35,8 +37,6 @@ M = C.get_matching()
 M.compute_accuracy(Idx)
 
 print(M)
+pa.matrix(Ga.Adj)
+pa.matrix(C.X)
 
-# print(f'{len(M)} Matchings:')
-
-# for m in M:
-#   print(m)
