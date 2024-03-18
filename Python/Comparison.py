@@ -19,8 +19,7 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def __init__(self, NetA, NetB, randomize_exploration=True, verbose=False,
-               algorithm='GASM', eta=1e-10):
+  def __init__(self, NetA, NetB, verbose=False):
     '''
     Comparison of two networks.
 
@@ -38,22 +37,6 @@ class Comparison:
     self.NetA = NetA
     self.NetB = NetB
 
-    # --- Algorithm and parameters
-
-    # Algorithm
-    self.algorithm = algorithm
-    ''' The algorithm can be: "Zager", "GASM". '''
-
-    self.randomize_exploration = randomize_exploration
-
-    # Algorithm-dependant parameters
-    match self.algorithm:
-
-      case 'GASM':
-
-        # Stochasticity factor
-        self.eta = eta
-
     # --- Scores
 
     self.X = None
@@ -69,40 +52,75 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def compute_scores(self, nIter=None, normalization=None,
-            i_function=None, i_param={}, initial_evaluation=False, measure_time=False, deg_norm=False):
-    ''' Score computation '''
+  def compute_scores(self, algorithm='GASM',
+            normalization=None,
+            i_function=None, i_param={}, initial_evaluation=False, measure_time=False,
+            **kwargs):
+    ''' 
+    Score computation 
+    
+    The algorithm can be: 'Zager', 'GASM'.
+
+    'Zager' parameters:
+      'nIter' (int): Number of iterations
+
+    'GASM' parameters:
+      'nIter' (int): Number of iterations
+      'eta' (float): Noise level (default 1e-10)
+    '''
 
     # --- Definitions --------------------------------------------------------
 
+    GA = self.NetA
+    GB = self.NetB
+
+    ''' Check complements here '''
+
     # Number of nodes
-    nA = self.NetA.nNd
-    nB = self.NetB.nNd
+    nA = GA.nNd
+    nB = GB.nNd
 
     # Number of edges
-    mA = self.NetA.nEd
-    mB = self.NetB.nEd
+    mA = GA.nEd
+    mB = GB.nEd
 
-    # --- Structural matching parameters
+    # --- Algorithms parameters
 
-    if not mA or not mB:
+    # Number of iterations
+    nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(GA.d, GB.d), 1)
 
-      nIter = 0
-      normalization = 1
+    # Non-default normalization
+    normalization = kwargs['normalization'] if 'normalization' in kwargs else None
 
-    else:
+    match algorithm:
 
-      # Number of iterations
-      if nIter is None:
-        nIter = max(min(self.NetA.d, self.NetB.d), 1)
+      case 'Zager':
 
-      # Normalization factor
-      if normalization is None:
-        normalization = 4*mA*mB/nA/nB + 1
-    
+        # NB: normalization is performed dynamically during iterations.
+        pass
+        
+      case 'GASM':
+  
+        # Normalization
+        if normalization is None:
+
+          # # Previous implementation
+          # normalization = 4*mA*mB/nA/nB + 1
+
+          dAi = np.sum(GA.Adj, axis=0)
+          dAo = np.sum(GA.Adj, axis=1)
+          dBi = np.sum(GB.Adj, axis=0)
+          dBo = np.sum(GB.Adj, axis=1)
+
+          normalization = np.outer(dAi,dBi) + np.outer(dAo,dBo)
+          normalization[normalization==0] = 1
+
+        # Noise
+        eta = kwargs['eta'] if 'eta' in kwargs else 1e-10
+            
     # --- Attributes ---------------------------------------------------------
 
-    match self.algorithm:
+    match algorithm:
 
       case 'Zager':
 
@@ -111,16 +129,16 @@ class Comparison:
         # Base
         Xc = np.ones((nA,nB))
         
-        for k, attr in enumerate(self.NetA.node_attr):
+        for k, attr in enumerate(GA.node_attr):
 
-          bttr = self.NetB.node_attr[k]
+          bttr = GB.node_attr[k]
 
           if attr['measurable']:
             pass
           else:
             # Build contraint attribute
-            A = np.tile(attr['values'], (self.NetB.nNd,1)).transpose()
-            B = np.tile(bttr['values'], (self.NetA.nNd,1))
+            A = np.tile(attr['values'], (GB.nNd,1)).transpose()
+            B = np.tile(bttr['values'], (GA.nNd,1))
             Xc *= A==B
         
         # Remapping in [-1, 1]
@@ -142,15 +160,16 @@ class Comparison:
         else:
 
           # Base
-          Xc = np.ones((nA,nB))/normalization
+          # Xc = np.ones((nA,nB))/normalization
+          Xc = np.ones((nA,nB))
 
           # Random initial fluctuations
-          Xc += np.random.rand(nA, nB)*self.eta
+          Xc += np.random.rand(nA, nB)*eta
 
-          for k, attr in enumerate(self.NetA.node_attr):
+          for k, attr in enumerate(GA.node_attr):
 
             wA = attr['values']
-            wB = self.NetB.node_attr[k]['values']
+            wB = GB.node_attr[k]['values']
 
             if attr['measurable']:
 
@@ -176,10 +195,10 @@ class Comparison:
 
           if mA and mB:
 
-            for k, attr in enumerate(self.NetA.edge_attr):
+            for k, attr in enumerate(GA.edge_attr):
 
               wA = attr['values']
-              wB = self.NetB.edge_attr[k]['values']
+              wB = GB.edge_attr[k]['values']
 
               if attr['measurable']:
 
@@ -201,24 +220,16 @@ class Comparison:
 
     # Iterative function settings
     if i_function is not None:
-      i_param['NetA'] = self.NetA
-      i_param['NetB'] = self.NetB
+      i_param['NetA'] = GA
+      i_param['NetB'] = GB
       output = []
 
     if not mA or not mB:
 
-      self.X = np.real(Xc)
+      self.X = Xc
       self.Y = Yc
 
     else:
-
-      if deg_norm:
-        dAi = np.sum(self.NetA.Adj, axis=0)
-        dAo = np.sum(self.NetA.Adj, axis=1)
-        dBi = np.sum(self.NetB.Adj, axis=0)
-        dBo = np.sum(self.NetB.Adj, axis=1)
-
-        dAB = np.outer(dAi,dBi) + np.outer(dAo,dBo)
 
       # Initialization
       self.X = np.ones((nA,nB))
@@ -273,12 +284,12 @@ class Comparison:
         iteration.
         '''
 
-        match self.algorithm:
+        match algorithm:
         
           case 'Zager':
 
-            self.X = self.NetA.As @ self.Y @ self.NetB.As.T + self.NetA.At @ self.Y @ self.NetB.At.T
-            self.Y = self.NetA.As.T @ self.X @ self.NetB.As + self.NetA.At.T @ self.X @ self.NetB.At
+            self.X = GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T
+            self.Y = GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At
 
             if normalization is None:
               # If normalization is not explicitely specified, the default normalization is used.
@@ -288,28 +299,23 @@ class Comparison:
           case 'GASM':
 
             if i==0:
-
-              self.X = (self.NetA.As @ self.Y @ self.NetB.As.T + self.NetA.At @ self.Y @ self.NetB.At.T + 1) * Xc
-              self.Y = (self.NetA.As.T @ self.X @ self.NetB.As + self.NetA.At.T @ self.X @ self.NetB.At) * Yc
+              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1) * Xc
+              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At) * Yc
 
             else:
-
-              self.X = (self.NetA.As @ self.Y @ self.NetB.As.T + self.NetA.At @ self.Y @ self.NetB.At.T + 1)
-              self.Y = (self.NetA.As.T @ self.X @ self.NetB.As + self.NetA.At.T @ self.X @ self.NetB.At)
+              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1)
+              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At)
 
         # Normalization 
-        if normalization is not None and normalization!=1:
+        if normalization is not None:
             self.X /= normalization
-          
-        if deg_norm:            
-            self.X /= dAB
 
         if i_function is not None:
           i_function(locals(), i_param, output)
 
       # --- Post-processing
           
-      match self.algorithm:
+      match algorithm:
         
         case 'Zager':
           self.X = self.X * Xc
@@ -328,7 +334,7 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def get_matching(self, force_perfect=True, **kwargs):
+  def get_matching(self, **kwargs):
     ''' Compute one matching '''
 
     # --- Similarity scores --------------------------------------------------

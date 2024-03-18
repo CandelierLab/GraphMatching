@@ -10,10 +10,10 @@ os.system('clear')
 
 # --- Parameters -----------------------------------------------------------
 
-nA = 5
-p = 0.5
+nA = 10
+p = 0.9
 
-algo = 'Zager'
+algo = 'GASM'
 
 # np.random.seed(0)
 
@@ -31,8 +31,8 @@ Ga.set_rand_edges('ER', p_edges=p)
 
 Gb, Idx = Ga.shuffle()
 
-C = Comparison(Ga, Gb, algorithm=algo)
-M = C.get_matching(normalization=1, deg_norm=True)
+C = Comparison(Ga, Gb)
+M = C.get_matching(algorithm=algo)
 M.compute_accuracy(Idx)
 
 print(M)
