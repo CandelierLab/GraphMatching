@@ -36,7 +36,7 @@ plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2)
 
 # Colors
-cm = plt.cm.rainbow(np.linspace(0,1,l_eta.size))
+cm = plt.cm.gist_rainbow(np.linspace(0,1,l_eta.size))
 
 # --- Accuracy
 
@@ -55,8 +55,8 @@ for i, eta in enumerate(l_eta):
   q_Zager += data.q_Zager.to_list()
   ax[1].plot(data.p, data.q_GASM, '-', color=cm[i], label=f'$\eta = {eta:g}$')
 
-ax[0].plot(l_p, g_Zager/l_eta.size, '--', color='white', label='Zager')
-ax[1].plot(l_p, q_Zager/l_eta.size, '--', color='white', label='Zager')
+ax[0].plot(l_p, g_Zager/l_eta.size, '--', color='w', label='Zager')
+ax[1].plot(l_p, q_Zager/l_eta.size, '--', color='w', label='Zager')
 
 ax[0].set_xlabel('p')
 ax[1].set_xlabel('p')
