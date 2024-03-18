@@ -67,6 +67,9 @@ class Comparison:
     'GASM' parameters:
       'nIter' (int): Number of iterations
       'eta' (float): Noise level (default 1e-10)
+
+    To improve: 
+      - measure_time: is it still useful ? Merge with verbose ?
     '''
 
     # --- Definitions --------------------------------------------------------
@@ -74,7 +77,16 @@ class Comparison:
     GA = self.NetA
     GB = self.NetB
 
-    ''' Check complements here '''
+    match algorithm:
+
+      case 'Zager':
+        pass
+        
+      case 'GASM':
+        complement = GA.nEd + GB.nEd > (GA.nNd**2 + GB.nNd**2)/2
+        if complement:
+          GA = self.NetA.complement()
+          GB = self.NetB.complement()
 
     # Number of nodes
     nA = GA.nNd
@@ -87,6 +99,8 @@ class Comparison:
     # --- Algorithms parameters
 
     # Number of iterations
+    print(GA)
+    pa.line()
     nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(GA.d, GB.d), 1)
 
     # Non-default normalization
@@ -245,6 +259,7 @@ class Comparison:
 
         if measure_time:
           start = time.time()
+          # Rework this part
 
         ''' === A note on operation order ===
 

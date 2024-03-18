@@ -66,8 +66,6 @@ class Network:
   #                          Console print
   # ------------------------------------------------------------------------
 
-  # === PRINT ==============================================================
-
   def __repr__(self):
     ''' Basic info on the network'''
 
@@ -384,6 +382,27 @@ class Network:
         Met.edge_attr[i]['values'] = attr['values'][J]
 
     return (Met, Icor)
+
+  # ========================================================================
+
+  def complement(self):
+
+    # New network object
+    Met = Network(nNode=self.nNd, directed=self.directed)
+
+    # Adjacency matrix
+    Met.Adj = np.logical_not(self.Adj)
+
+    # Preparation
+    Met.prepare()
+
+    # --- Node attributes
+
+    Met.node_attr = self.node_attr
+
+    # NB: No edge attribute when complementing.
+
+    return Met
 
   # ========================================================================
 

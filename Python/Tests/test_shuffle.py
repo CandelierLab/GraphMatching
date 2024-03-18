@@ -36,6 +36,5 @@ M = C.get_matching(algorithm=algo)
 M.compute_accuracy(Idx)
 
 print(M)
-pa.matrix(Ga.Adj)
 pa.matrix(C.X)
 
