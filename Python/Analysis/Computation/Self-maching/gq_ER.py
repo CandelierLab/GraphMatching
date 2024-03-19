@@ -17,8 +17,9 @@ os.system('clear')
 
 nA = 20
 l_p = np.linspace(0,1,41)
-l_eta = np.logspace(-15, -5, 11)
-nRun = 10
+l_eta = np.logspace(-14, 0, 8)
+# l_eta = [1e-10]
+nRun = 1000
 
 # ==========================================================================
 

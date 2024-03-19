@@ -21,13 +21,15 @@ algo = 'GASM'
 
 # --- Random graphs
 
-Ga = Network(nA)
-Ga.set_rand_edges('ER', p_edges=p)
+# Ga = Network(nA)
+# Ga.set_rand_edges('ER', p_edges=p)
 
 # # Ga.add_edge_attr('rand', name='test_edge')
 # # Ga.add_node_attr('rand', name='test_node')
 
 # Ga = Network(nx=nx.circular_ladder_graph(5))
+
+Ga = star_branched(9,10)
 
 Gb, Idx = Ga.shuffle()
 
@@ -36,5 +38,5 @@ M = C.get_matching(algorithm=algo)
 M.compute_accuracy(Idx)
 
 print(M)
-pa.matrix(C.X)
+# pa.matrix(C.X)
 

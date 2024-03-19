@@ -15,10 +15,10 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-l_k = np.arange(1,11)
+l_k = np.arange(2,11)
 l_n = np.arange(1,11)
 
-l_eta = [1e-10] #np.logspace(-6, -14, 5)
+l_eta = [1e-3]
 nRun = 1000
 
 # ==========================================================================
@@ -35,7 +35,7 @@ for k in l_k:
 
     print(f'k={k:d}, n={n:d}, ', end='')
 
-    NetA = star_branched(k,n)
+    NetA = star_branched(k,n, directed=True)
 
     for eta in l_eta:
 
@@ -53,8 +53,8 @@ for k in l_k:
 
         # --- Zager
 
-        C = Comparison(NetA, NetB, algorithm='Zager')
-        M = C.get_matching()
+        C = Comparison(NetA, NetB)
+        M = C.get_matching(algorithm='Zager')
         M.compute_accuracy(Idx)
 
         g_Zager.append(M.accuracy)
@@ -62,8 +62,8 @@ for k in l_k:
 
         # --- GASM
 
-        C = Comparison(NetA, NetB, algorithm='GASM', eta=eta)
-        M = C.get_matching()
+        C = Comparison(NetA, NetB)
+        M = C.get_matching(algorithm='GASM', eta=eta)
         M.compute_accuracy(Idx)
 
         g_GASM.append(M.accuracy)

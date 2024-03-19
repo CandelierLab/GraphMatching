@@ -344,6 +344,10 @@ class Network:
         self.d = nx.diameter(self.G)
       else:
         self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.G)])
+
+    else:
+
+      self.d = 0
       
   # ========================================================================
   #                             MODIFICATIONS
@@ -534,7 +538,6 @@ class Network:
 # ------------------------------------------------------------------------
 #                           Star-branched-graph
 # ------------------------------------------------------------------------
-  
 
 def star_branched(k, n, directed=False):
   '''

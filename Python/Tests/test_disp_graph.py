@@ -15,6 +15,9 @@ os.system('clear')
 
 # Net = Network(nx=nx.duplication_divergence_graph(40, 0.2))
 
-Net = star_branched(5,10)
+Net = star_branched(10,3)
+
+print(Net)
 
 Net.display()
+

@@ -10,7 +10,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 20
-nRun = 100
+nRun = 1000
 
 # --------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ if os.path.exists(fname):
   l_p = np.unique(df.p)
   l_eta = np.unique(df.eta)
 
-l_eta = np.array([l_eta[5]])
+# l_eta = np.array([l_eta[5]])
 
 # --- Display --------------------------------------------------------------
 
@@ -57,6 +57,9 @@ for i, eta in enumerate(l_eta):
 
 ax[0].plot(l_p, g_Zager/l_eta.size, '--', color='w', label='Zager')
 ax[1].plot(l_p, q_Zager/l_eta.size, '--', color='w', label='Zager')
+
+ax[0].set_ylim([0, 1])
+ax[1].set_ylim([0.95, 1.001])
 
 ax[0].set_xlabel('p')
 ax[1].set_xlabel('p')

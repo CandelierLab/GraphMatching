@@ -63,9 +63,11 @@ class Comparison:
 
     'Zager' parameters:
       'nIter' (int): Number of iterations
+      'normalization' (float or np.Array): normalization factor(s)
 
     'GASM' parameters:
       'nIter' (int): Number of iterations
+      'normalization' (float or np.Array): normalization factor(s)
       'eta' (float): Noise level (default 1e-10)
 
     To improve: 
@@ -77,6 +79,7 @@ class Comparison:
     GA = self.NetA
     GB = self.NetB
 
+    # Complement
     match algorithm:
 
       case 'Zager':
@@ -99,8 +102,6 @@ class Comparison:
     # --- Algorithms parameters
 
     # Number of iterations
-    print(GA)
-    pa.line()
     nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(GA.d, GB.d), 1)
 
     # Non-default normalization
@@ -119,15 +120,15 @@ class Comparison:
         if normalization is None:
 
           # # Previous implementation
-          # normalization = 4*mA*mB/nA/nB + 1
+          normalization = 4*mA*mB/nA/nB + 1
 
-          dAi = np.sum(GA.Adj, axis=0)
-          dAo = np.sum(GA.Adj, axis=1)
-          dBi = np.sum(GB.Adj, axis=0)
-          dBo = np.sum(GB.Adj, axis=1)
+          # dAi = np.sum(GA.Adj, axis=0)
+          # dAo = np.sum(GA.Adj, axis=1)
+          # dBi = np.sum(GB.Adj, axis=0)
+          # dBo = np.sum(GB.Adj, axis=1)
 
-          normalization = np.outer(dAi,dBi) + np.outer(dAo,dBo)
-          normalization[normalization==0] = 1
+          # normalization = np.outer(dAi,dBi) + np.outer(dAo,dBo)
+          # normalization[normalization==0] = 1
 
         # Noise
         eta = kwargs['eta'] if 'eta' in kwargs else 1e-10

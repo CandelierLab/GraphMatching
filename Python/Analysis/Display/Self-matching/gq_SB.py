@@ -15,7 +15,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nRun = 1000
+nRun = 100
 
 # --------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2, figsize=(12,6))
 
 # Colors
-cm = plt.cm.rainbow(np.linspace(0, 1, l_k.size))
+cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_k.size))
 
 # --- Plots
 
@@ -70,5 +70,7 @@ ax[1].set_ylabel('$q$')
 
 ax[0].legend()
 ax[1].legend()
+
+ax[1].grid(True)
 
 plt.show()

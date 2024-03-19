@@ -57,8 +57,8 @@ for h in l_h:
 
       # --- Zager
 
-      C = Comparison(NetA, NetB, algorithm='Zager')
-      M = C.get_matching()
+      C = Comparison(NetA, NetB)
+      M = C.get_matching(algorithm='Zager')
       M.compute_accuracy(Idx)
 
       g_Zager.append(M.accuracy)
@@ -66,8 +66,8 @@ for h in l_h:
 
       # --- GASM
 
-      C = Comparison(NetA, NetB, algorithm='GASM', eta=eta)
-      M = C.get_matching()
+      C = Comparison(NetA, NetB)
+      M = C.get_matching(algorithm='GASM', eta=eta)
       M.compute_accuracy(Idx)
 
       g_GASM.append(M.accuracy)
