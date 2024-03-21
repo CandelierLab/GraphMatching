@@ -66,7 +66,13 @@ class Matching:
 
     # Computation time
     if self.time is not None:
-      s += f'│ Computation time: \t\033[35m{self.time:0.2f}\033[0m ms\n'
+
+      s += f'│ Computation time: \t\033[35m{self.time["total"]:0.2f}\033[0m ms'
+
+      if self.algorithm in ['Zager', 'GASM']:
+        s += f' ({self.time["scores"]:0.2f} + {self.time["LAP"]:0.2f})'
+
+      s += '\n'
       param_suff = '│\n'
 
     # Matching score

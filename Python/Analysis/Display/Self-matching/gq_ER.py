@@ -10,7 +10,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 20
-nRun = 100
+nRun = 1000
 
 # --------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ if os.path.exists(fname):
   l_p = np.unique(df.p)
   l_eta = np.unique(df.eta)
 
-# l_eta = np.array([l_eta[5]])
+l_eta = np.array([l_eta[2]])
 
 # --- Display --------------------------------------------------------------
 
@@ -38,7 +38,8 @@ fig, ax = plt.subplots(1,2)
 # Colors
 cm = plt.cm.gist_rainbow(np.linspace(0,1,l_eta.size))
 
-# --- Accuracy
+g_FAQ = np.zeros(l_p.size)
+q_FAQ = np.zeros(l_p.size)
 
 g_Zager = np.zeros(l_p.size)
 q_Zager = np.zeros(l_p.size)
@@ -48,12 +49,17 @@ for i, eta in enumerate(l_eta):
   data = df.loc[df['eta'] == eta]
 
   # Accuracy
+  g_FAQ += data.g_FAQ.to_list()
   g_Zager += data.g_Zager.to_list()
   ax[0].plot(data.p, data.g_GASM, '-', color=cm[i], label=f'$\eta = {eta:g}$')
 
   # Structural quality
+  q_FAQ += data.q_FAQ.to_list()
   q_Zager += data.q_Zager.to_list()
   ax[1].plot(data.p, data.q_GASM, '-', color=cm[i], label=f'$\eta = {eta:g}$')
+
+ax[0].plot(l_p, g_FAQ/l_eta.size, '-', color='c', label='FAQ')
+ax[1].plot(l_p, q_FAQ/l_eta.size, '-', color='c', label='FAQ')
 
 ax[0].plot(l_p, g_Zager/l_eta.size, '--', color='w', label='Zager')
 ax[1].plot(l_p, q_Zager/l_eta.size, '--', color='w', label='Zager')

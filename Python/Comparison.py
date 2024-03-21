@@ -355,6 +355,7 @@ class Comparison:
 
     # Prepare output
     M = Matching(self.NetA, self.NetB, algorithm=algorithm)
+    M.time = {'total': None}
 
     # Measure time
     tref = time.perf_counter_ns()
@@ -367,7 +368,7 @@ class Comparison:
         res = quadratic_assignment(self.NetA.Adj, self.NetB.Adj, options={'maximize': True})
         
         # Record computing time
-        M.time = (time.perf_counter_ns()-tref)*1e-6
+        M.time['total'] = (time.perf_counter_ns()-tref)*1e-6
 
         # Populate the matching object
         M.from_lists(np.arange(self.NetA.nNd), res.col_ind)
@@ -390,8 +391,11 @@ class Comparison:
             self.compute_scores(algorithm=algorithm, **kwargs)
 
           if self.verbose:
-            print('* Scoring: {:.02f} ms'.format((time.time()-start)*1000))
+            print('* Scoring: {:.02f} ms'.format((time.time()-tref)*1000))
 
+        M.time['scores'] = (time.perf_counter_ns()-tref)*1e-6
+        tref = time.perf_counter_ns()
+        
         # --- Emptyness check ----------------------------------------------------
 
         if not self.X.size:
@@ -403,7 +407,8 @@ class Comparison:
         idxA, idxB = linear_sum_assignment(self.X, maximize=True)
 
         # Record computing time
-        M.time = (time.perf_counter_ns()-tref)*1e-6
+        M.time['LAP'] = (time.perf_counter_ns()-tref)*1e-6
+        M.time['total'] = M.time['scores'] + M.time['LAP']
 
         # --- Initialize matching object
             

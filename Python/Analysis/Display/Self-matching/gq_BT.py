@@ -43,6 +43,9 @@ fig, ax = plt.subplots(1,2, figsize=(12,6))
 
 # --- Accuracy
 
+g_FAQ = np.zeros(l_h.size)
+q_FAQ = np.zeros(l_h.size)
+
 g_Zager = np.zeros(l_h.size)
 q_Zager = np.zeros(l_h.size)
 
@@ -51,18 +54,22 @@ for i, eta in enumerate(l_eta):
   data = df.loc[df['eta'] == eta]
 
   # Accuracy
+  g_FAQ += data.g_FAQ.to_list()
   g_Zager += data.g_Zager.to_list()
   ax[0].plot(data.h, data.g_GASM, '-', label=f'$\eta = {eta:g}$')
 
   # Structural quality
+  q_FAQ += data.q_FAQ.to_list()
   q_Zager += data.q_Zager.to_list()
   ax[1].plot(data.h, data.q_GASM, '-', label=f'$\eta = {eta:g}$')
+
+ax[0].plot(l_h, g_FAQ/l_eta.size, '-', label='FAQ')
+ax[1].plot(l_h, q_FAQ/l_eta.size, '-', label='FAQ')
 
 ax[0].plot(l_h, g_Zager/l_eta.size, '-', label='Zager')
 ax[1].plot(l_h, q_Zager/l_eta.size, '-', label='Zager')
 
 ax[0].plot(l_h, np.exp(-l_h/2), '--', label='Th')
-
 
 ax[0].set_yscale('log')
 
