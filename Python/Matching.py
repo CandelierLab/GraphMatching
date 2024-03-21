@@ -14,7 +14,7 @@ class Matching:
   # |                                                                      |
   # ========================================================================
 
-  def __init__(self, NetA, NetB):
+  def __init__(self, NetA, NetB, algorithm=None):
 
     # Definitions
     self.NetA = NetA
@@ -30,6 +30,10 @@ class Matching:
     self.score = None
     self.accuracy = None
     self.structural_quality = None
+
+    # Misc infos
+    self.algorithm = algorithm
+    self.time = None
 
   # ========================================================================
   # |                                                                      |
@@ -48,26 +52,36 @@ class Matching:
     mcpl = os.get_terminal_size()[0]
 
     # Maximum number of correspondences to display
-    kmax = 100
+    kmax = 20
 
     s = '╒══ Matching ' + '═'*(mcpl-13) + '\n'
     
     s += '│\n'
     param_suff = ''
   
+    # Algorithm
+    if self.algorithm is not None:
+      s += f'│ Algorithm: \t\t\033[31m{self.algorithm}\033[0m\n'
+      param_suff = '│\n'
+
+    # Computation time
+    if self.time is not None:
+      s += f'│ Computation time: \t\033[35m{self.time:0.2f}\033[0m ms\n'
+      param_suff = '│\n'
+
     # Matching score
     if self.score is not None:
-      s += f'│ Matching score: {self.score:.03f}\n'
+      s += f'│ Matching score: \t{self.score:.03f}\n'
       param_suff = '│\n'
 
     # Accuracy
     if self.accuracy is not None:
-      s += f'│ Accuracy: {self.accuracy:.03f}\n'
+      s += f'│ Accuracy: \t\t\033[36m{self.accuracy:.03f}\033[0m\n'
       param_suff = '│\n'
 
     # Structural quality
     if self.structural_quality is not None:
-      s += f'│ Structural quality: {self.structural_quality:.03f}\n'
+      s += f'│ Structural quality: \t\033[96m{self.structural_quality:.03f}\033[0m\n'
       param_suff = '│\n'
 
     s += param_suff

@@ -3,7 +3,7 @@ import warnings
 from collections import Counter
 import numpy as np
 from scipy.spatial.distance import cdist
-from scipy.optimize import linear_sum_assignment
+from scipy.optimize import linear_sum_assignment, quadratic_assignment
 import time
 import paprint as pa
 
@@ -350,49 +350,69 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def get_matching(self, **kwargs):
+  def get_matching(self, algorithm='GASM', **kwargs):
     ''' Compute one matching '''
 
-    # --- Similarity scores --------------------------------------------------
-
-    if self.X is None:
-
-      if self.verbose:
-        print('* No score matrix found, computing the score matrices.')
-        start = time.time()
-
-      if 'i_function' in kwargs:
-        output = self.compute_scores(**kwargs)
-      else:
-        self.compute_scores(**kwargs)
-
-      if self.verbose:
-        print('* Scoring: {:.02f} ms'.format((time.time()-start)*1000))
-
-    # --- Emptyness check ----------------------------------------------------
-
-    if not self.X.size:
-      return ([], output) if 'i_function' in kwargs else []
-
-    # --- Solution search ---------------------------------------------------
-
-    if self.verbose:
-        tref = time.perf_counter_ns()
-
     # Prepare output
-    M = Matching(self.NetA, self.NetB)
+    M = Matching(self.NetA, self.NetB, algorithm=algorithm)
 
-    # Jonker-Volgenant resolution of the LAP
-    idxA, idxB = linear_sum_assignment(self.X, maximize=True)
+    # Measure time
+    tref = time.perf_counter_ns()
 
-    # --- Initialize matching object
+    match algorithm:
+
+      case 'FAQ':
+
+        # Solve the Quadratic Assignment Problem        
+        res = quadratic_assignment(self.NetA.Adj, self.NetB.Adj, options={'maximize': True})
         
-    M.from_lists(idxA, idxB)
-    M.compute_score(self.X)
+        # Record computing time
+        M.time = (time.perf_counter_ns()-tref)*1e-6
 
-    if self.verbose:
-      print('* Matching: {:.02f} ms'.format((time.perf_counter_ns()-tref)*1e-6))
+        # Populate the matching object
+        M.from_lists(np.arange(self.NetA.nNd), res.col_ind)
+        M.score = res.fun
 
-    # --- Output
-    
-    return (M, output) if 'i_function' in kwargs else M
+        return M
+
+      case 'Zager' | 'GASM':
+
+        # --- Similarity scores --------------------------------------------------
+
+        if self.X is None:
+
+          if self.verbose:
+            print('* No score matrix found, computing the score matrices.')
+
+          if 'i_function' in kwargs:
+            output = self.compute_scores(algorithm=algorithm, **kwargs)
+          else:
+            self.compute_scores(algorithm=algorithm, **kwargs)
+
+          if self.verbose:
+            print('* Scoring: {:.02f} ms'.format((time.time()-start)*1000))
+
+        # --- Emptyness check ----------------------------------------------------
+
+        if not self.X.size:
+          return ([], output) if 'i_function' in kwargs else []
+
+        # --- Solution search ---------------------------------------------------
+
+        # Jonker-Volgenant resolution of the LAP
+        idxA, idxB = linear_sum_assignment(self.X, maximize=True)
+
+        # Record computing time
+        M.time = (time.perf_counter_ns()-tref)*1e-6
+
+        # --- Initialize matching object
+            
+        M.from_lists(idxA, idxB)
+        M.compute_score(self.X)
+
+        if self.verbose:
+          print('* Matching: {:.02f} ms'.format())
+
+        # --- Output
+        
+        return (M, output) if 'i_function' in kwargs else M

@@ -25,7 +25,7 @@ nRun = 10000
 fname = project.root + f'/Files/Self-matching/CL/CL.csv'
 
 # Creating dataframe
-df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_Zager', 'g_GASM', 'q_Zager', 'q_GASM', 'g_Zager_std', 'g_GASM_std', 'q_Zager_std', 'q_GASM_std'])
+df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
 
 k = 0
 
@@ -40,6 +40,8 @@ for n in l_n:
     print(f'{nRun:d} iterations: eta={eta:.05f} ...', end='')
     start = time.time()
     
+    g_FAQ = []
+    q_FAQ = []
     g_Zager = []
     g_GASM = []
     q_Zager = []
@@ -48,6 +50,15 @@ for n in l_n:
     for i in range(nRun):
 
       NetB, Idx = NetA.shuffle()
+
+      # --- FAQ
+
+      C = Comparison(NetA, NetB)
+      M = C.get_matching(algorithm='FAQ')
+      M.compute_accuracy(Idx)
+
+      g_FAQ.append(M.accuracy)
+      q_FAQ.append(M.structural_quality)
 
       # --- Zager
 
@@ -74,12 +85,16 @@ for n in l_n:
     df.loc[k, 'eta'] = eta
 
     # Mean values
+    df.loc[k, 'g_FAQ'] = np.mean(g_FAQ)
+    df.loc[k, 'q_FAQ'] = np.mean(q_FAQ)
     df.loc[k, 'g_Zager'] = np.mean(g_Zager)
     df.loc[k, 'q_Zager'] = np.mean(q_Zager)
     df.loc[k, 'g_GASM'] = np.mean(g_GASM)
     df.loc[k, 'q_GASM'] = np.mean(q_GASM)
 
     # Standard deviations
+    df.loc[k, 'g_FAQ_std'] = np.std(g_FAQ)
+    df.loc[k, 'q_FAQ_std'] = np.std(q_FAQ)
     df.loc[k, 'g_Zager_std'] = np.std(g_Zager)
     df.loc[k, 'q_Zager_std'] = np.std(q_Zager)
     df.loc[k, 'g_GASM_std'] = np.std(g_GASM)
