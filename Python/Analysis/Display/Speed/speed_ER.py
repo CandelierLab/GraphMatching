@@ -35,9 +35,13 @@ ax.plot(l_n, df.Zager, '.-', label='Zager')
 ax.plot(l_n, df.GASM, '.-', label='GASM')
 ax.plot(l_n, df.GASM_LAP, '--', label='GASM_LAP')
 
-ax.set_xscale('log')
-ax.set_yscale('log')
+# ax.set_xscale('log')
+# ax.set_yscale('log')
+
+ax.set_xlabel('$n_A$')
+ax.set_ylabel('$t$ (ms)')
 
 ax.legend()
+ax.grid(True)
 
 plt.show()

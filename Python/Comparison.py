@@ -44,6 +44,7 @@ class Comparison:
 
     # --- Misc
 
+    self.info = {}
     self.verbose = verbose
 
   # ========================================================================
@@ -54,7 +55,7 @@ class Comparison:
 
   def compute_scores(self, algorithm='GASM',
             normalization=None,
-            i_function=None, i_param={}, initial_evaluation=False, measure_time=False,
+            i_function=None, i_param={}, initial_evaluation=False,
             **kwargs):
     ''' 
     Score computation 
@@ -69,9 +70,6 @@ class Comparison:
       'nIter' (int): Number of iterations
       'normalization' (float or np.Array): normalization factor(s)
       'eta' (float): Noise level (default 1e-10)
-
-    To improve: 
-      - measure_time: is it still useful ? Merge with verbose ?
     '''
 
     # --- Definitions --------------------------------------------------------
@@ -103,6 +101,7 @@ class Comparison:
 
     # Number of iterations
     nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(GA.d, GB.d), 1)
+    self.info['nIter'] = nIter
 
     # Non-default normalization
     normalization = kwargs['normalization'] if 'normalization' in kwargs else None
@@ -119,16 +118,7 @@ class Comparison:
         # Normalization
         if normalization is None:
 
-          # # Previous implementation
           normalization = 4*mA*mB/nA/nB + 1
-
-          # dAi = np.sum(GA.Adj, axis=0)
-          # dAo = np.sum(GA.Adj, axis=1)
-          # dBi = np.sum(GB.Adj, axis=0)
-          # dBo = np.sum(GB.Adj, axis=1)
-
-          # normalization = np.outer(dAi,dBi) + np.outer(dAo,dBo)
-          # normalization[normalization==0] = 1
 
         # Noise
         eta = kwargs['eta'] if 'eta' in kwargs else 1e-10
@@ -250,17 +240,25 @@ class Comparison:
       self.X = np.ones((nA,nB))
       self.Y = np.ones((mA,mB))
 
+      by = np.zeros((mA,nA))
+
+      from scipy import sparse
+      X = sparse.csr_matrix((nA,nB))
+      Y = sparse.csr_matrix((mA,mB))
+
       # Initial evaluation
       if i_function is not None and initial_evaluation:
         i_function(locals(), i_param, output)
 
       # --- Iterations
-      
+
+      if self.verbose:
+          t0 = time.perf_counter_ns()
+
       for i in range(nIter):
 
-        if measure_time:
-          start = time.time()
-          # Rework this part
+        if self.verbose:
+          ti = time.perf_counter_ns()
 
         ''' === A note on operation order ===
 
@@ -314,13 +312,29 @@ class Comparison:
             
           case 'GASM':
 
-            if i==0:
-              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1) * Xc
-              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At) * Yc
+            # if i==0:
+            #   self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1) * Xc
+            #   self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At) * Yc
 
-            else:
-              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1)
-              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At)
+            # else:
+            #   self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1)
+            #   self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At)
+
+            # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
+
+            # np.dot(GA.As.T, self.X, out=by)
+            # np.dot(by, GB.As, out=self.Y)
+            # np.dot(GA.At.T, self.X, out=by)
+            # np.dot(by, GB.At, out=self.Y)
+
+            # X = As @ Y @ BsT + At @ Y @ BtT
+            # Y = AsT @ X @ Bs + AtT @ X @ Bt
+
+            X = GA.As @ Y @ GB.As.T + GA.At @ Y @ GB.At.T
+            Y = GA.As.T @ X @ GB.As + GA.At.T @ X @ GB.At
+
+            # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
+
 
         # Normalization 
         if normalization is not None:
@@ -328,6 +342,14 @@ class Comparison:
 
         if i_function is not None:
           i_function(locals(), i_param, output)
+
+        print('iterations', i, ':', (time.perf_counter_ns()-ti)*1e-6, 'ms')
+
+      # --- Timing
+          
+      if self.verbose:
+        print('Total Iterations', (time.perf_counter_ns()-t0)*1e-6, 'ms')
+
 
       # --- Post-processing
           
@@ -390,6 +412,9 @@ class Comparison:
           else:
             self.compute_scores(algorithm=algorithm, **kwargs)
 
+          # Informations
+          M.info = self.info
+          
           if self.verbose:
             print('* Scoring: {:.02f} ms'.format((time.time()-tref)*1000))
 
@@ -414,9 +439,6 @@ class Comparison:
             
         M.from_lists(idxA, idxB)
         M.compute_score(self.X)
-
-        if self.verbose:
-          print('* Matching: {:.02f} ms'.format())
 
         # --- Output
         

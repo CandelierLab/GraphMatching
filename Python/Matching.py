@@ -34,6 +34,7 @@ class Matching:
     # Misc infos
     self.algorithm = algorithm
     self.time = None
+    self.info = None
 
   # ========================================================================
   # |                                                                      |
@@ -52,7 +53,7 @@ class Matching:
     mcpl = os.get_terminal_size()[0]
 
     # Maximum number of correspondences to display
-    kmax = 20
+    kmax = 10
 
     s = '╒══ Matching ' + '═'*(mcpl-13) + '\n'
     
