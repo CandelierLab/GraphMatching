@@ -237,23 +237,9 @@ class Comparison:
 
     else:
 
-      # --- Initialize Y
-
-      ti = time.perf_counter_ns()
-
-      # Y = sparse.csr_matrix((mA,mB))
-      # Y0 = sparse.lil_matrix((mA,mB))
-
-      # Compute degrees
-      diA = np.sum(self.NetA.Adj, axis=0)
-      doA = np.sum(self.NetA.Adj, axis=1)
-
-      diB = np.sum(self.NetB.Adj, axis=0)
-      doB = np.sum(self.NetB.Adj, axis=1)
+      # --- Initialization
 
       self.Y = np.ones((mA, mB))
-
-      print('Initialization', (time.perf_counter_ns()-ti)*1e-6, 'ms')
 
       # --- Initial evaluation
 
@@ -324,23 +310,13 @@ class Comparison:
             
           case 'GASM':
 
-            # if i==0:
-            #   self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1) * Xc
-            #   self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At) * Yc
+            if i==0:
+              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1) * Xc
+              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At) * Yc
 
-            # else:
-            #   self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1)
-            #   self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At)
-
-            # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
-
-            self.X = GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T
-
-            # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
-
-            self.Y = GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At
-
-            # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
+            else:
+              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1)
+              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At)
 
         # Normalization 
         if normalization is not None:
@@ -349,23 +325,10 @@ class Comparison:
         if i_function is not None:
           i_function(locals(), i_param, output)
 
-        # print(np.sum(X!=0))
-        # print(np.sum(Y!=0))
-
-        print('\tIteration', i, ':', (time.perf_counter_ns()-ti)*1e-6, 'ms')
-
-      # --- Store scores
-        
-      # self.X = X.toarray()
-      # self.Y = Y.toarray()
-      # self.X = X
-      # self.Y = Y
-
       # --- Timing
           
       if self.verbose:
         print('Total Iterations', (time.perf_counter_ns()-t0)*1e-6, 'ms')
-
 
       # --- Post-processing
           
