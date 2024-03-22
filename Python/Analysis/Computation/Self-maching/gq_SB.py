@@ -19,7 +19,7 @@ l_k = np.arange(2,11)
 l_n = np.arange(1,11)
 
 l_eta = [1e-3]
-nRun = 100
+nRun = 1000
 
 # ==========================================================================
 
@@ -58,7 +58,7 @@ for k in l_k:
         C = Comparison(NetA, NetB)
         M = C.get_matching(algorithm='FAQ')
         M.compute_accuracy(Idx)
-
+        
         g_FAQ.append(M.accuracy)
         q_FAQ.append(M.structural_quality)
 
@@ -88,20 +88,20 @@ for k in l_k:
       df.loc[i, 'eta'] = eta
 
       # Mean values
-      df.loc[k, 'g_FAQ'] = np.mean(g_FAQ)
-      df.loc[k, 'q_FAQ'] = np.mean(q_FAQ)
-      df.loc[k, 'g_Zager'] = np.mean(g_Zager)
-      df.loc[k, 'q_Zager'] = np.mean(q_Zager)
-      df.loc[k, 'g_GASM'] = np.mean(g_GASM)
-      df.loc[k, 'q_GASM'] = np.mean(q_GASM)
+      df.loc[i, 'g_FAQ'] = np.mean(g_FAQ)
+      df.loc[i, 'q_FAQ'] = np.mean(q_FAQ)
+      df.loc[i, 'g_Zager'] = np.mean(g_Zager)
+      df.loc[i, 'q_Zager'] = np.mean(q_Zager)
+      df.loc[i, 'g_GASM'] = np.mean(g_GASM)
+      df.loc[i, 'q_GASM'] = np.mean(q_GASM)
 
       # Standard deviations
-      df.loc[k, 'g_FAQ_std'] = np.std(g_FAQ)
-      df.loc[k, 'q_FAQ_std'] = np.std(q_FAQ)
-      df.loc[k, 'g_Zager_std'] = np.std(g_Zager)
-      df.loc[k, 'q_Zager_std'] = np.std(q_Zager)
-      df.loc[k, 'g_GASM_std'] = np.std(g_GASM)
-      df.loc[k, 'q_GASM_std'] = np.std(q_GASM)
+      df.loc[i, 'g_FAQ_std'] = np.std(g_FAQ)
+      df.loc[i, 'q_FAQ_std'] = np.std(q_FAQ)
+      df.loc[i, 'g_Zager_std'] = np.std(g_Zager)
+      df.loc[i, 'q_Zager_std'] = np.std(q_Zager)
+      df.loc[i, 'g_GASM_std'] = np.std(g_GASM)
+      df.loc[i, 'q_GASM_std'] = np.std(q_GASM)
 
       i += 1
 
@@ -109,8 +109,6 @@ for k in l_k:
 
 # --- Save
     
-print(i)
-
 print('Saving ...', end='')
 start = time.time()
 

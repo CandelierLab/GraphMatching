@@ -36,11 +36,7 @@ if os.path.exists(fname):
 
 # --- Display --------------------------------------------------------------
 
-plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2, figsize=(12,6))
-
-# Colors
-cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_k.size))
 
 # --- Plots
 
@@ -49,14 +45,14 @@ for ki, k in enumerate(l_k):
   data = df.loc[df['k'] == k]
 
   # Accuracy    
-  ax[0].plot(data.n, data.g_GASM, '-', color=cm[ki], label=f'GASM $k = {k:d}$')
-  ax[0].plot(data.n, data.g_FAQ, ':', color=cm[ki], label=f'FAQ $k = {k:d}$')
-  ax[0].plot(data.n, data.g_Zager, '--', color=cm[ki], label=f'Zager $k = {k:d}$')
+  ax[0].plot(data.n, data.g_GASM, '-', label=f'GASM $k = {k:d}$')
+  ax[0].plot(data.n, data.g_FAQ, ':', label=f'FAQ $k = {k:d}$')
+  ax[0].plot(data.n, data.g_Zager, '--', label=f'Zager $k = {k:d}$')
 
   # Structural quality  
-  ax[1].plot(data.n, data.q_GASM, '-', color=cm[ki], label=f'GASM $k = {k:d}$')
-  ax[1].plot(data.n, data.q_FAQ, ':', color=cm[ki], label=f'FAQ $k = {k:d}$')
-  ax[1].plot(data.n, data.q_Zager, '--', color=cm[ki], label=f'Zager $k = {k:d}$')
+  ax[1].plot(data.n, data.q_GASM, '-', label=f'GASM $k = {k:d}$')
+  ax[1].plot(data.n, data.q_FAQ, ':', label=f'FAQ $k = {k:d}$')
+  ax[1].plot(data.n, data.q_Zager, '--', label=f'Zager $k = {k:d}$')
 
 ax[0].set_ylim([0, 1.01])
 ax[1].set_ylim([0, 1.01])

@@ -109,7 +109,7 @@ for n in l_n:
 print('Saving ...', end='')
 start = time.time()
 
-df.to_csv(fname)
+# df.to_csv(fname)
 
 print('{:.02f} sec'.format((time.time() - start)))
 
