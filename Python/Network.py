@@ -326,8 +326,8 @@ class Network:
 
     # Conversion to sparse
     # Strangely slows down when there are several matrix multiplications
-    self.As = sparse.csr_matrix(self.As)
-    self.At = sparse.csr_matrix(self.At)
+    # self.As = sparse.csr_matrix(self.As)
+    # self.At = sparse.csr_matrix(self.At)
 
     # --- Other measurements
 

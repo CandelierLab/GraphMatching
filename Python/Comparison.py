@@ -2,6 +2,7 @@ import time
 import warnings
 from collections import Counter
 import numpy as np
+from scipy import sparse
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment, quadratic_assignment
 import time
@@ -236,17 +237,26 @@ class Comparison:
 
     else:
 
-      # Initialization
-      self.X = np.ones((nA,nB))
-      self.Y = np.ones((mA,mB))
+      # --- Initialize Y
 
-      by = np.zeros((mA,nA))
+      ti = time.perf_counter_ns()
 
-      from scipy import sparse
-      X = sparse.csr_matrix((nA,nB))
-      Y = sparse.csr_matrix((mA,mB))
+      # Y = sparse.csr_matrix((mA,mB))
+      # Y0 = sparse.lil_matrix((mA,mB))
 
-      # Initial evaluation
+      # Compute degrees
+      diA = np.sum(self.NetA.Adj, axis=0)
+      doA = np.sum(self.NetA.Adj, axis=1)
+
+      diB = np.sum(self.NetB.Adj, axis=0)
+      doB = np.sum(self.NetB.Adj, axis=1)
+
+      self.Y = np.ones((mA, mB))
+
+      print('Initialization', (time.perf_counter_ns()-ti)*1e-6, 'ms')
+
+      # --- Initial evaluation
+
       if i_function is not None and initial_evaluation:
         i_function(locals(), i_param, output)
 
@@ -267,6 +277,8 @@ class Comparison:
         not give any additional information. However, when all Y are equal the 
         update of X does not give an homogeneous matrix as some information 
         about the network strutures is included.
+
+        + Network complement
 
         So it is always preferable to start with the update of X.
         '''
@@ -322,19 +334,13 @@ class Comparison:
 
             # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
 
-            # np.dot(GA.As.T, self.X, out=by)
-            # np.dot(by, GB.As, out=self.Y)
-            # np.dot(GA.At.T, self.X, out=by)
-            # np.dot(by, GB.At, out=self.Y)
-
-            # X = As @ Y @ BsT + At @ Y @ BtT
-            # Y = AsT @ X @ Bs + AtT @ X @ Bt
-
-            X = GA.As @ Y @ GB.As.T + GA.At @ Y @ GB.At.T
-            Y = GA.As.T @ X @ GB.As + GA.At.T @ X @ GB.At
+            self.X = GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T
 
             # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
 
+            self.Y = GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At
+
+            # print((time.perf_counter_ns()-ti)*1e-6, 'ms')
 
         # Normalization 
         if normalization is not None:
@@ -343,7 +349,17 @@ class Comparison:
         if i_function is not None:
           i_function(locals(), i_param, output)
 
-        print('iterations', i, ':', (time.perf_counter_ns()-ti)*1e-6, 'ms')
+        # print(np.sum(X!=0))
+        # print(np.sum(Y!=0))
+
+        print('\tIteration', i, ':', (time.perf_counter_ns()-ti)*1e-6, 'ms')
+
+      # --- Store scores
+        
+      # self.X = X.toarray()
+      # self.Y = Y.toarray()
+      # self.X = X
+      # self.Y = Y
 
       # --- Timing
           
