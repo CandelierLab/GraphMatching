@@ -54,10 +54,7 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def compute_scores(self, algorithm='GASM',
-            normalization=None,
-            i_function=None, i_param={}, initial_evaluation=False,
-            **kwargs):
+  def compute_scores(self, algorithm='GASM', normalization=None, **kwargs):
     ''' 
     Score computation 
     
@@ -224,12 +221,6 @@ class Comparison:
 
     # --- Computation --------------------------------------------------------
 
-    # Iterative function settings
-    if i_function is not None:
-      i_param['NetA'] = GA
-      i_param['NetB'] = GB
-      output = []
-
     if not mA or not mB:
 
       self.X = Xc
@@ -239,12 +230,8 @@ class Comparison:
 
       # --- Initialization
 
+      if not nIter: self.X = np.ones((nA, nB))  
       self.Y = np.ones((mA, mB))
-
-      # --- Initial evaluation
-
-      if i_function is not None and initial_evaluation:
-        i_function(locals(), i_param, output)
 
       # --- Iterations
 
@@ -322,9 +309,6 @@ class Comparison:
         if normalization is not None:
             self.X /= normalization
 
-        if i_function is not None:
-          i_function(locals(), i_param, output)
-
       # --- Timing
           
       if self.verbose:
@@ -339,11 +323,6 @@ class Comparison:
 
         case 'GASM':
           pass
-
-    # --- Output
-
-    if i_function is not None:
-      return output
 
   # ========================================================================
   # |                                                                      |
@@ -381,7 +360,9 @@ class Comparison:
 
         # --- Similarity scores --------------------------------------------------
 
-        if self.X is None:
+        force = kwargs['force'] if 'force' in kwargs else False
+
+        if self.X is None or force:
 
           if self.verbose:
             print('* No score matrix found, computing the score matrices.')
@@ -403,7 +384,7 @@ class Comparison:
         # --- Emptyness check ----------------------------------------------------
 
         if not self.X.size:
-          return ([], output) if 'i_function' in kwargs else []
+          return None
 
         # --- Solution search ---------------------------------------------------
 
@@ -421,4 +402,4 @@ class Comparison:
 
         # --- Output
         
-        return (M, output) if 'i_function' in kwargs else M
+        return M
