@@ -16,12 +16,12 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 100
-nRun = 10
+nRun = 200
 
 # l_delta = np.geomspace(0.01, 0.5, 10)
 l_delta = np.linspace(0, 1, 21)
 
-l_meas = [0]
+l_meas = [0, 1, 2, 3, 5]
 
 # --------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ for d in l_delta:
       NetA, NetB = get_Nets(nA, p, m, d)
         
       C = Comparison(NetA, NetB)
-      M = C.get_matching(algorithm='random')
+      M = C.get_matching(algorithm='GASM')
       M.compute_accuracy()
 
       g.append(M.accuracy)

@@ -14,7 +14,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 100
-nRun = 10
+nRun = 200
 
 # --------------------------------------------------------------------------
 
@@ -47,8 +47,8 @@ ax[1].plot(l_delta, data.q, '--', color='w', label=f'FAQ')
 
 for m in l_meas:
   data = df.loc[np.logical_and(df['algo']=='GASM', df['nMeasAttr']==m)]
-  ax[0].plot(l_delta, data.g, '.-', label=f'GASM {m}')
-  ax[1].plot(l_delta, data.q, '.-', label=f'GASM {m}')
+  ax[0].plot(l_delta, data.g, '-', label=f'GASM {m}')
+  ax[1].plot(l_delta, data.q, '-', label=f'GASM {m}')
 
 ax[0].set_yscale('log')
 

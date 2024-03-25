@@ -491,9 +491,6 @@ class Network:
         # Number of modifications
         nmod = round(delta*self.nEd)
 
-        print('Number of edges', self.nEd)
-        print('Number of modifications', nmod)
-
         # 0 → 1
         Ip = np.random.choice(np.ravel_multi_index(np.where(self.Adj==0), (self.nNd, self.nNd)), nmod, replace=False)
         Net.Adj[np.unravel_index(Ip,(self.nNd, self.nNd))] = 1
@@ -501,9 +498,6 @@ class Network:
         # 1 → 0
         In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nNd, self.nNd)), nmod, replace=False)
         Net.Adj[np.unravel_index(In,(self.nNd, self.nNd))] = 0
-
-        print(np.ravel_multi_index(np.where(self.Adj==1), (self.nNd, self.nNd)))
-        print('In', In)
         
     # --- Output
 
