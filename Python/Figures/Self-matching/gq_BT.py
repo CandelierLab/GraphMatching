@@ -17,6 +17,8 @@ os.system('clear')
 
 r = 2
 
+err_alpha = 0.2
+
 # --------------------------------------------------------------------------
 
 fname = project.root + f'/Files/Self-matching/BT/r={r:d}.csv'
@@ -28,59 +30,54 @@ if os.path.exists(fname):
   # Load data
   df = pd.read_csv(fname)
 
-  # Retrieve l_h l_eta
+  # Retrieve l_h
 
   l_h = np.unique(df.h)
-  l_eta = np.unique(df.eta)
 
 # --- Display --------------------------------------------------------------
 
-plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2, figsize=(12,6))
 
 # Colors
-# cm = plt.cm.rainbow(np.linspace(0, 1, l_eta.size))
+c = {'GASM': '#1B2ACC', 'eGASM': '#089FFF',
+     'Zager': '#CC4F1B', 'eZager': '#FF9848',
+     'FAQ': '#3F7F4C', 'eFAQ':'#7EFF99'}
 
 # --- Accuracy
 
-g_FAQ = np.zeros(l_h.size)
-q_FAQ = np.zeros(l_h.size)
+ax[0].plot(df.h, df.g_GASM, '-', color=c['GASM'], label=f'GASM')
+# ax[0].fill_between(df.h, df.g_GASM - df.g_GASM_std, df.g_GASM + df.g_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
 
-g_Zager = np.zeros(l_h.size)
-q_Zager = np.zeros(l_h.size)
+ax[0].plot(df.h, df.g_Zager, '-', color=c['Zager'], label=f'Zager')
+# ax[0].fill_between(df.h, df.g_Zager - df.g_Zager_std, df.g_Zager + df.g_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
 
-for i, eta in enumerate(l_eta):
+ax[0].plot(df.h, df.g_FAQ, '-', color=c['FAQ'], label=f'FAQ')
+# ax[0].fill_between(df.h, df.g_FAQ - df.g_FAQ_std, df.g_FAQ + df.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
-  data = df.loc[df['eta'] == eta]
+ax[0].plot(l_h, np.exp(-l_h/2), '--', color='k', label='Th')
 
-  # Accuracy
-  g_FAQ += data.g_FAQ.to_list()
-  g_Zager += data.g_Zager.to_list()
-  ax[0].plot(data.h, data.g_GASM, '-', label=f'$\eta = {eta:g}$')
+# --- Structural quality
 
-  # Structural quality
-  q_FAQ += data.q_FAQ.to_list()
-  q_Zager += data.q_Zager.to_list()
-  ax[1].plot(data.h, data.q_GASM, '-', label=f'$\eta = {eta:g}$')
+ax[1].plot(df.h, df.q_GASM, '-', color=c['GASM'], label=f'GASM')
+ax[1].fill_between(df.h, df.q_GASM - df.q_GASM_std, df.q_GASM + df.q_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
 
-ax[0].plot(l_h, g_FAQ/l_eta.size, '-', label='FAQ')
-ax[1].plot(l_h, q_FAQ/l_eta.size, '-', label='FAQ')
+ax[1].plot(df.h, df.q_Zager, '-', color=c['Zager'], label=f'Zager')
+ax[1].fill_between(df.h, df.q_Zager - df.q_Zager_std, df.q_Zager + df.q_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
 
-ax[0].plot(l_h, g_Zager/l_eta.size, '-', label='Zager')
-ax[1].plot(l_h, q_Zager/l_eta.size, '-', label='Zager')
+ax[1].plot(df.h, df.q_FAQ, '-', color=c['FAQ'], label=f'FAQ')
+ax[1].fill_between(df.h, df.q_FAQ - df.q_FAQ_std, df.q_FAQ + df.q_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
-ax[0].plot(l_h, np.exp(-l_h/2), '--', label='Th')
 
 ax[0].set_yscale('log')
 
-ax[0].set_ylim([0,1.01])
-ax[1].set_ylim([0, 1.01])
+ax[0].set_ylim([0,1])
+ax[1].set_ylim([0, 1])
 
-ax[0].set_xlabel('h')
-ax[1].set_xlabel('h')
+ax[0].set_xlabel('$h$')
+ax[1].set_xlabel('$h$')
 
 ax[0].set_ylabel('$\gamma$')
-ax[1].set_ylabel('$q$')
+ax[1].set_ylabel('$q_s$')
 
 ax[0].legend()
 ax[1].legend()

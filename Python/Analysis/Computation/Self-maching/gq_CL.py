@@ -18,7 +18,7 @@ os.system('clear')
 l_n = np.arange(1, 26)
 l_eta = [1e-10] #np.logspace(-6, -14, 3)
 
-nRun = 10000
+nRun = 1000
 
 # ==========================================================================
 
@@ -109,7 +109,7 @@ for n in l_n:
 print('Saving ...', end='')
 start = time.time()
 
-# df.to_csv(fname)
+df.to_csv(fname)
 
 print('{:.02f} sec'.format((time.time() - start)))
 

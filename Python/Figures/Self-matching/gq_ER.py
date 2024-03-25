@@ -1,3 +1,7 @@
+'''
+Erdo-Renyi: average gamma and q
+'''
+
 import os
 import numpy as np
 import pandas as pd
@@ -10,7 +14,9 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 20
-nRun = 1000
+nRun = 100
+
+err_alpha = 0.2
 
 # --------------------------------------------------------------------------
 
@@ -28,50 +34,48 @@ if os.path.exists(fname):
   l_p = np.unique(df.p)
   l_eta = np.unique(df.eta)
 
-l_eta = np.array([l_eta[2]])
+data = df.loc[df['eta'] == l_eta[2]]
 
 # --- Display --------------------------------------------------------------
 
-plt.style.use('dark_background')
-fig, ax = plt.subplots(1,2)
+fig, ax = plt.subplots(1,2, figsize=(12,6))
 
 # Colors
-cm = plt.cm.gist_rainbow(np.linspace(0,1,l_eta.size))
+c = {'GASM': '#1B2ACC', 'eGASM': '#089FFF',
+     'Zager': '#CC4F1B', 'eZager': '#FF9848',
+     'FAQ': '#3F7F4C', 'eFAQ':'#7EFF99'}
 
-g_FAQ = np.zeros(l_p.size)
-q_FAQ = np.zeros(l_p.size)
+# --- Accuracy
 
-g_Zager = np.zeros(l_p.size)
-q_Zager = np.zeros(l_p.size)
+ax[0].plot(data.p, data.g_GASM, '-', color=c['GASM'], label=f'GASM')
+# ax[0].fill_between(data.h, data.g_GASM - data.g_GASM_std, data.g_GASM + data.g_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
 
-for i, eta in enumerate(l_eta):
+ax[0].plot(data.p, data.g_Zager, '-', color=c['Zager'], label=f'Zager')
+# ax[0].fill_between(data.h, data.g_Zager - data.g_Zager_std, data.g_Zager + data.g_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
 
-  data = df.loc[df['eta'] == eta]
+ax[0].plot(data.p, data.g_FAQ, '-', color=c['FAQ'], label=f'FAQ')
+# ax[0].fill_between(data.h, data.g_FAQ - data.g_FAQ_std, data.g_FAQ + data.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
-  # Accuracy
-  g_FAQ += data.g_FAQ.to_list()
-  g_Zager += data.g_Zager.to_list()
-  ax[0].plot(data.p, data.g_GASM, '-', color=cm[i], label=f'$\eta = {eta:g}$')
+# --- Structural quality
 
-  # Structural quality
-  q_FAQ += data.q_FAQ.to_list()
-  q_Zager += data.q_Zager.to_list()
-  ax[1].plot(data.p, data.q_GASM, '-', color=cm[i], label=f'$\eta = {eta:g}$')
+ax[1].plot(data.p, data.q_GASM, '-', color=c['GASM'], label=f'GASM')
+ax[1].fill_between(data.p, data.q_GASM - data.q_GASM_std, data.q_GASM + data.q_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
 
-ax[0].plot(l_p, g_FAQ/l_eta.size, '-', color='c', label='FAQ')
-ax[1].plot(l_p, q_FAQ/l_eta.size, '-', color='c', label='FAQ')
+ax[1].plot(data.p, data.q_Zager, '-', color=c['Zager'], label=f'Zager')
+ax[1].fill_between(data.p, data.q_Zager - data.q_Zager_std, data.q_Zager + data.q_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
 
-ax[0].plot(l_p, g_Zager/l_eta.size, '--', color='w', label='Zager')
-ax[1].plot(l_p, q_Zager/l_eta.size, '--', color='w', label='Zager')
+ax[1].plot(data.p, data.q_FAQ, '-', color=c['FAQ'], label=f'FAQ')
+ax[1].fill_between(data.p, data.q_FAQ - data.q_FAQ_std, data.q_FAQ + data.q_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
-ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.95, 1.001])
 
-ax[0].set_xlabel('p')
-ax[1].set_xlabel('p')
+ax[0].set_ylim([0, 1.01])
+ax[1].set_ylim([0.9, 1.001])
+
+ax[0].set_xlabel('$n$')
+ax[1].set_xlabel('$n$')
 
 ax[0].set_ylabel('$\gamma$')
-ax[1].set_ylabel('$q$')
+ax[1].set_ylabel('$q_s$')
 
 ax[0].legend()
 ax[1].legend()

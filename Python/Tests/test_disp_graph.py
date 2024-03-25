@@ -4,7 +4,7 @@ import project
 from Network import *
 from  Comparison import *
 
-import AE.Network.ANN
+# import AE.Network.ANN
 
 os.system('clear')
 

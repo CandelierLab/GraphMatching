@@ -5,114 +5,85 @@ Star-branched graph: average gamma and q
 import os
 import numpy as np
 import pandas as pd
-import time
+import matplotlib.pyplot as plt
 
 import project
 from Network import *
-from Comparison import *
+from  Comparison import *
 
 os.system('clear')
 
 # === Parameters ===========================================================
 
-l_k = np.arange(2,11)
-l_n = np.arange(1,11)
+nRun = 100
 
-l_eta = [1e-3]
-nRun = 1000
+K = [3,6,9]
+ks = ['-', '--', ':']
+err_alpha = 0.2
 
 # ==========================================================================
 
 fname = project.root + f'/Files/Self-matching/SB/nRun={nRun:d}.csv'
 
-# Creating dataframe
-df = pd.DataFrame(columns=['k', 'n', 'eta', 'nRun', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
+if os.path.exists(fname):
 
-i = 0
+  # Load data
+  df = pd.read_csv(fname)
 
-for k in l_k:
-  for n in l_n:
+  # Retrieve l_k, l_n and l_eta
 
-    print(f'k={k:d}, n={n:d}, ', end='')
+  l_k = np.unique(df.k)
+  l_n = np.unique(df.n)
 
-    NetA = star_branched(k,n, directed=True)
+# --- Display --------------------------------------------------------------
 
-    for eta in l_eta:
+fig, ax = plt.subplots(1,2, figsize=(12,6))
 
-      print(f'{nRun:d} iterations: eta={eta:.05f} ...', end='')
-      start = time.time()
-      
-      g_FAQ = []
-      q_FAQ = []
-      g_Zager = []
-      g_GASM = []
-      q_Zager = []
-      q_GASM = []
+# Colors
+c = {'GASM': '#1B2ACC', 'eGASM': '#089FFF',
+     'Zager': '#CC4F1B', 'eZager': '#FF9848',
+     'FAQ': '#3F7F4C', 'eFAQ':'#7EFF99'}
 
-      for j in range(nRun):
+for ki, k in enumerate(K):
 
-        NetB, Idx = NetA.shuffle()
+  data = df.loc[df['k'] == k]
 
-        # --- FAQ
+  # --- Accuracy
 
-        C = Comparison(NetA, NetB)
-        M = C.get_matching(algorithm='FAQ')
-        M.compute_accuracy(Idx)
-        
-        g_FAQ.append(M.accuracy)
-        q_FAQ.append(M.structural_quality)
+  ax[0].plot(data.n, data.g_GASM, '-', color=c['GASM'], linestyle=ks[ki], label=f'GASM')
+  # ax[0].fill_between(data.h, data.g_GASM - data.g_GASM_std, data.g_GASM + data.g_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
 
-        # --- Zager
+  ax[0].plot(data.n, data.g_Zager, '-', color=c['Zager'], linestyle=ks[ki], label=f'Zager')
+  # ax[0].fill_between(data.h, data.g_Zager - data.g_Zager_std, data.g_Zager + data.g_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
 
-        C = Comparison(NetA, NetB)
-        M = C.get_matching(algorithm='Zager')
-        M.compute_accuracy(Idx)
+  ax[0].plot(data.n, data.g_FAQ, '-', color=c['FAQ'], linestyle=ks[ki], label=f'FAQ')
+  # ax[0].fill_between(data.h, data.g_FAQ - data.g_FAQ_std, data.g_FAQ + data.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
-        g_Zager.append(M.accuracy)
-        q_Zager.append(M.structural_quality)
+  # --- Structural quality
 
-        # --- GASM
+  ax[1].plot(data.n, data.q_GASM, '-', color=c['GASM'], linestyle=ks[ki], label=f'GASM')
+  ax[1].fill_between(data.n, data.q_GASM - data.q_GASM_std, data.q_GASM + data.q_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
 
-        C = Comparison(NetA, NetB)
-        M = C.get_matching(algorithm='GASM', eta=eta)
-        M.compute_accuracy(Idx)
+  ax[1].plot(data.n, data.q_Zager, '-', color=c['Zager'], linestyle=ks[ki], label=f'Zager')
+  ax[1].fill_between(data.n, data.q_Zager - data.q_Zager_std, data.q_Zager + data.q_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
 
-        g_GASM.append(M.accuracy)
-        q_GASM.append(M.structural_quality)
+  ax[1].plot(data.n, data.q_FAQ, '-', color=c['FAQ'], linestyle=ks[ki], label=f'FAQ')
+  ax[1].fill_between(data.n, data.q_FAQ - data.q_FAQ_std, data.q_FAQ + data.q_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
-      # --- Store
-        
-      # Parameters
-      df.loc[i, 'k'] = k
-      df.loc[i, 'n'] = n
-      df.loc[i, 'eta'] = eta
 
-      # Mean values
-      df.loc[i, 'g_FAQ'] = np.mean(g_FAQ)
-      df.loc[i, 'q_FAQ'] = np.mean(q_FAQ)
-      df.loc[i, 'g_Zager'] = np.mean(g_Zager)
-      df.loc[i, 'q_Zager'] = np.mean(q_Zager)
-      df.loc[i, 'g_GASM'] = np.mean(g_GASM)
-      df.loc[i, 'q_GASM'] = np.mean(q_GASM)
+# ax[0].set_xscale('log')
+ax[0].set_yscale('log')
 
-      # Standard deviations
-      df.loc[i, 'g_FAQ_std'] = np.std(g_FAQ)
-      df.loc[i, 'q_FAQ_std'] = np.std(q_FAQ)
-      df.loc[i, 'g_Zager_std'] = np.std(g_Zager)
-      df.loc[i, 'q_Zager_std'] = np.std(q_Zager)
-      df.loc[i, 'g_GASM_std'] = np.std(g_GASM)
-      df.loc[i, 'q_GASM_std'] = np.std(q_GASM)
+ax[0].set_ylim([0, 1])
+ax[1].set_ylim([0.9, 1])
 
-      i += 1
+ax[0].set_xlabel('$n$')
+ax[1].set_xlabel('$n$')
 
-      print('{:.02f} sec'.format((time.time() - start)))
+ax[0].set_ylabel('$\gamma$')
+ax[1].set_ylabel('$q_s$')
 
-# --- Save
-    
-print('Saving ...', end='')
-start = time.time()
+ax[0].legend()
+ax[1].legend()
 
-df.to_csv(fname)
-
-print('{:.02f} sec'.format((time.time() - start)))
-
+plt.show()
