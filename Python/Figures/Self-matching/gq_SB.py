@@ -17,6 +17,7 @@ os.system('clear')
 
 nRun = 1000
 
+l_k = [2, 5, 10]
 err_alpha = 0.2
 ks = ['-', '--', ':']
 
@@ -33,11 +34,11 @@ if os.path.exists(fname):
 
   # Retrieve l_k, l_n and l_eta
 
-  l_k = np.unique(df.k)
+  # l_k = np.unique(df.k)
   l_n = np.unique(df.n)
-  l_eta = np.unique(df.eta)
+  # l_eta = np.unique(df.eta)
 
-l_k = [2, 4, 8]
+
 
 # --- Display --------------------------------------------------------------
 
@@ -82,7 +83,7 @@ for ki, k in enumerate(l_k):
 ax[0].set_yscale('log')
 
 ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.9, 1])
+ax[1].set_ylim([0.85, 1])
 
 ax[0].set_xlabel('n')
 ax[1].set_xlabel('n')
@@ -92,7 +93,5 @@ ax[1].set_ylabel('$q$')
 
 ax[0].legend()
 ax[1].legend()
-
-ax[1].grid(True)
 
 plt.show()

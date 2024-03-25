@@ -55,6 +55,7 @@ ax[0].plot(df.h, df.g_FAQ, '-', color=c['FAQ'], label=f'FAQ')
 # ax[0].fill_between(df.h, df.g_FAQ - df.g_FAQ_std, df.g_FAQ + df.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
 # ax[0].plot(l_h, np.exp(-l_h/2), '--', color='k', label='Th')
+ax[0].plot(l_h, (l_h+1)/(2**(l_h+1) - 1), '--', color='k', label='Th')
 
 # --- Structural quality
 
@@ -70,8 +71,8 @@ ax[1].fill_between(df.h, df.q_FAQ - df.q_FAQ_std, df.q_FAQ + df.q_FAQ_std, alpha
 
 ax[0].set_yscale('log')
 
-ax[0].set_ylim([0,1])
-ax[1].set_ylim([0, 1])
+ax[0].set_ylim([0, 1])
+ax[1].set_ylim([0.75, 1])
 
 ax[0].set_xlabel('$h$')
 ax[1].set_xlabel('$h$')
