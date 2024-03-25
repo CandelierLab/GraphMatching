@@ -1,3 +1,6 @@
+'''
+Self-matching convergence
+'''
 import os
 import time
 import matplotlib.pyplot as plt

@@ -10,16 +10,13 @@ os.system('clear')
 # === Parameters ===========================================================
 
 n = 100
-
-# Average number of edges per node
-
-nIter = 10
-
+scale = 'lin'
+# scale = 'log'
 nRun = 100
 
 # --------------------------------------------------------------------------
 
-fname = project.root + '/Files/Normalization/ER/n={:d}_nIter={:d}_nRun={:d}.csv'.format(n, nIter, nRun)
+fname = project.root + f'/Files/Normalization/ER/{scale}_n={n:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 
@@ -34,9 +31,7 @@ mv = F.mean()
 s = F.std()
 
 # Simple normalization factor
-f0 = 4*x**2 + 1 
-
-# f1 = 4*x**2 + 4*x**0.8 + 1 
+f0 = np.minimum(4*x**2 + 1, 4*(n-x)**2 + 1)
 
 # === Display =================================================================
 
@@ -52,10 +47,11 @@ ax.plot(x, mv, '.')
 
 # ax.plot(x, f1, 'r-', linewidth=1)
 
-ax.set_xlabel('Ratio of edge per node')
+ax.set_xlabel('Average degree')
 ax.set_ylabel('Normalization factor')
 
-ax.set_xscale('log')
+if scale=='log':
+  ax.set_xscale('log')
 ax.set_yscale('log')
 
 ax.set_title('n = {:d}'.format(n))

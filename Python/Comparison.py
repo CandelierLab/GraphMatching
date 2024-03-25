@@ -54,7 +54,7 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def compute_scores(self, algorithm='GASM', normalization=None, **kwargs):
+  def compute_scores(self, algorithm='GASM', **kwargs):
     ''' 
     Score computation 
     
@@ -115,7 +115,6 @@ class Comparison:
   
         # Normalization
         if normalization is None:
-
           normalization = 4*mA*mB/nA/nB + 1
 
         # Noise
@@ -258,12 +257,10 @@ class Comparison:
 
         ''' === A note on normalization ===
 
-        Normalization is useful for proving the convergence of the algorithm, 
-        but is not necessary in the computation since the scores are relative
+        Normalization is useful for proving the convergence of the algorithm, but is not necessary in the computation since the scores are relative
         and not absolute.
         
-        So as long as the scores do not overflow the maximal float value, 
-        there is no need to normalize. But this can happen quite fast.
+        So as long as the scores do not overflow the maximal float value, there is no need to normalize. But this can happen quite fast.
 
         A good approximation of the normalization factor is:
 
@@ -273,14 +270,11 @@ class Comparison:
         
                 f = 2 sqrt(nA.nB.pA.pB)
 
-        Nevertheless, if one needs normalization as defined in Zager et.al.,
-        it can be performed after the iterative procedure by dividing the final
-        score matrices X and Y by:
+        Nevertheless, if one needs normalization as defined in Zager et.al., it can be performed after the iterative procedure by dividing the final score matrices X and Y by:
 
                 f = np.sqrt(np.sum(X**2))
 
-        This is more efficient than computing the normalization at each
-        iteration.
+        This is slightly more efficient than computing the normalization at each iteration.
         '''
 
         match algorithm:
@@ -305,9 +299,21 @@ class Comparison:
               self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1)
               self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At)
 
-        # Normalization 
+        # --- Normalization 
+              
         if normalization is not None:
-            self.X /= normalization
+            self.Y /= normalization
+
+        # --- Information
+            
+        if 'info_avgScores' in kwargs:
+
+          # Initialization
+          if 'avgX' not in self.info:
+            self.info['avgX'] = []
+
+          # Update
+          self.info['avgX'].append(np.mean(self.X))
 
       # --- Timing
           

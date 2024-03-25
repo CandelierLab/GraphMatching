@@ -13,24 +13,23 @@ os.system('clear')
 # === Parameters ===========================================================
 
 n = 100
-
-# Degrees (average number of edges per node)
-l_deg = np.geomspace(1/n, n, 29)
+scale = 'lin'
+# scale = 'log'
 
 nRun = 100
 
+
+# Degrees (average number of edges per node)
+match scale:
+  case 'lin':
+    l_deg = np.linspace(0, n, 31)
+  case 'log':
+    l_deg = np.geomspace(1/n, n, 31)
+
+
 # --------------------------------------------------------------------------
 
-fname = project.root + '/Files/Normalization/ER/n={:d}_nRun={:d}.csv'.format(n, nRun)
-
-# === Functions ============================================================
-
-def probe(V, param, out):
-
-  f = np.mean(V['X'])
-
-  # Output
-  out.append(f)
+fname = project.root + f'/Files/Normalization/ER/{scale}_n={n:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 
@@ -50,18 +49,17 @@ for deg in l_deg:
     NetA = Network(n)
     NetA.set_rand_edges('ER', int(deg*n))
 
-    NetB, Icorr = NetA.shuffle()
+    NetB, Idx = NetA.shuffle()
 
-    # NetB = Network(int(n))
-    # NetB.set_rand_edges('ER', int(deg*n))
+    # --- Matching
 
-    # --- Convergence
+    C = Comparison(NetA, NetB)
+    M = C.get_matching(algorithm='GASM', normalization=1, info_avgScores=True)
 
-    # Scores
-    X, Y, output = scores(NetA, NetB, normalization=1,
-                          i_function=probe, initial_evaluation=True)
-
-    f[run] = output[-1]/output[-2]
+    if 'avgX' in C.info and len(C.info['avgX'])>1:
+      f[run] = C.info['avgX'][-1]/C.info['avgX'][-2]
+    else:
+      f[run] = 1
 
   fac[deg] = f
 
