@@ -299,14 +299,14 @@ class Network:
   #                             PREPARATION
   # ========================================================================
 
-  def prepare(self):
+  def prepare(self, reset_edges=False):
 
     # Symmetrize adjacency matric for undirected graphs
     if not self.directed:
       self.Adj = np.logical_or(self.Adj, self.Adj.T)
 
     # Count edges
-    if self.nEd==0:
+    if self.nEd==0 or reset_edges:
       self.nEd = np.count_nonzero(self.Adj)
 
     # Edge list
@@ -459,7 +459,7 @@ class Network:
   
   # ========================================================================
 
-  def degrade(self, type, **kwargs):
+  def degrade(self, delta, type='Se', **kwargs):
     '''Network degradation
 
     Degradation can be done in many different ways ('type' argument):
@@ -469,6 +469,7 @@ class Network:
       'Ces': Change edge sources
       'Cet': Change edge targets
       'Cest': Change edge sources and targets
+      'Se': Switch edges (default)
     - Attributes:
       'Cna': Change node attributes
       'Cea': Change edge attributes
@@ -476,60 +477,40 @@ class Network:
       'Nea': add Gaussian noise to edge attribute
     '''
 
-    # !!! TO RECODE !!!
-
     # New network object
-    Det = copy.deepcopy(self)
+    Net = copy.deepcopy(self)
 
     match type:
 
-      case 'struct':
-        
+      case 'Se':
+
+        # ------------------------------------------------------------------
+        #     Switch edges
+        # ------------------------------------------------------------------
+
         # Number of modifications
-        if 'p' in kwargs:
-          n = round(kwargs['p']*Det.nEd)
-        else:
-          n = kwargs['n'] if 'n' in kwargs else 1
+        nmod = round(delta*self.nEd)
 
-        # --- Edges to remove
+        print('Number of edges', self.nEd)
+        print('Number of modifications', nmod)
 
-        I = np.where(Det.Adj)
-        nEtr = len(I[0])
+        # 0 → 1
+        Ip = np.random.choice(np.ravel_multi_index(np.where(self.Adj==0), (self.nNd, self.nNd)), nmod, replace=False)
+        Net.Adj[np.unravel_index(Ip,(self.nNd, self.nNd))] = 1
 
-        if n>nEtr:
-          raise Exception('Not enough edges to modify ({:d} asked for {:d} existing).'.format(n, nEtr)) 
+        # 1 → 0
+        In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nNd, self.nNd)), nmod, replace=False)
+        Net.Adj[np.unravel_index(In,(self.nNd, self.nNd))] = 0
+
+        print(np.ravel_multi_index(np.where(self.Adj==1), (self.nNd, self.nNd)))
+        print('In', In)
         
-        # --- Edges to create
-
-        J = np.where(Det.Adj==False)
-        nEtc = len(J[0])
-
-        if n>nEtc:
-          raise Exception('Too many edges to modify ({:d} asked for {:d} possible).'.format(n, nEtc)) 
-
-        # --- Operation
-
-        # Remove edges
-        K = np.random.choice(nEtr, n, replace=False)
-        Det.Adj[I[0][K], I[1][K]] = False
-
-        # Unmodified edges
-        Jcor = np.setdiff1d(range(Det.nEd), K)
-
-        # New edges
-        K = np.random.choice(nEtc, n, replace=False)
-        Det.Adj[J[0][K], J[1][K]] = True
-
-      case 'struct+attr':
-        pass
-
-      case 'attr':
-        pass
+    # --- Output
 
     # Preparation
-    Det.prepare()
+    Net.prepare(reset_edges=True)
 
-    return (Det, Jcor)
+    return Net
 
 # ##########################################################################
 #                        Graph generation functions

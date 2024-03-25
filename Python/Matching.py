@@ -209,12 +209,15 @@ class Matching:
     # Compute structural correspondence
     self.structural_quality = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
 
-  def compute_accuracy(self, Idx):
+  def compute_accuracy(self, Idx=None):
     '''
     Compute the matching accuracy
     '''
 
-    self.accuracy= np.count_nonzero(Idx[self.idxB]==self.idxA)/self.idxA.size
+    if Idx is None:
+      self.accuracy= np.count_nonzero(self.idxB==self.idxA)/self.idxA.size
+    else:
+      self.accuracy= np.count_nonzero(Idx[self.idxB]==self.idxA)/self.idxA.size
 
   def compute_score(self, X):
     '''

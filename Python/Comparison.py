@@ -348,6 +348,15 @@ class Comparison:
 
     match algorithm:
 
+      case 'random':
+
+        # Populate the matching object
+        Idx = np.arange(self.NetA.nNd)
+        np.random.shuffle(Idx)
+        M.from_lists(np.arange(self.NetA.nNd), Idx)
+
+        M.time['total'] = (time.perf_counter_ns()-tref)*1e-6
+
       case 'FAQ':
 
         # Solve the Quadratic Assignment Problem        
@@ -359,8 +368,6 @@ class Comparison:
         # Populate the matching object
         M.from_lists(np.arange(self.NetA.nNd), res.col_ind)
         M.score = res.fun
-
-        return M
 
       case 'Zager' | 'GASM':
 
@@ -406,6 +413,6 @@ class Comparison:
         M.from_lists(idxA, idxB)
         M.compute_score(self.X)
 
-        # --- Output
-        
-        return M
+    # --- Output
+    
+    return M
