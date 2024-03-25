@@ -32,6 +32,8 @@ if os.path.exists(fname):
 
   l_n = np.unique(df.n)
 
+print(df)
+
 # --- Display --------------------------------------------------------------
 
 fig, ax = plt.subplots(1,2, figsize=(12,6))

@@ -54,7 +54,7 @@ ax[0].plot(df.h, df.g_Zager, '-', color=c['Zager'], label=f'Zager')
 ax[0].plot(df.h, df.g_FAQ, '-', color=c['FAQ'], label=f'FAQ')
 # ax[0].fill_between(df.h, df.g_FAQ - df.g_FAQ_std, df.g_FAQ + df.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
-ax[0].plot(l_h, np.exp(-l_h/2), '--', color='k', label='Th')
+# ax[0].plot(l_h, np.exp(-l_h/2), '--', color='k', label='Th')
 
 # --- Structural quality
 

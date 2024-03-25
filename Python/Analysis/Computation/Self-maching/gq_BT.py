@@ -16,7 +16,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 r = 2
-l_h = np.arange(2,10)
+l_h = np.arange(2,11)
 
 # r = 3
 # l_h = np.arange(2,8)
@@ -39,7 +39,7 @@ for h in l_h:
   NetA = Network(nx=nx.balanced_tree(r, h))
 
   # Number of runs
-  nRun = int(np.ceil(2.0**(10-h)))
+  nRun = int(np.ceil(2.0**(13-h)))
 
   for eta in l_eta:
 
