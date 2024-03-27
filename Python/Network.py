@@ -14,12 +14,12 @@ class Network:
     
   # === CONSTRUCTOR ========================================================
 
-  def __init__(self, nNode=0, directed=True, nx=None):
+  def __init__(self, nV=0, directed=True, nx=None):
 
     # Numbers
-    self.nNd = nNode
-    self.nNa = 0
-    self.nEd = 0
+    self.nV = nV
+    self.nVa = 0
+    self.nE = 0
     self.nEa = 0
 
     # Edges
@@ -31,10 +31,10 @@ class Network:
 
     # Attributes
     self.edge_attr = []
-    self.node_attr = []
+    self.vrtx_attr = []
 
     # Connected
-    self.isconnected = None
+    self.is_strongly_connected = None
 
     # Diameter
     self.d = None
@@ -42,7 +42,8 @@ class Network:
     # --- Networkx
 
     if nx is None:
-      self.G = None
+      self.nx = None
+      self.nxu = None
     else:
       self.import_from_networkx(nx)
 
@@ -56,10 +57,14 @@ class Network:
   # ------------------------------------------------------------------------
 
   def display(self):
-    ''' Display with matplotlib '''
+    '''
+    Display with matplotlib
+    '''
 
     import matplotlib.pyplot as plt
-    nx.draw(self.G)
+
+    nx.draw(self.nx)
+    
     plt.show()
 
   # ------------------------------------------------------------------------
@@ -67,12 +72,14 @@ class Network:
   # ------------------------------------------------------------------------
 
   def __repr__(self):
-    ''' Basic info on the network'''
+    ''' 
+    Some info on the network
+    '''
 
     pa.line(self.__class__.__name__)
 
-    s = f'\nNumber of nodes: {self.nNd}\n'
-    s += f'Number of edges: {self.nEd}\n'
+    s = f'\nNumber of vertices: {self.nV}\n'
+    s += f'Number of edges: {self.nE}\n'
 
     return s
   
@@ -87,22 +94,22 @@ class Network:
 
     # --- Network properties
 
-    if self.isconnected is not None:
-      print('The graph is {:s}connected'.format('' if self.isconnected else 'dis'))
+    if self.is_strongly_connected is not None:
+      print('The graph is strongly {:s}connected'.format('' if self.is_strongly_connected else 'dis'))
 
     if self.d is not None:
       print('Diameter: {:d}'.format(self.d))
 
-    # --- Node attributes
+    # --- Vertex attributes
 
-    for i in range(self.nNa):
+    for i in range(self.nVa):
 
-      attr = self.node_attr[0]
+      attr = self.vrtx_attr[0]
 
       if 'name' in attr:
-        print("\nNode attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
+        print("\nVertex attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
       else:
-        print('\nNode attribute {:d}:'.format(i))
+        print('\nVertex attribute {:d}:'.format(i))
 
       print('', attr['values'])
 
@@ -129,22 +136,27 @@ class Network:
 
   def import_from_networkx(self, G):
 
-    # Networkx graph
-    self.G = G
-    self.directed = self.G.is_directed()  
+    # Assign netorkx graph
+    self.nx = G
 
-    # Number of nodes
-    self.nNd = self.G.number_of_nodes()
+    # Directivity
+    self.directed = G.is_directed()
+
+    # Undirected flavor
+    self.nxu = G.to_undirected() if self.directed else self.nx
 
     # Adjacency matrix
-    self.Adj = np.full((self.nNd, self.nNd), False)
-    
-    E = np.array([e for e in self.G.edges])
-    self.Adj[E[:,0], E[:,1]] = True
-      
+    self.Adj = nx.to_numpy_array(self.nx, dtype=bool)
+
+    # Number of vertices
+    self.nV = self.nx.number_of_nodes()
+
+    # Number of edges
+    self.nE = self.nx.number_of_edges()
+
     # Preparation
     self.prepare()
-
+    
   # ========================================================================
   #                             GENERATION
   # ========================================================================
@@ -160,7 +172,7 @@ class Network:
     per node n_epn (float).
     '''
 
-    A = np.random.rand(self.nNd, self.nNd)
+    A = np.random.rand(self.nV, self.nV)
 
     match method:
 
@@ -172,14 +184,14 @@ class Network:
         if n_edges is not None:
           p = n_edges
         elif p_edges is not None:
-          p = int(np.round(p_edges*self.nNd**2))
+          p = int(np.round(p_edges*self.nV**2))
         elif n_epn is not None:
-          p = int(np.round(n_epn*self.nNd))
+          p = int(np.round(n_epn*self.nV))
         else:
           raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
 
-        if p==self.nNd**2:
-          self.Adj = np.full((self.nNd,self.nNd), True)
+        if p==self.nV**2:
+          self.Adj = np.full((self.nV,self.nV), True)
         else:
           self.Adj = A < np.sort(A.flatten())[p]
 
@@ -189,18 +201,18 @@ class Network:
 
         # --- Define p as a proportion of edges
         if n_edges is not None:
-          p = n_edges/self.nNd**2
+          p = n_edges/self.nV**2
         elif p_edges is not None:
           p = p_edges
         elif n_epn is not None:
-          p = n_epn/self.nNd
+          p = n_epn/self.nV
         else:
           raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
 
         self.Adj = A < p
 
     # Update number of edges
-    self.nEd = np.count_nonzero(self.Adj)
+    self.nE = np.count_nonzero(self.Adj)
 
     # Prepare structure
     self.prepare()
@@ -223,7 +235,7 @@ class Network:
 
           # Attribute
           attr = {'measurable': True, 
-                  'values': np.random.random(self.nEd)*(Mv-mv) + mv}
+                  'values': np.random.random(self.nE)*(Mv-mv) + mv}
 
         case 'gauss':
           
@@ -233,7 +245,7 @@ class Network:
 
           # Attribute
           attr = {'measurable': True, 
-                  'values': mu + sigma*np.random.randn(self.nEd)}
+                  'values': mu + sigma*np.random.randn(self.nE)}
 
     else:
       
@@ -269,7 +281,7 @@ class Network:
 
           # Attribute
           attr = {'measurable': True, 
-                  'values': np.random.random(self.nNd)*(Mv-mv) + mv}
+                  'values': np.random.random(self.nV)*(Mv-mv) + mv}
 
         case 'gauss':
           
@@ -279,7 +291,7 @@ class Network:
 
           # Attribute
           attr = {'measurable': True, 
-                  'values': mu + sigma*np.random.randn(self.nNd)}
+                  'values': mu + sigma*np.random.randn(self.nV)}
 
     else:
       
@@ -290,39 +302,52 @@ class Network:
       attr['name'] = kwargs['name']
 
     # Append attribute
-    self.node_attr.append(attr)
+    self.vrtx_attr.append(attr)
 
     # Update number of node attributes
-    self.nNa = len(self.node_attr)
+    self.nVa = len(self.vrtx_attr)
 
   # ========================================================================
   #                             PREPARATION
   # ========================================================================
 
-  def prepare(self, reset_edges=False):
+  def prepare(self):
+    '''
+    Prepares the network for comparison by:
+    - Compute the graph connected state
+    - Computing the graph diameter
+    - Computing the As and At matrices.
 
-    # Symmetrize adjacency matric for undirected graphs
-    if not self.directed:
-      self.Adj = np.logical_or(self.Adj, self.Adj.T)
+    Also: 
+    - establish the list of edges if it is empty
+    - Perform other measurements:
+      + strong connectivity (is every vertex reachable from any vertex)
+      + diameter
+    '''
 
-    # Count edges
-    if self.nEd==0 or reset_edges:
-      self.nEd = np.count_nonzero(self.Adj)
+    # --- Preparation
 
     # Edge list
-    self.edges = np.zeros((self.nEd,2), dtype=np.int32)
+    list_edges = self.edges is None
 
-    # --- Source-edge and terminus-edge matrices
+    if list_edges:
+      self.edges = np.zeros((self.nE, 2), dtype=np.int32)
 
-    self.As = np.zeros((self.nNd, self.nEd))
-    self.At = np.zeros((self.nNd, self.nEd))
+    # Source-edge and terminus-edge matrices
+    self.As = np.zeros((self.nV, self.nE))
+    self.At = np.zeros((self.nV, self.nE))
+
+    # --- Loop through edges
 
     I = np.where(self.Adj)
 
     for i in range(len(I[0])):
-      self.edges[i,:] = [I[0][i], I[1][i]]
+
       self.As[I[0][i], i] = 1
       self.At[I[1][i], i] = 1
+
+      if list_edges:
+        self.edges[i,:] = [I[0][i], I[1][i]]
 
     # Conversion to sparse
     # Strangely slows down when there are several matrix multiplications
@@ -331,19 +356,16 @@ class Network:
 
     # --- Other measurements
 
-    if self.nEd>0:
+    if self.nE:
       
-      # Networkx
-      self.G = nx.from_numpy_array(self.Adj)
-
       # Connectivity
-      self.isconnected = nx.is_connected(self.G)
+      self.is_strongly_connected = nx.is_strongly_connected(self.nx)
 
       # Diameter
-      if self.isconnected:
-        self.d = nx.diameter(self.G)
+      if self.is_strongly_connected:
+        self.d = nx.diameter(self.nx)
       else:
-        self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.G)])
+        self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.nx)])
 
     else:
 
@@ -359,7 +381,7 @@ class Network:
     Met = copy.deepcopy(self)
 
     # Shuffling indexes
-    Icor = np.arange(self.nNd)
+    Icor = np.arange(self.nV)
     np.random.shuffle(Icor)
 
     # Adjacency matrix
@@ -392,7 +414,7 @@ class Network:
   def complement(self):
 
     # New network object
-    Met = Network(nNode=self.nNd, directed=self.directed)
+    Met = Network(nNode=self.nV, directed=self.directed)
 
     # Adjacency matrix
     Met.Adj = np.logical_not(self.Adj)
@@ -402,7 +424,7 @@ class Network:
 
     # --- Node attributes
 
-    Met.node_attr = self.node_attr
+    Met.node_attr = self.vrtx_attr
 
     # NB: No edge attribute when complementing.
 
@@ -410,18 +432,100 @@ class Network:
 
   # ========================================================================
 
-  def subnet(self, idx):
+  def degrade(self, type, delta, preserval=False, **kwargs):
+    '''
+    Network degradation
+
+    Degradation can be done in many different ways ('type' argument):
+    - Structure:
+      'nd_rm', 'nr': Remove nodes (and the corresponding edges), equivalent to subgraph matching
+      'ed_rm', 'er': Remove edges
+      'ed_sw_src', 'es': Swap edges' sources
+      'ed_sw_tgt', 'et': Swap edges' targets
+      'ed_mv', 'em': Move edges, ie swap both sources and targets.
+
+    - Attributes (to redo):
+      'Cna': Change node attributes
+      'Cea': Change edge attributes
+      'Nna': add Gaussian noise to node attribute
+      'Nea': add Gaussian noise to edge attribute
+
+    + Can be at random (preserval=False) or in a given graph area (preserval=True)
+    '''
+
+    # New network object
+    Net = copy.deepcopy(self)
+
+    match type:
+
+      case 'ed_rm' | 'er':
+
+        # ------------------------------------------------------------------
+        #     Remove edges
+        # ------------------------------------------------------------------
+
+        # Number of modifications
+        nmod = round(delta*self.nE)
+        
+        if preserval:
+
+          # Edge BFS with random node seed
+          print(self.directed, self.nx.is_directed())
+          Z = list(nx.edge_bfs(self.nx, source=0, orientation='ignore'))
+          print(Z)
+
+          # Indices
+
+          pass
+
+        else:
+
+          # Indices
+          I = np.ravel_multi_index(np.where(self.Adj), (self.nV, self.nV))
+          J = np.random.choice(I, nmod, replace=False)
+          K = np.unravel_index(J, (self.nV, self.nV))
+
+          # Remove
+          Net.Adj[K] = 0
+
+      case 'Me':
+
+        # ------------------------------------------------------------------
+        #     Move edges
+        # ------------------------------------------------------------------
+
+        # Number of modifications
+        nmod = round(delta*self.nE)
+
+        # 0 → 1
+        Ip = np.random.choice(np.ravel_multi_index(np.where(self.Adj==0), (self.nV, self.nV)), nmod, replace=False)
+        Net.Adj[np.unravel_index(Ip,(self.nV, self.nV))] = 1
+
+        # 1 → 0
+        In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nV, self.nV)), nmod, replace=False)
+        Net.Adj[np.unravel_index(In,(self.nV, self.nV))] = 0
+        
+    # --- Output
+
+    # Preparation
+    Net.prepare(reset_edges=True)
+
+    return Net
+
+  # ========================================================================
+
+  def subgraph(self, idx):
 
     # Create subnetwork
     Sub = type(self)()
 
     # Check
-    if not isinstance(idx, list) and idx>self.nNd:
-      raise Exception(f"Subnetwork: The number of nodes in the subnet ({idx}) is greater than in the original network ({self.nNd})")
+    if not isinstance(idx, list) and idx>self.nV:
+      raise Exception(f"Subnetwork: The number of nodes in the subnet ({idx}) is greater than in the original network ({self.nV})")
 
     # Indexes
-    I = idx if isinstance(idx, list) else np.random.choice(range(self.nNd), idx, replace=False)
-    # I = idx if isinstance(idx, list) else random.sample(range(self.nNd), idx)
+    I = idx if isinstance(idx, list) else np.random.choice(range(self.nV), idx, replace=False)
+    # I = idx if isinstance(idx, list) else random.sample(range(self.nV), idx)
     K = np.ix_(I,I)
 
     # Adjacency matrix
@@ -431,7 +535,7 @@ class Network:
 
     Sub.nNd = len(I)
     Sub.nEd = np.count_nonzero(Sub.Adj)
-    Sub.nNa = self.nNa
+    Sub.nNa = self.nVa
     Sub.nEa = self.nEa
 
      # Preparation
@@ -439,7 +543,7 @@ class Network:
 
     # --- Node attributes
 
-    for attr in self.node_attr:
+    for attr in self.vrtx_attr:
 
       Sub.add_node_attr( {'measurable': attr['measurable'], 'values': attr['values'][I]} )
     
@@ -457,59 +561,40 @@ class Network:
 
     return Sub if isinstance(idx, list) else (Sub, I)
   
-  # ========================================================================
-
-  def degrade(self, delta, type='Se', **kwargs):
-    '''Network degradation
-
-    Degradation can be done in many different ways ('type' argument):
-    - Structure:
-      'Rn': Remove nodes (and the corresponding edges)
-      'Re': Remove edges
-      'Ces': Change edge sources
-      'Cet': Change edge targets
-      'Cest': Change edge sources and targets
-      'Se': Switch edges (default)
-    - Attributes:
-      'Cna': Change node attributes
-      'Cea': Change edge attributes
-      'Nna': add Gaussian noise to node attribute
-      'Nea': add Gaussian noise to edge attribute
-    '''
-
-    # New network object
-    Net = copy.deepcopy(self)
-
-    match type:
-
-      case 'Se':
-
-        # ------------------------------------------------------------------
-        #     Switch edges
-        # ------------------------------------------------------------------
-
-        # Number of modifications
-        nmod = round(delta*self.nEd)
-
-        # 0 → 1
-        Ip = np.random.choice(np.ravel_multi_index(np.where(self.Adj==0), (self.nNd, self.nNd)), nmod, replace=False)
-        Net.Adj[np.unravel_index(Ip,(self.nNd, self.nNd))] = 1
-
-        # 1 → 0
-        In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nNd, self.nNd)), nmod, replace=False)
-        Net.Adj[np.unravel_index(In,(self.nNd, self.nNd))] = 0
-        
-    # --- Output
-
-    # Preparation
-    Net.prepare(reset_edges=True)
-
-    return Net
-
 # ##########################################################################
 #                        Graph generation functions
 # ##########################################################################
-  
+
+# ------------------------------------------------------------------------
+#                        Random graphs (Erdös-Rényi)
+# ------------------------------------------------------------------------
+
+def Gnm(n, m=None, p=None, a=None):
+  '''
+  G(n,m) or Erdös-Rényi random graph.
+  In the ER model, the number of edges m is guaranteed.
+
+  The parameter controlling the number of edges can be either:
+  - The number of edges m (int)
+  - The proportion of edges p (float, in [0,1])
+  - The average number of edges per node a (float).
+  '''
+
+  # Number of edges
+  if m is None:
+
+    if p is not None:
+      m = int(np.round(p*n**2))
+
+    elif a is not None:
+      m = int(np.round(a*n))
+
+    else:
+      raise Exception("The number of edges has to be defined with at least one of the parameters: 'm', 'p' or 'a'.") 
+
+  # Network
+  return Network(nx=nx.dense_gnm_random_graph(n, m, seed=np.random))
+
 # ------------------------------------------------------------------------
 #                           Star-branched-graph
 # ------------------------------------------------------------------------
