@@ -1,7 +1,6 @@
 Rewriting
-- Check complement
-- Check shuffle
 - Degradation
+- Subgraph
 
 Analysis.Computation
 - Rewrite and rerun all Supplementaries

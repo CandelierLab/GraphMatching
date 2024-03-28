@@ -213,7 +213,7 @@ class Graph:
 
   # ------------------------------------------------------------------------
 
-  def add_node_attr(self, *args, **kwargs):
+  def add_vrtx_attr(self, *args, **kwargs):
     '''
     In case attr is fed directly, it should have the following structure:
     attr = {'measurable': bool, 'values': val}
@@ -342,59 +342,72 @@ class Graph:
   # ========================================================================
 
   def shuffle(self):
+    '''
+    Deep copy shuffled version of the graph, and shuffling indices.
+    Use np.random for the RNG.
+    '''
 
     # New Graph object
-    Met = copy.deepcopy(self)
+    H = copy.deepcopy(self)
 
     # Shuffling indexes
     Icor = np.arange(self.nV)
     np.random.shuffle(Icor)
 
     # Adjacency matrix
-    Met.Adj = Met.Adj[Icor, :][:, Icor]
+    H.Adj = H.Adj[Icor, :][:, Icor]
 
     # Preparation
-    Met.prepare()
+    H.prepare()
 
     # --- Node attributes
 
-    for i, attr in enumerate(Met.node_attr):
-      Met.node_attr[i]['values'] = attr['values'][Icor]
+    if self.nVa:
+      for i, attr in enumerate(H.vrtx_attr):
+        H.vrtx_attr[i]['values'] = attr['values'][Icor]
 
     # --- Edge attributes
 
     if self.nEa:
 
-      # NB: Preparation has to be done before this point.
+      # NB: The edge list is necessary at this point, so preparation has to be done.
 
       # Compute indexes
-      J = [np.where(np.all(self.edges==[Icor[e[0]], Icor[e[1]]], axis=1))[0][0] for e in Met.edges]
+      J = [np.where(np.all(self.edges==[Icor[e[0]], Icor[e[1]]], axis=1))[0][0] for e in H.edges]
       
-      for i, attr in enumerate(Met.edge_attr):
-        Met.edge_attr[i]['values'] = attr['values'][J]
+      for i, attr in enumerate(H.edge_attr):
+        H.edge_attr[i]['values'] = attr['values'][J]
 
-    return (Met, Icor)
+    return (H, Icor)
 
   # ========================================================================
 
   def complement(self):
+    '''
+    Complementary graph
+
+    NB: No edge attribute can be kept when complementing.
+    '''
 
     # New Graph object
-    Met = Graph(nNode=self.nV, directed=self.directed)
+    H = Graph(nV=self.nV, directed=self.directed)
 
     # Adjacency matrix
-    Met.Adj = np.logical_not(self.Adj)
+    H.Adj = np.logical_not(self.Adj)
+
+    # Number of edges
+    H.nEd = np.count_nonzero(H.Adj)
+    H.nE = H.nEd if H.directed else np.count_nonzero(np.triu(H.Adj))
 
     # Preparation
-    Met.prepare()
+    H.prepare()
 
     # --- Node attributes
 
-    Met.node_attr = self.vrtx_attr
+    H.nVa = self.nVa
+    H.vrtx_attr = self.vrtx_attr
 
-    # NB: No edge attribute when complementing.
-
-    return Met
+    return H
 
   # ========================================================================
 
