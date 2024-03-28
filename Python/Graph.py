@@ -14,7 +14,7 @@ class Graph:
     
   # === CONSTRUCTOR ========================================================
 
-  def __init__(self, nV=0, directed=True, nx=None):
+  def __init__(self, nV=0, directed=True, Adj=None, nx=None):
 
     # Numbers
     self.nV = nV  # Number of verticex
@@ -40,7 +40,7 @@ class Graph:
     # Diameter
     self.d = None
 
-    # --- Networkx
+    # --- Imports
 
     if nx is None:
       self.nx = None
@@ -48,6 +48,8 @@ class Graph:
     else:
       self.import_from_networkx(nx)
 
+    if Adj is not None:
+      self.from_adjacency_matrix(Adj)
 
   # ========================================================================
   #                             DISPLAY
@@ -139,6 +141,22 @@ class Graph:
   # ========================================================================
   #                             IMPORT
   # ========================================================================
+
+  def from_adjacency_matrix(self, Adj):
+
+    # Check adjacency matrix is symmetric for undirected graphs
+    if not self.directed:
+      Adj = np.logical_or(Adj, Adj.T)
+
+    # Adjacency matrix
+    self.Adj = Adj
+
+    # Edges
+    self.nEd = np.count_nonzero(self.Adj)
+    self.nE = self.nEd if self.directed else np.count_nonzero(np.triu(self.Adj))
+
+    # Finalize preparation
+    self.prepare()
 
   def import_from_networkx(self, G):
 
@@ -411,13 +429,13 @@ class Graph:
 
   # ========================================================================
 
-  def degrade(self, type, delta, preserval=False, **kwargs):
+  def degrade(self, type, delta, preserval=False, source=None, **kwargs):
     '''
     Graph degradation
 
     Degradation can be done in many different ways ('type' argument):
     - Structure:
-      'vx_rm', 'vr': Remove vertices (and the corresponding edges), equivalent to subgraph matching
+      'vx_rm', 'vr': Remove vertices (and the corresponding edges), equivalent to subgraph generation
       'ed_rm', 'er': Remove edges
       'ed_sw_src', 'es': Swap edges' sources
       'ed_sw_tgt', 'et': Swap edges' targets
@@ -432,8 +450,11 @@ class Graph:
     + Can be at random (preserval=False) or in a given graph area (preserval=True)
     '''
 
+    # Checks
+    delta = min(max(delta,0),1)
+
     # New Graph object
-    Net = copy.deepcopy(self)
+    H = copy.deepcopy(self)
 
     match type:
 
@@ -449,7 +470,6 @@ class Graph:
         if preserval:
 
           # Edge BFS with random node seed
-          print(self.directed, self.nx.is_directed())
           Z = list(nx.edge_bfs(self.nx, source=0, orientation='ignore'))
           print(Z)
 
@@ -465,7 +485,7 @@ class Graph:
           K = np.unravel_index(J, (self.nV, self.nV))
 
           # Remove
-          Net.Adj[K] = 0
+          H.Adj[K] = 0
 
       case 'Me':
 
@@ -478,18 +498,18 @@ class Graph:
 
         # 0 → 1
         Ip = np.random.choice(np.ravel_multi_index(np.where(self.Adj==0), (self.nV, self.nV)), nmod, replace=False)
-        Net.Adj[np.unravel_index(Ip,(self.nV, self.nV))] = 1
+        H.Adj[np.unravel_index(Ip,(self.nV, self.nV))] = 1
 
         # 1 → 0
         In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nV, self.nV)), nmod, replace=False)
-        Net.Adj[np.unravel_index(In,(self.nV, self.nV))] = 0
+        H.Adj[np.unravel_index(In,(self.nV, self.nV))] = 0
         
     # --- Output
 
     # Preparation
-    Net.prepare(reset_edges=True)
+    H.prepare()
 
-    return Net
+    return H
 
   # ========================================================================
 
@@ -548,7 +568,7 @@ class Graph:
 #                        Random graphs (Erdös-Rényi)
 # ------------------------------------------------------------------------
 
-def Gnm(n, m=None, p=None, a=None, directed=True):
+def Gnm(n, m=None, p=None, a=None, directed=True, selfloops=True):
   '''
   G(n,m) or Erdös-Rényi random graph.
   In the ER model, the number of edges m is guaranteed.
@@ -571,10 +591,30 @@ def Gnm(n, m=None, p=None, a=None, directed=True):
     else:
       raise Exception("The number of edges has to be defined with at least one of the parameters: 'm', 'p' or 'a'.") 
 
-  # Graph
-  return Graph(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
+  # Check boundaries
+  m = min(max(m, 0), n**2)
 
-def Gnp(n, p=None, m=None, a=None, directed=True):
+  # Selfloops
+  if selfloops:
+
+    if m==0:
+      Adj = np.full((n,n), False)
+    elif m==n**2:
+      Adj = np.full((n,n), True)
+    else:
+      A = np.random.rand(n,n)
+      Adj = A < np.sort(A.flatten())[p]
+
+    # Output
+    return Graph(nV=n, directed=directed, Adj=Adj)
+
+  else:
+
+    return Graph(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
+
+    
+
+def Gnp(n, p=None, m=None, a=None, directed=True, selfloops=True):
   '''
   G(n,p) or Erdös-Rényi-Gilbert random graph.
   In the ERG model, the number of edges m is not guaranteed.
@@ -595,9 +635,25 @@ def Gnp(n, p=None, m=None, a=None, directed=True):
     else:
       raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'p', 'm' or 'a'.") 
 
-  # Graph
-  return Graph(nx=nx.gnp_random_graph(n, p, seed=np.random, directed=directed))
+  # Check boundaries
+  p = min(max(p, 0), 1)
 
+  # Selfloops
+  if selfloops:
+
+    if p==0:
+      Adj = np.full((n,n), False)
+    elif p==1:
+      Adj = np.full((n,n), True)
+    else:
+      Adj = np.random.rand(n,n) < p
+
+    # Output
+    return Graph(nV=n, directed=directed, Adj=Adj)
+
+  else:
+
+    return Graph(nx=nx.gnp_random_graph(n, p, seed=np.random, directed=directed))
 
 # ------------------------------------------------------------------------
 #                           Star-branched-graph
@@ -612,33 +668,18 @@ def star_branched(k, n, directed=False):
   The central node index is 0.
   '''
 
-  # Define Graph
-  G = Graph(k*n+1, directed=directed)
+  nV = k*n+1
 
   # --- Edges and adjacency matrix
 
-  G.Adj = np.full((G.nV, G.nV), False)
+  Adj = np.full((nV, nV), False)
 
   z = 0
   for ki in range(k):
     z+=1
-    G.Adj[0,z] = True
+    Adj[0,z] = True
     for ni in range(n-1):
-      G.Adj[z,z+1] = True
+      Adj[z,z+1] = True
       z+=1
 
-  # Edges
-  G.nE = np.count_nonzero(G.Adj)
-
-  # Symmetrize adjacency matrix
-  if not directed:
-    G.Adj = np.logical_or(G.Adj, G.Adj.T)
-
-  # Directed edges
-  G.nEd = np.count_nonzero(G.Adj)
-
-  # Finalize preparation
-  G.prepare()
-
-  return G
-    
+  return Graph(nV, directed=directed, Adj=Adj)

@@ -14,17 +14,14 @@ nA = 10
 
 # --------------------------------------------------------------------------
 
-# Net = Gnp(10, 0.1, directed=True)
-Net = star_branched(2, 2, directed=False)
+# G = Gnp(10, 0.1, directed=True)
+G = star_branched(3, 5, directed=False)
 
-# Net = Network(nx=nx.balanced_tree(2, 3, create_using=nx.DiGraph))
+# G = Network(nx=nx.balanced_tree(2, 3, create_using=nx.DiGraph))
 
-G = Net.complement()
-
-Net.print()
 G.print()
 
-# Net.display()
+G.display()
 
 # --- Display with AE ------------------------------------------------------
 

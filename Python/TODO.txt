@@ -1,5 +1,6 @@
 Rewriting
 - Degradation
+- Comparison / Matching
 - Subgraph
 
 Analysis.Computation
