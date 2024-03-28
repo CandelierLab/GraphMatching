@@ -17,10 +17,11 @@ class Network:
   def __init__(self, nV=0, directed=True, nx=None):
 
     # Numbers
-    self.nV = nV
-    self.nVa = 0
-    self.nE = 0
-    self.nEa = 0
+    self.nV = nV  # Number of verticex
+    self.nVa = 0  # NUmber of vertex attributes
+    self.nE = 0   # Number of edges 
+    self.nEd = 0  # Number of directed edges (nE for directed graphs, 2*nE for undirected graphs)
+    self.nEa = 0  # Number of edge attributes
 
     # Edges
     self.directed = directed
@@ -34,7 +35,7 @@ class Network:
     self.vrtx_attr = []
 
     # Connected
-    self.is_strongly_connected = None
+    self.connected = None
 
     # Diameter
     self.d = None
@@ -78,7 +79,8 @@ class Network:
 
     pa.line(self.__class__.__name__)
 
-    s = f'\nNumber of vertices: {self.nV}\n'
+    s = f'\nDirected\n' if self.directed else f'\nUndirected\n'
+    s += f'Number of vertices: {self.nV}\n'
     s += f'Number of edges: {self.nE}\n'
 
     return s
@@ -94,8 +96,12 @@ class Network:
 
     # --- Network properties
 
-    if self.is_strongly_connected is not None:
-      print('The graph is strongly {:s}connected'.format('' if self.is_strongly_connected else 'dis'))
+    if self.connected is not None:
+      if self.directed:
+        print('The graph is strongly {:s}connected'.format('' if self.connected else 'dis'))
+      else:
+        print('The graph is {:s}connected'.format('' if self.connected else 'dis'))
+
 
     if self.d is not None:
       print('Diameter: {:d}'.format(self.d))
@@ -153,6 +159,7 @@ class Network:
 
     # Number of edges
     self.nE = self.nx.number_of_edges()
+    self.nEd = np.count_nonzero(self.Adj)
 
     # Preparation
     self.prepare()
@@ -165,57 +172,57 @@ class Network:
   #                          Random structure
   # ------------------------------------------------------------------------
 
-  def set_rand_edges(self, method='ERG', n_edges=None, p_edges=None, n_epn=None):
-    '''
-    NB: the parameter p can be either the number of edges n_edges (int), the 
-    proportion of edges p_edges (float, in [0,1]) or the number of edges
-    per node n_epn (float).
-    '''
+  # def set_rand_edges(self, method='ERG', n_edges=None, p_edges=None, n_epn=None):
+  #   '''
+  #   NB: the parameter p can be either the number of edges n_edges (int), the 
+  #   proportion of edges p_edges (float, in [0,1]) or the number of edges
+  #   per node n_epn (float).
+  #   '''
 
-    A = np.random.rand(self.nV, self.nV)
+  #   A = np.random.rand(self.nV, self.nV)
 
-    match method:
+  #   match method:
 
-      case 'Erdös-Rényi' | 'ER':
-        # In the ER model, the number of edges is guaranteed.
+  #     case 'Erdös-Rényi' | 'ER':
+  #       # In the ER model, the number of edges is guaranteed.
 
-        # --- Define p as a number of edges
+  #       # --- Define p as a number of edges
 
-        if n_edges is not None:
-          p = n_edges
-        elif p_edges is not None:
-          p = int(np.round(p_edges*self.nV**2))
-        elif n_epn is not None:
-          p = int(np.round(n_epn*self.nV))
-        else:
-          raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
+  #       if n_edges is not None:
+  #         p = n_edges
+  #       elif p_edges is not None:
+  #         p = int(np.round(p_edges*self.nV**2))
+  #       elif n_epn is not None:
+  #         p = int(np.round(n_epn*self.nV))
+  #       else:
+  #         raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
 
-        if p==self.nV**2:
-          self.Adj = np.full((self.nV,self.nV), True)
-        else:
-          self.Adj = A < np.sort(A.flatten())[p]
+  #       if p==self.nV**2:
+  #         self.Adj = np.full((self.nV,self.nV), True)
+  #       else:
+  #         self.Adj = A < np.sort(A.flatten())[p]
 
-      case 'Erdös-Rényi-Gilbert' | 'ERG':
-        # In the ERG the edges are drawn randomly so the exact number of 
-        # edges is not guaranteed.
+  #     case 'Erdös-Rényi-Gilbert' | 'ERG':
+  #       # In the ERG the edges are drawn randomly so the exact number of 
+  #       # edges is not guaranteed.
 
-        # --- Define p as a proportion of edges
-        if n_edges is not None:
-          p = n_edges/self.nV**2
-        elif p_edges is not None:
-          p = p_edges
-        elif n_epn is not None:
-          p = n_epn/self.nV
-        else:
-          raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
+  #       # --- Define p as a proportion of edges
+  #       if n_edges is not None:
+  #         p = n_edges/self.nV**2
+  #       elif p_edges is not None:
+  #         p = p_edges
+  #       elif n_epn is not None:
+  #         p = n_epn/self.nV
+  #       else:
+  #         raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
 
-        self.Adj = A < p
+  #       self.Adj = A < p
 
-    # Update number of edges
-    self.nE = np.count_nonzero(self.Adj)
+  #   # Update number of edges
+  #   self.nE = np.count_nonzero(self.Adj)
 
-    # Prepare structure
-    self.prepare()
+  #   # Prepare structure
+  #   self.prepare()
 
   # ------------------------------------------------------------------------
   #                              Attributes
@@ -334,12 +341,15 @@ class Network:
       self.edges = np.zeros((self.nE, 2), dtype=np.int32)
 
     # Source-edge and terminus-edge matrices
-    self.As = np.zeros((self.nV, self.nE))
-    self.At = np.zeros((self.nV, self.nE))
+    self.As = np.zeros((self.nV, self.nEd), dtype=bool)
+    self.At = np.zeros((self.nV, self.nEd), dtype=bool)
 
     # --- Loop through edges
 
-    I = np.where(self.Adj)
+    if self.directed:
+      I = np.where(self.Adj)
+    else:
+      I = np.where(np.triu(self.Adj))
 
     for i in range(len(I[0])):
 
@@ -349,7 +359,7 @@ class Network:
       if list_edges:
         self.edges[i,:] = [I[0][i], I[1][i]]
 
-    # Conversion to sparse
+    # Conversion to Scipy sparse
     # Strangely slows down when there are several matrix multiplications
     # self.As = sparse.csr_matrix(self.As)
     # self.At = sparse.csr_matrix(self.At)
@@ -359,10 +369,13 @@ class Network:
     if self.nE:
       
       # Connectivity
-      self.is_strongly_connected = nx.is_strongly_connected(self.nx)
+      if self.directed:
+        self.connected = nx.is_strongly_connected(self.nx)
+      else:
+        self.connected = nx.is_connected(self.nx)
 
       # Diameter
-      if self.is_strongly_connected:
+      if self.connected:
         self.d = nx.diameter(self.nx)
       else:
         self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.nx)])
@@ -569,7 +582,7 @@ class Network:
 #                        Random graphs (Erdös-Rényi)
 # ------------------------------------------------------------------------
 
-def Gnm(n, m=None, p=None, a=None):
+def Gnm(n, m=None, p=None, a=None, directed=True):
   '''
   G(n,m) or Erdös-Rényi random graph.
   In the ER model, the number of edges m is guaranteed.
@@ -593,7 +606,32 @@ def Gnm(n, m=None, p=None, a=None):
       raise Exception("The number of edges has to be defined with at least one of the parameters: 'm', 'p' or 'a'.") 
 
   # Network
-  return Network(nx=nx.dense_gnm_random_graph(n, m, seed=np.random))
+  return Network(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
+
+def Gnp(n, p=None, m=None, a=None, directed=True):
+  '''
+  G(n,p) or Erdös-Rényi-Gilbert random graph.
+  In the ERG model, the number of edges m is not guaranteed.
+
+  The parameter controlling the number of edges can be either:
+  - The number of edges m (int)
+  - The proportion of edges p (float, in [0,1])
+  - The average number of edges per node a (float).
+  '''
+
+  # Edge proportion
+  if p is None:
+
+    if m is not None:
+      p = m/n**2
+    elif a is not None:
+      p = a/n
+    else:
+      raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'p', 'm' or 'a'.") 
+
+  # Network
+  return Network(nx=nx.gnp_random_graph(n, p, seed=np.random, directed=directed))
+
 
 # ------------------------------------------------------------------------
 #                           Star-branched-graph
