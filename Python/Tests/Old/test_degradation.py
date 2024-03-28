@@ -1,5 +1,5 @@
 import os
-from Network import *
+from Graph import *
 from  Comparison import *
 
 os.system('clear')

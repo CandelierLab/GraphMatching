@@ -4,7 +4,7 @@ import pandas as pd
 import time
 
 import project
-from Network import *
+from Graph import *
 from Comparison import *
 
 os.system('clear')

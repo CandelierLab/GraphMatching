@@ -4,7 +4,7 @@ import numpy as np
 import sparse
 
 import project
-from Network import *
+from Graph import *
 import paprint as pa
 
 os.system('clear')

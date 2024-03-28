@@ -1,7 +1,7 @@
 import os
 
 import project
-from Network import *
+from Graph import *
 from  Comparison import *
 
 import paprint as pa
@@ -29,10 +29,7 @@ np.random.seed(0)
 
 # --- Random graphs
 
-Ga = Network(nA)
-Ga.set_rand_edges('ER', p_edges=p)
-
-print(Ga.nx.is_directed())
+Ga = Gnp(nA, p, directed=True)
 
 Gb = Ga.degrade(type, delta, preserval=preserval)
 

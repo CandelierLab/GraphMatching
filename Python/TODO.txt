@@ -1,9 +1,14 @@
+Rewriting
+- Check complement
+- Check shuffle
+- Degradation
+
 Analysis.Computation
 - Rewrite and rerun all Supplementaries
-- Recode star-branched graph generator
+
 - Rewrite and rerun all Self-matching
 
 Degradation
-- Perform degradation
+- Perform ed_rm degradation
 
 

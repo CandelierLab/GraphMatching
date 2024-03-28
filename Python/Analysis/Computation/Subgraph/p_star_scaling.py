@@ -6,7 +6,7 @@ import os
 import numpy as np
 
 import project
-from Network import *
+from Graph import *
 from Comparison import *
 
 # os.system('clear')

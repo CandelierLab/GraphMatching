@@ -3,7 +3,7 @@ import time
 import pandas as pd
 
 import project
-from Network import *
+from Graph import *
 from  Comparison import *
 import paprint as pa
 

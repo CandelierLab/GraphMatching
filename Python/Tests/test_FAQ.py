@@ -1,7 +1,7 @@
 import os
 from scipy.optimize import quadratic_assignment
 import project
-from Network import *
+from Graph import *
 from  Comparison import *
 
 import paprint as pa

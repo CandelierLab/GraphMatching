@@ -6,11 +6,11 @@ import networkx as nx
 import paprint as pa
 
 # ##########################################################################
-#                          Generic Network class
+#                          Generic Graph class
 # ##########################################################################
 
-class Network:
-  ''' Generic class for networks '''
+class Graph:
+  ''' Generic class for graphs '''
     
   # === CONSTRUCTOR ========================================================
 
@@ -74,7 +74,7 @@ class Network:
 
   def __repr__(self):
     ''' 
-    Some info on the network
+    Some info on the graph
     '''
 
     pa.line(self.__class__.__name__)
@@ -86,7 +86,7 @@ class Network:
     return s
   
   def print(self, maxrow=20, maxcol=20):
-    '''Extended info on the network'''
+    '''Extended info on the graph'''
 
     # Basic info
     print(self)
@@ -94,11 +94,11 @@ class Network:
     # Adjacency matrix
     pa.matrix(self.Adj)
 
-    # --- Network properties
+    # --- Graph properties
 
     if self.connected is not None:
       if self.directed:
-        print('The graph is strongly {:s}connected'.format('' if self.connected else 'dis'))
+        print('The graph is {:s}strongly connected'.format('' if self.connected else 'not '))
       else:
         print('The graph is {:s}connected'.format('' if self.connected else 'dis'))
 
@@ -167,62 +167,6 @@ class Network:
   # ========================================================================
   #                             GENERATION
   # ========================================================================
-
-  # ------------------------------------------------------------------------
-  #                          Random structure
-  # ------------------------------------------------------------------------
-
-  # def set_rand_edges(self, method='ERG', n_edges=None, p_edges=None, n_epn=None):
-  #   '''
-  #   NB: the parameter p can be either the number of edges n_edges (int), the 
-  #   proportion of edges p_edges (float, in [0,1]) or the number of edges
-  #   per node n_epn (float).
-  #   '''
-
-  #   A = np.random.rand(self.nV, self.nV)
-
-  #   match method:
-
-  #     case 'Erdös-Rényi' | 'ER':
-  #       # In the ER model, the number of edges is guaranteed.
-
-  #       # --- Define p as a number of edges
-
-  #       if n_edges is not None:
-  #         p = n_edges
-  #       elif p_edges is not None:
-  #         p = int(np.round(p_edges*self.nV**2))
-  #       elif n_epn is not None:
-  #         p = int(np.round(n_epn*self.nV))
-  #       else:
-  #         raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
-
-  #       if p==self.nV**2:
-  #         self.Adj = np.full((self.nV,self.nV), True)
-  #       else:
-  #         self.Adj = A < np.sort(A.flatten())[p]
-
-  #     case 'Erdös-Rényi-Gilbert' | 'ERG':
-  #       # In the ERG the edges are drawn randomly so the exact number of 
-  #       # edges is not guaranteed.
-
-  #       # --- Define p as a proportion of edges
-  #       if n_edges is not None:
-  #         p = n_edges/self.nV**2
-  #       elif p_edges is not None:
-  #         p = p_edges
-  #       elif n_epn is not None:
-  #         p = n_epn/self.nV
-  #       else:
-  #         raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'n_edges', 'p_deges', 'p_epn'.") 
-
-  #       self.Adj = A < p
-
-  #   # Update number of edges
-  #   self.nE = np.count_nonzero(self.Adj)
-
-  #   # Prepare structure
-  #   self.prepare()
 
   # ------------------------------------------------------------------------
   #                              Attributes
@@ -320,16 +264,14 @@ class Network:
 
   def prepare(self):
     '''
-    Prepares the network for comparison by:
-    - Compute the graph connected state
+    Prepares the Graph for comparison by:
+    - Compute the graph connected state (strongly connected for directed graphs)
     - Computing the graph diameter
     - Computing the As and At matrices.
 
     Also: 
-    - establish the list of edges if it is empty
-    - Perform other measurements:
-      + strong connectivity (is every vertex reachable from any vertex)
-      + diameter
+    - Establish the list of edges if it is empty
+    - Create the corresponding networkx graphs if not present
     '''
 
     # --- Preparation
@@ -364,6 +306,17 @@ class Network:
     # self.As = sparse.csr_matrix(self.As)
     # self.At = sparse.csr_matrix(self.At)
 
+    # --- Networkx graphs
+        
+    if self.nx is None:
+
+      if self.directed:
+        self.nx = nx.from_numpy_array(self.Adj, create_using=nx.DiGraph)
+        self.nxu = self.nx.to_undirected()
+      else:
+        self.nx = nx.from_numpy_array(self.Adj)
+        self.nxu = self.nx
+
     # --- Other measurements
 
     if self.nE:
@@ -390,7 +343,7 @@ class Network:
 
   def shuffle(self):
 
-    # New network object
+    # New Graph object
     Met = copy.deepcopy(self)
 
     # Shuffling indexes
@@ -426,8 +379,8 @@ class Network:
 
   def complement(self):
 
-    # New network object
-    Met = Network(nNode=self.nV, directed=self.directed)
+    # New Graph object
+    Met = Graph(nNode=self.nV, directed=self.directed)
 
     # Adjacency matrix
     Met.Adj = np.logical_not(self.Adj)
@@ -447,11 +400,11 @@ class Network:
 
   def degrade(self, type, delta, preserval=False, **kwargs):
     '''
-    Network degradation
+    Graph degradation
 
     Degradation can be done in many different ways ('type' argument):
     - Structure:
-      'nd_rm', 'nr': Remove nodes (and the corresponding edges), equivalent to subgraph matching
+      'vx_rm', 'vr': Remove vertices (and the corresponding edges), equivalent to subgraph matching
       'ed_rm', 'er': Remove edges
       'ed_sw_src', 'es': Swap edges' sources
       'ed_sw_tgt', 'et': Swap edges' targets
@@ -466,7 +419,7 @@ class Network:
     + Can be at random (preserval=False) or in a given graph area (preserval=True)
     '''
 
-    # New network object
+    # New Graph object
     Net = copy.deepcopy(self)
 
     match type:
@@ -529,12 +482,12 @@ class Network:
 
   def subgraph(self, idx):
 
-    # Create subnetwork
+    # Create subgraph
     Sub = type(self)()
 
     # Check
     if not isinstance(idx, list) and idx>self.nV:
-      raise Exception(f"Subnetwork: The number of nodes in the subnet ({idx}) is greater than in the original network ({self.nV})")
+      raise Exception(f"Subgraph: The number of nodes in the subnet ({idx}) is greater than in the original graph ({self.nV})")
 
     # Indexes
     I = idx if isinstance(idx, list) else np.random.choice(range(self.nV), idx, replace=False)
@@ -605,8 +558,8 @@ def Gnm(n, m=None, p=None, a=None, directed=True):
     else:
       raise Exception("The number of edges has to be defined with at least one of the parameters: 'm', 'p' or 'a'.") 
 
-  # Network
-  return Network(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
+  # Graph
+  return Graph(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
 
 def Gnp(n, p=None, m=None, a=None, directed=True):
   '''
@@ -629,8 +582,8 @@ def Gnp(n, p=None, m=None, a=None, directed=True):
     else:
       raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'p', 'm' or 'a'.") 
 
-  # Network
-  return Network(nx=nx.gnp_random_graph(n, p, seed=np.random, directed=directed))
+  # Graph
+  return Graph(nx=nx.gnp_random_graph(n, p, seed=np.random, directed=directed))
 
 
 # ------------------------------------------------------------------------
@@ -646,8 +599,12 @@ def star_branched(k, n, directed=False):
   The central node index is 0.
   '''
 
-  G = Network(k*n+1, directed=directed)
-  G.Adj = np.full((G.nNd, G.nNd), False)
+  # Define Graph
+  G = Graph(k*n+1, directed=directed)
+
+  # --- Edges and adjacency matrix
+
+  G.Adj = np.full((G.nV, G.nV), False)
 
   z = 0
   for ki in range(k):
@@ -656,7 +613,18 @@ def star_branched(k, n, directed=False):
     for ni in range(n-1):
       G.Adj[z,z+1] = True
       z+=1
-      
+
+  # Edges
+  G.nE = np.count_nonzero(G.Adj)
+
+  # Symmetrize adjacency matrix
+  if not directed:
+    G.Adj = np.logical_or(G.Adj, G.Adj.T)
+
+  # Directed edges
+  G.nEd = np.count_nonzero(G.Adj)
+
+  # Finalize preparation
   G.prepare()
 
   return G

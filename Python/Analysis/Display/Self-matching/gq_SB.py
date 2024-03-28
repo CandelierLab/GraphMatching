@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import project
-from Network import *
+from Graph import *
 from  Comparison import *
 
 os.system('clear')

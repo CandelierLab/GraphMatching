@@ -4,7 +4,7 @@ from scipy.stats.kde import gaussian_kde
 import matplotlib.pyplot as plt
 
 import project
-from Network import *
+from Graph import *
 from  Comparison import *
 
 import paprint as pa

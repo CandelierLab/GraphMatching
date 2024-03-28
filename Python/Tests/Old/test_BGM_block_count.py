@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 import project
-from Network import *
+from Graph import *
 import paprint as pa
 
 os.system('clear')
