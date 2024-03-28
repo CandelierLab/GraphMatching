@@ -361,42 +361,38 @@ class Graph:
 
   def shuffle(self):
     '''
-    Deep copy shuffled version of the graph, and shuffling indices.
+    Shuffled version of the graph, and shuffling indices.
     Use np.random for the RNG.
     '''
 
-    # New Graph object
-    H = copy.deepcopy(self)
-
     # Shuffling indexes
-    Icor = np.arange(self.nV)
-    np.random.shuffle(Icor)
+    Idx = np.arange(self.nV)
+    np.random.shuffle(Idx)
 
-    # Adjacency matrix
-    H.Adj = H.Adj[Icor, :][:, Icor]
-
-    # Preparation
-    H.prepare()
+    # Shuffled graph 
+    H = Graph(nV=self.nV, directed=self.directed, Adj=self.Adj[Idx, :][:, Idx])
 
     # --- Node attributes
 
-    if self.nVa:
-      for i, attr in enumerate(H.vrtx_attr):
-        H.vrtx_attr[i]['values'] = attr['values'][Icor]
+    for a in self.vrtx_attr:
+
+      attr = copy.deepcopy(a)
+      attr['values'] = a['values'][Idx]
+      H.add_vrtx_attr(attr)
 
     # --- Edge attributes
 
     if self.nEa:
 
-      # NB: The edge list is necessary at this point, so preparation has to be done.
-
       # Compute indexes
-      J = [np.where(np.all(self.edges==[Icor[e[0]], Icor[e[1]]], axis=1))[0][0] for e in H.edges]
+      J = [np.where(np.all(self.edges==[Idx[e[0]], Idx[e[1]]], axis=1))[0][0] for e in self.edges]
       
-      for i, attr in enumerate(H.edge_attr):
-        H.edge_attr[i]['values'] = attr['values'][J]
+      for a in self.edge_attr:
+        attr = copy.deepcopy(a)
+        attr['values'] = a['values'][J]
+        H.add_edge_attr(attr)
 
-    return (H, Icor)
+    return (H, Idx)
 
   # ========================================================================
 
@@ -407,18 +403,9 @@ class Graph:
     NB: No edge attribute can be kept when complementing.
     '''
 
-    # New Graph object
-    H = Graph(nV=self.nV, directed=self.directed)
-
-    # Adjacency matrix
-    H.Adj = np.logical_not(self.Adj)
-
-    # Number of edges
-    H.nEd = np.count_nonzero(H.Adj)
-    H.nE = H.nEd if H.directed else np.count_nonzero(np.triu(H.Adj))
-
-    # Preparation
-    H.prepare()
+    # --- Complement graph object
+    
+    H = Graph(nV=self.nV, directed=self.directed, Adj=np.logical_not(self.Adj))
 
     # --- Node attributes
 
@@ -434,6 +421,12 @@ class Graph:
     Graph degradation
 
     Degradation can be done in many different ways ('type' argument):
+
+    - Directivity (TO IMPLEMENT):
+      'undirect': Undirect previsouly directed graphs
+      'direct': Direct previsouly undirected graphs
+      'reverse': Reverse the edges of a directed graph
+
     - Structure:
       'vx_rm', 'vr': Remove vertices (and the corresponding edges), equivalent to subgraph generation
       'ed_rm', 'er': Remove edges
@@ -441,21 +434,22 @@ class Graph:
       'ed_sw_tgt', 'et': Swap edges' targets
       'ed_mv', 'em': Move edges, ie swap both sources and targets.
 
-    - Attributes (to redo):
+    - Attributes (TO IMPLEMENT):
       'Cna': Change node attributes
       'Cea': Change edge attributes
       'Nna': add Gaussian noise to node attribute
       'Nea': add Gaussian noise to edge attribute
 
-    + Can be at random (preserval=False) or in a given graph area (preserval=True)
+    + Can be at random (preserval=False) or in a given graph area. In the former case a breadth-first search is performed around a root node (source), and the algorithm can either preserve the surroundings of the root (preserval='first') or remove it (preserval='last').
     '''
 
     # Checks
     delta = min(max(delta,0),1)
 
-    # New Graph object
-    H = copy.deepcopy(self)
-
+    # Parameters of the new graph object
+    nV = self.nV
+    directed = self.directed
+        
     match type:
 
       case 'ed_rm' | 'er':
@@ -464,28 +458,74 @@ class Graph:
         #     Remove edges
         # ------------------------------------------------------------------
 
+        # Base adjacency matrix
+        Adj = copy.deepcopy(self.Adj)
+
         # Number of modifications
         nmod = round(delta*self.nE)
-        
+
         if preserval:
 
           # Edge BFS with random node seed
-          Z = list(nx.edge_bfs(self.nx, source=0, orientation='ignore'))
-          print(Z)
+          T = list(nx.edge_bfs(self.nx, source=0, orientation='ignore'))
+          
+          Ki = []
+          Kj = []
 
-          # Indices
+          # Walk through BFS
+          for i in range(nmod):
 
-          pass
+            # Preserve first or last in the BFS tree
+            match preserval:
+              case 'first': j = len(T)-i-1
+              case 'last': j = i
+
+            Ki.append(T[j][0])
+            Kj.append(T[j][1])
+            if not directed:
+              Ki.append(T[j][1])
+              Kj.append(T[j][0])                          
+
+          K = (np.array(Ki), np.array(Kj))
 
         else:
 
           # Indices
-          I = np.ravel_multi_index(np.where(self.Adj), (self.nV, self.nV))
+          if directed:
+            I = np.ravel_multi_index(np.where(self.Adj), (self.nV, self.nV))
+          else:
+            I = np.ravel_multi_index(np.where(np.triu(self.Adj)), (self.nV, self.nV))
+
           J = np.random.choice(I, nmod, replace=False)
           K = np.unravel_index(J, (self.nV, self.nV))
 
-          # Remove
-          H.Adj[K] = 0
+          if not directed:
+            K = (np.concatenate((K[0], K[1])), np.concatenate((K[1], K[0])))
+
+        # --- Create degraded graph
+
+        # Remove edges          
+        Adj[K] = 0
+
+        # Create graph
+        H = Graph(nV=nV, directed=directed, Adj=Adj)
+
+        # --- Vertices attributes
+
+        H.vrtx_attr = copy.deepcopy(self.vrtx_attr)
+        H.nVa = len(H.vrtx_attr)
+
+        # --- Edge attributes
+
+        if directed:
+          J = [np.where(np.all(self.edges==[i,j], axis=1))[0][0] for (i,j) in zip(K[0], K[1])]
+        else:
+          J = [np.where(np.all(self.edges==[min(i,j), max(i,j)], axis=1))[0][0] for (i,j) in zip(K[0], K[1])]
+          
+        for a in self.edge_attr:
+          attr = copy.deepcopy(a)
+          attr['values'] = np.delete(attr['values'], J)
+          H.add_edge_attr(attr)
 
       case 'Me':
 
@@ -493,21 +533,20 @@ class Graph:
         #     Move edges
         # ------------------------------------------------------------------
 
-        # Number of modifications
-        nmod = round(delta*self.nE)
+        pass
 
-        # 0 → 1
-        Ip = np.random.choice(np.ravel_multi_index(np.where(self.Adj==0), (self.nV, self.nV)), nmod, replace=False)
-        H.Adj[np.unravel_index(Ip,(self.nV, self.nV))] = 1
+        # # Number of modifications
+        # nmod = round(delta*self.nE)
 
-        # 1 → 0
-        In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nV, self.nV)), nmod, replace=False)
-        H.Adj[np.unravel_index(In,(self.nV, self.nV))] = 0
+        # # 0 → 1
+        # Ip = np.random.choice(np.ravel_multi_index(np.where(self.Adj==0), (self.nV, self.nV)), nmod, replace=False)
+        # H.Adj[np.unravel_index(Ip,(self.nV, self.nV))] = 1
+
+        # # 1 → 0
+        # In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nV, self.nV)), nmod, replace=False)
+        # H.Adj[np.unravel_index(In,(self.nV, self.nV))] = 0
         
     # --- Output
-
-    # Preparation
-    H.prepare()
 
     return H
 
@@ -611,8 +650,6 @@ def Gnm(n, m=None, p=None, a=None, directed=True, selfloops=True):
   else:
 
     return Graph(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
-
-    
 
 def Gnp(n, p=None, m=None, a=None, directed=True, selfloops=True):
   '''

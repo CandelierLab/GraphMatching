@@ -10,7 +10,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 200
+nA = 5
 # p = 0.9
 
 algo = 'GASM'
@@ -25,8 +25,7 @@ p = np.log(nA)/nA
 
 # --- Random graphs
 
-Ga = Network(nA)
-Ga.set_rand_edges('ER', p_edges=p)
+Ga = Gnp(nA, p)
 
 # # Ga.add_edge_attr('rand', name='test_edge')
 # # Ga.add_node_attr('rand', name='test_node')
@@ -37,11 +36,14 @@ Ga.set_rand_edges('ER', p_edges=p)
 
 Gb, Idx = Ga.shuffle()
 
-C = Comparison(Ga, Gb, verbose=True)
-M = C.get_matching(algorithm=algo)
-M.compute_accuracy(Idx)
+Ga.print()
+print(Idx)
+Gb.print()
 
-print(M)
+# C = Comparison(Ga, Gb, verbose=True)
+# M = C.get_matching(algorithm=algo)
+# M.compute_accuracy(Idx)
+
+# print(M)
 # pa.matrix(C.X)
 
-print(Ga.nNd, Ga.nEd)
