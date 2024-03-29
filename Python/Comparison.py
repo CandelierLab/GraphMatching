@@ -20,23 +20,27 @@ class Comparison:
   # |                                                                      |
   # ========================================================================
 
-  def __init__(self, NetA, NetB, verbose=False):
+  def __init__(self, Ga, Gb, verbose=False):
     '''
-    Comparison of two networks.
+    Comparison of two graphs.
 
     The algorithm parameters can be:
-    - 'Zager', as in [1]
+    - 'FAQ', as in [1]
+    - 'Zager', as in [2]
     - 'GASM', Graph Attribute and Structure Matching (default)
 
-    [1] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
-        Applied Mathematics Letters 21 (2008) 86–94, doi: 10.1016/j.aml.2007.01.006
+    [1] J.T. Vogelstein et al., "Fast Approximate Quadratic Programming for Graph Matching",
+      PLoS One 10(4) (2015); doi:10.1371/journal.pone.012002
+
+    [2] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
+        Applied Mathematics Letters 21 (2008) 86–94; doi: 10.1016/j.aml.2007.01.006
     '''
 
     # --- Definitions
 
     # The networks to compare
-    self.NetA = NetA
-    self.NetB = NetB
+    self.Ga = Ga
+    self.Gb = Gb
 
     # --- Scores
 
@@ -72,8 +76,8 @@ class Comparison:
 
     # --- Definitions --------------------------------------------------------
 
-    GA = self.NetA
-    GB = self.NetB
+    GA = self.Ga
+    GB = self.Gb
 
     # Complement
     match algorithm:
@@ -82,14 +86,14 @@ class Comparison:
         pass
         
       case 'GASM':
-        complement = GA.nEd + GB.nEd > (GA.nNd**2 + GB.nNd**2)/2
+        complement = GA.nEd + GB.nEd > (GA.nV**2 + GB.nV**2)/2
         if complement:
-          GA = self.NetA.complement()
-          GB = self.NetB.complement()
+          GA = self.Ga.complement()
+          GB = self.Gb.complement()
 
-    # Number of nodes
-    nA = GA.nNd
-    nB = GB.nNd
+    # Number of vertices
+    nA = GA.nV
+    nB = GB.nV
 
     # Number of edges
     mA = GA.nEd
@@ -108,7 +112,7 @@ class Comparison:
 
       case 'Zager':
 
-        # NB: normalization is performed dynamically during iterations.
+        ''' Normalization is performed dynamically during iterations. '''
         pass
         
       case 'GASM':
@@ -131,16 +135,16 @@ class Comparison:
         # Base
         Xc = np.ones((nA,nB))
         
-        for k, attr in enumerate(GA.node_attr):
+        for k, attr in enumerate(GA.vrtx_attr):
 
-          bttr = GB.node_attr[k]
+          bttr = GB.vrtx_attr[k]
 
           if attr['measurable']:
             pass
           else:
             # Build contraint attribute
-            A = np.tile(attr['values'], (GB.nNd,1)).transpose()
-            B = np.tile(bttr['values'], (GA.nNd,1))
+            A = np.tile(attr['values'], (nB,1)).transpose()
+            B = np.tile(bttr['values'], (nA,1))
             Xc *= A==B
         
         # Remapping in [-1, 1]
@@ -162,16 +166,15 @@ class Comparison:
         else:
 
           # Base
-          # Xc = np.ones((nA,nB))/normalization
           Xc = np.ones((nA,nB))
 
           # Random initial fluctuations
           Xc += np.random.rand(nA, nB)*eta
 
-          for k, attr in enumerate(GA.node_attr):
+          for k, attr in enumerate(GA.vrtx_attr):
 
             wA = attr['values']
-            wB = GB.node_attr[k]['values']
+            wB = GB.vrtx_attr[k]['values']
 
             if attr['measurable']:
 
@@ -340,7 +343,7 @@ class Comparison:
     ''' Compute one matching '''
 
     # Prepare output
-    M = Matching(self.NetA, self.NetB, algorithm=algorithm)
+    M = Matching(self.Ga, self.Gb, algorithm=algorithm)
     M.time = {'total': None}
 
     # Measure time
@@ -351,22 +354,22 @@ class Comparison:
       case 'random':
 
         # Populate the matching object
-        Idx = np.arange(self.NetA.nNd)
+        Idx = np.arange(self.Ga.nV)
         np.random.shuffle(Idx)
-        M.from_lists(np.arange(self.NetA.nNd), Idx)
+        M.from_lists(np.arange(self.Ga.nV), Idx)
 
         M.time['total'] = (time.perf_counter_ns()-tref)*1e-6
 
       case 'FAQ':
 
         # Solve the Quadratic Assignment Problem        
-        res = quadratic_assignment(self.NetA.Adj, self.NetB.Adj, options={'maximize': True})
+        res = quadratic_assignment(self.Ga.Adj, self.Gb.Adj, options={'maximize': True})
         
         # Record computing time
         M.time['total'] = (time.perf_counter_ns()-tref)*1e-6
 
         # Populate the matching object
-        M.from_lists(np.arange(self.NetA.nNd), res.col_ind)
+        M.from_lists(np.arange(self.Ga.nV), res.col_ind)
         M.score = res.fun
 
       case 'Zager' | 'GASM':

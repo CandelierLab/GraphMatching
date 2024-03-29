@@ -14,13 +14,13 @@ class Matching:
   # |                                                                      |
   # ========================================================================
 
-  def __init__(self, NetA, NetB, algorithm=None):
+  def __init__(self, Ga, Gb, algorithm=None):
 
     # Definitions
-    self.NetA = NetA
-    self.NetB = NetB
-    self.nA = NetA.nNd
-    self.nB = NetB.nNd
+    self.Ga = Ga
+    self.Gb = Gb
+    self.nA = Ga.nV
+    self.nB = Gb.nV
 
     # Matching
     self.idxA = np.empty(0)
@@ -207,7 +207,7 @@ class Matching:
         Z[i,j] = True
 
     # Compute structural correspondence
-    self.structural_quality = np.count_nonzero(Z @ self.NetB.Adj == self.NetA.Adj @ Z)/self.nA/self.nB
+    self.structural_quality = np.count_nonzero(Z @ self.Gb.Adj == self.Ga.Adj @ Z)/self.nA/self.nB
 
   def compute_accuracy(self, Idx=None):
     '''
