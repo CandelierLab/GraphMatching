@@ -19,7 +19,7 @@ nA = 20
 l_p = np.linspace(0,1,41)
 l_eta = np.logspace(-14, -2, 7)
 # l_eta = [1e-10]
-nRun = 1000
+nRun = 100
 
 # ==========================================================================
 
@@ -48,13 +48,12 @@ for p in l_p:
 
     for i in range(nRun):
 
-      NetA = Network(nA)
-      NetA.set_rand_edges('ER', p_edges=p)
-      NetB, Idx = NetA.shuffle()
+      Ga = Gnp(nA, p)
+      Gb, Idx = Ga.shuffle()
 
       # --- FAQ
 
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='FAQ')
       M.compute_accuracy(Idx)
 
@@ -63,7 +62,7 @@ for p in l_p:
 
       # --- Zager
 
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='Zager')
       M.compute_accuracy(Idx)
 
@@ -72,7 +71,7 @@ for p in l_p:
 
       # --- GASM
 
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='GASM', eta=eta)
       M.compute_accuracy(Idx)
 

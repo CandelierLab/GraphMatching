@@ -452,6 +452,14 @@ class Graph:
         
     match type:
 
+      case 'vx_rm' | 'vr':
+
+        # ------------------------------------------------------------------
+        # Remove Vertices (and corresponding edges), equivalent to subgraph
+        # ------------------------------------------------------------------
+
+        H = self.subgraph(delta=delta)
+
       case 'ed_rm' | 'er':
 
         # ------------------------------------------------------------------
@@ -552,22 +560,28 @@ class Graph:
 
   # ========================================================================
 
-  def subgraph(self, idx):
+  def subgraph(self, Idx=None, delta=None):
+    '''
+    Subgraph generator.
+    Remove specific nodes, or nodes at random with a degradation parameter delta.
+    '''
 
     # Create subgraph
     Sub = type(self)()
 
     # Check
-    if not isinstance(idx, list) and idx>self.nV:
-      raise Exception(f"Subgraph: The number of nodes in the subnet ({idx}) is greater than in the original graph ({self.nV})")
+    if Idx is None and delta is None:
+      raise Exception(f"Subgraph: either a node list or a node degradation ratio has to be provided.")
 
     # Indexes
-    I = idx if isinstance(idx, list) else np.random.choice(range(self.nV), idx, replace=False)
-    # I = idx if isinstance(idx, list) else random.sample(range(self.nV), idx)
+    '''
+    !! Implement preserval !!
+    '''
+    I = Idx if isinstance(Idx, list) else np.random.choice(range(self.nV), Idx, replace=False)
     K = np.ix_(I,I)
 
     # Adjacency matrix
-    Sub.Adj = self.Adj[K]
+    Adj = self.Adj[K]
 
     # --- Properties
 
