@@ -119,7 +119,7 @@ class Comparison:
   
         # Normalization
         if normalization is None:
-          normalization = 4*mA*mB/nA/nB + 1
+          normalization = 4*mA*mB/nA/nB + 1 if nA and nB else 1
 
         # Noise
         eta = kwargs['eta'] if 'eta' in kwargs else 1e-10
@@ -400,7 +400,10 @@ class Comparison:
         # --- Emptyness check ----------------------------------------------------
 
         if not self.X.size:
-          return None
+          M.time['LAP'] = (time.perf_counter_ns()-tref)*1e-6
+          M.time['total'] = (time.perf_counter_ns()-tref)*1e-6
+          M.initialize()
+          return M
 
         # --- Solution search ---------------------------------------------------
 

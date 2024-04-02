@@ -10,15 +10,15 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 5
+nA = 100
 # p = np.log(nA)/nA
-p = 0.5
+p = 2/nA
 
-algo = 'FAQ'
+algo = 'Zager'
 
-delta = 0.5
-localization = 'last'
-# localization = False
+delta = 1
+# localization = 'last'
+localization = False
 
 # --------------------------------------------------------------------------
 
@@ -35,16 +35,14 @@ Ga.add_vrtx_attr('rand')
 Ga.add_edge_attr('rand')
 
 
-Gb, Idx = Ga.subgraph(delta=0.5, localization=localization)
+Gb, Idx = Ga.subgraph(delta=delta, localization=localization)
 
-Ga.print()
-# print(Idx)
-Gb.print()
+# Ga.print()
+# # print(Idx)
+# Gb.print()
 
-# pa.matrix(Ga.Adj, highlight=Ga.Adj!=Gb.Adj)
+C = Comparison(Ga, Gb)
+M = C.get_matching(algorithm=algo)
+M.compute_accuracy()
 
-# C = Comparison(Ga, Gb)
-# M = C.get_matching(algorithm=algo)
-# M.compute_accuracy()
-
-# print(M)
+print(M)

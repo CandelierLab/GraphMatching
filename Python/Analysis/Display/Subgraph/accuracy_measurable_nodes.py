@@ -1,5 +1,4 @@
 import os
-import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,52 +9,38 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-dname = project.root + '/Files/Success ratios/Meas_nodes/'
+nA = 100
+nRun = 100
+
+# --------------------------------------------------------------------------
+
+fname = project.root + f'/Files/Subgraph/ER/Meas_nodes_nA={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 
-# Regular expression
-p = re.compile("ER_nA=(.*)_zeta=(.*)_nRun=(.*)\.csv")
+if os.path.exists(fname):
+
+  # Load data
+  df = pd.read_csv(fname)
+
+  # Retrieve l_delta and l_zeta
+
+  l_delta = np.unique(df.delta)
+  l_zeta = np.unique(df.zeta)
 
 # --- Display
 
 plt.style.use('dark_background')
 fig, ax = plt.subplots()
 
-for fname in os.listdir(dname):
+# Colors
+cm = plt.cm.spring(np.linspace(0, 1, l_zeta.size))
 
-  # --- Extract parameters
-  res = p.search(fname)
-  if res is not None:
-    nA = int(res.group(1))
-    zeta = int(res.group(2))
-    nRun = int(res.group(3))
+for i, zeta in enumerate(l_zeta):
 
-  # --- Load data
+  data = df.loc[df['zeta'] == zeta]
 
-  gamma = pd.read_csv(dname + fname, index_col=0)
-
-  # x-values
-  Nsub = np.array([int(i) for i in list(gamma)])
-  rho = Nsub/Nsub[-1]
-
-  # Compute mean and std
-  m = gamma.mean()
-  s = gamma.std()
-
-  # Plot
-  ax.plot(rho, m, '.-', label=zeta)
-
-# --- Misc display
-
-# Random matchings
-ax.axhline(y = 1/nA, color = 'w', linestyle = ':')
-
-ax.set_xlabel(r'subgraph ratio $\rho$')
-ax.set_xlim(0, 1)
-ax.set_ylabel(r'Accuracy $\gamma$')
-ax.set_ylim(0, 1)
-
-ax.legend()
+  ax.plot(data.delta, data.g_Zager, '--', color=cm[i], label=f'$\zeta = {zeta}$')
+  ax.plot(data.delta, data.g_GASM, '.-', color=cm[i], label=f'$\zeta = {zeta}$')
 
 plt.show()

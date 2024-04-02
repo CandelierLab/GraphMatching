@@ -1,14 +1,10 @@
-Rewriting
-- Degradation
-- Comparison / Matching
-- Subgraph
+Subgraph:
+- Computation (accuracy measurable nodes)
+- Display
 
-Analysis.Computation
-- Rewrite and rerun all Supplementaries
-
-- Rewrite and rerun all Self-matching
-
-Degradation
-- Perform ed_rm degradation
+Make batch
+- Computation
+- Save display
+... and tweak iteration formula.
 
 

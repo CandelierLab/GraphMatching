@@ -194,30 +194,39 @@ class Matching:
     if self.structural_quality is None:
       self.compute_structural_quality()
 
-
   def compute_structural_quality(self):
     '''
     Compute the structural quality of the matching
     '''
 
-    # Matching matrix
-    Z = np.full((self.nA, self.nB), False)
-    for (i,j) in zip(self.idxA, self.idxB):
-      if j is not None:
-        Z[i,j] = True
+    if not self.nA or not self.nB:
 
-    # Compute structural correspondence
-    self.structural_quality = np.count_nonzero(Z @ self.Gb.Adj == self.Ga.Adj @ Z)/self.nA/self.nB
+      self.structural_quality = 0
+
+    else:
+
+      # Matching matrix
+      Z = np.full((self.nA, self.nB), False)
+      for (i,j) in zip(self.idxA, self.idxB):
+        if j is not None:
+          Z[i,j] = True
+
+      # Compute structural correspondence
+      self.structural_quality = np.count_nonzero(Z @ self.Gb.Adj == self.Ga.Adj @ Z)/self.nA/self.nB
 
   def compute_accuracy(self, Idx=None):
     '''
     Compute the matching accuracy
     '''
 
-    if Idx is None:
-      self.accuracy= np.count_nonzero(self.idxB==self.idxA)/self.idxA.size
+    if not self.Ga.nV or not self.Gb.nV:
+      self.accuracy = 0
+
+    elif Idx is None:
+      self.accuracy = np.count_nonzero(self.idxB==self.idxA)/self.idxA.size
+
     else:
-      self.accuracy= np.count_nonzero(Idx[self.idxB]==self.idxA)/self.idxA.size
+      self.accuracy = np.count_nonzero(Idx[self.idxB]==self.idxA)/self.idxA.size
 
   def compute_score(self, X):
     '''

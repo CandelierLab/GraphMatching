@@ -12,56 +12,95 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 100
-p_star = 2/nA
-nRun = 1000
+p = 2/nA
+nRun = 100
 
-l_zeta = [1] #np.arange(9)
+l_zeta = [0, 1] #np.arange(9)
 
 force = True
 
 # --------------------------------------------------------------------------
 
-nSub = np.linspace(0, nA, 11, dtype=int)
-nSub[0] = 1
+l_delta = np.linspace(0, 1, 11)
+l_delta[0] = 1/nA
 
 # ==========================================================================
+
+fname = project.root + f'/Files/Subgraph/ER/Meas_nodes_nA={nA:d}_nRun={nRun:d}.csv'
+
+# Creating dataframe
+df = pd.DataFrame(columns=['delta', 'zeta', 'g_Zager', 'g_GASM', 'q_Zager', 'q_GASM', 'g_Zager_std', 'g_GASM_std', 'q_Zager_std', 'q_GASM_std'])
+
+k = 0
 
 for zeta in l_zeta:
 
   print(f'--- Zeta = {zeta}')
 
-  fname = project.root + f'/Files/Gbgraph/ER/Meas_nodes_nA={nA:d}_zeta={zeta:d}_nRun={nRun:d}.csv'
+  for delta in l_delta:
 
-  # Skip if existing
-  if os.path.exists(fname) and not force: continue
-
-  # Creating dataframe
-  gamma = pd.DataFrame()
-
-  for n in nSub:
-
-    print('{:d} iterations with Gbgraph of size {:d} ...'.format(nRun, n), end='')
+    print(f'{nRun} iterations with delta={delta} ...', end='')
     start = time.time()
     
-    g = np.empty(nRun)
+    g_Zager = []
+    g_GASM = []
+    q_Zager = []
+    q_GASM = []
 
     for i in range(nRun):
 
-      Ga = Gnp(nA, p_star)
+      Ga = Gnp(nA, p)
+      for i in range(zeta):
+        Ga.add_vrtx_attr('gauss')
 
-      for z in range(zeta):
-        Ga.add_node_attr('gauss')
+      # Subgraph
+      Gb, Idx = Ga.subgraph(delta=delta)
 
-      Gb, Idx = Ga.subgraph(n)
+      # --- Zager
+
+      C = Comparison(Ga, Gb)
+      M = C.get_matching(algorithm='Zager')
+      M.compute_accuracy()
+
+      g_Zager.append(M.accuracy)
+      q_Zager.append(M.structural_quality)
+
+      # --- GASM
 
       C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='GASM')
-      M.compute_accuracy(Idx)
+      M.compute_accuracy()
 
-      gamma[n] = M.accuracy
+      g_GASM.append(M.accuracy)
+      q_GASM.append(M.structural_quality)
+
+    # --- Store
+      
+    # Parameters
+    df.loc[k, 'delta'] = delta
+    df.loc[k, 'zeta'] = zeta
+
+    # Mean values
+    df.loc[k, 'g_Zager'] = np.mean(g_Zager)
+    df.loc[k, 'q_Zager'] = np.mean(q_Zager)
+    df.loc[k, 'g_GASM'] = np.mean(g_GASM)
+    df.loc[k, 'q_GASM'] = np.mean(q_GASM)
+
+    # Standard deviations
+    df.loc[k, 'g_Zager_std'] = np.std(g_Zager)
+    df.loc[k, 'q_Zager_std'] = np.std(q_Zager)
+    df.loc[k, 'g_GASM_std'] = np.std(g_GASM)
+    df.loc[k, 'q_GASM_std'] = np.std(q_GASM)
+
+    k += 1
 
     print('{:.02f} sec'.format((time.time() - start)))
 
-  # --- Save
+# --- Save
+    
+print('Saving ...', end='')
+start = time.time()
 
-  gamma.to_csv(fname)
+df.to_csv(fname)
+
+print('{:.02f} sec'.format((time.time() - start)))

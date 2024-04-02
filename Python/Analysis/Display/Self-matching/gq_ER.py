@@ -36,7 +36,7 @@ plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2)
 
 # Colors
-cm = plt.cm.gist_rainbow(np.linspace(0,1,l_eta.size))
+cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_eta.size))
 
 g_FAQ = np.zeros(l_p.size)
 q_FAQ = np.zeros(l_p.size)
