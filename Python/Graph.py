@@ -151,6 +151,9 @@ class Graph:
     # Adjacency matrix
     self.Adj = Adj
 
+    # Vertices
+    self.nV = self.Adj.shape[0]
+
     # Edges
     self.nEd = np.count_nonzero(self.Adj)
     self.nE = self.nEd if self.directed else np.count_nonzero(np.triu(self.Adj))
@@ -416,6 +419,95 @@ class Graph:
 
   # ========================================================================
 
+  def trim(self, Kv=None, Ke=None, Rv=None, Re=None):
+    '''
+    Trim nodes and edges.
+
+    Parameters:
+      Kv [int]: Vertices to keep
+      Ke [int]: Edges to keep
+      Rv [int]: Vertices to remove
+      Re [int]: Edges to remove
+
+    NB 1: If no parameteris defined, everything is kept and a copy of the graph is returned.
+    NB 2: If vertices are removed, the associated edges are automatically added for removal.
+    NB 3: If incoherent instructions are given, the precedence goes to:
+      1) Edge removal due to vertice removal
+      2) Keep instead of remove
+    '''
+
+    # --- Preparation ------------------------------------------------------
+
+    # --- Vertices
+
+    if Kv is None:
+      Rv = np.empty(0) if Rv is None else np.array(Rv)
+      Kv = np.setdiff1d(np.arange(self.nV), Rv)
+    else:
+      Rv = np.setdiff1d(np.arange(self.nV), Kv)
+
+    # --- Associated edges to remove
+
+    Ae = np.empty(0, dtype=int)
+    for v in Rv:
+      for i in np.where(self.Adj[v,:])[0]:
+        if self.directed:
+          Ae = np.concatenate((Ae, np.where(np.all(self.edges==[v,i], axis=1))[0]))
+        else:
+          if i>v:
+            Ae = np.concatenate((Ae, np.where(np.all(self.edges==[v,i], axis=1))[0]))
+          else:
+            Ae = np.concatenate((Ae, np.where(np.all(self.edges==[i,v], axis=1))[0]))
+
+    # --- Edges
+      
+    if Ke is None:
+      Re = Ae if Re is None else np.union1d(np.array(Re, dtype=int), Ae)
+    else:
+      Re = np.union1d(np.setdiff1d(np.arange(self.nE), Ke), Ae)
+
+    Ke = np.setdiff1d(np.arange(self.nE), Re)
+    
+    # --- Create degraded graph
+
+    Adj = copy.deepcopy(self.Adj)
+
+    # Remove edges
+    if self.directed:
+      Adj[self.edges[Re,0], self.edges[Re,1]] = False
+    else:
+      Adj[self.edges[Re,0], self.edges[Re,1]] = False
+      Adj[self.edges[Re,1], self.edges[Re,0]] = False
+
+    # Remove nodes
+    Adj = Adj[Kv,:][:,Kv]
+
+    H = Graph(Adj=Adj, directed=self.directed)
+ 
+    # --- Attributes
+
+    # Vertices attributes
+    for attr in self.vrtx_attr:
+
+      # Attribute reproduction
+      a = {'measurable': attr['measurable'], 'values': attr['values'][Kv]}
+      if 'name' in attr: a['name'] = attr['name']
+
+      H.add_vrtx_attr(a)
+
+    # Edge attributes
+    for attr in self.edge_attr:
+
+      # Attribute reproduction
+      a = {'measurable': attr['measurable'], 'values': attr['values'][Ke]}
+      if 'name' in attr: a['name'] = attr['name']
+
+      H.add_edge_attr(a)
+
+    return H
+
+  # ========================================================================
+
   def degrade(self, type, delta, localization=False, source=None, **kwargs):
     '''
     Graph degradation
@@ -466,9 +558,6 @@ class Graph:
         #     Remove edges
         # ------------------------------------------------------------------
 
-        # Base adjacency matrix
-        Adj = copy.deepcopy(self.Adj)
-
         # Number of modifications
         nmod = round(delta*self.nE)
 
@@ -476,65 +565,28 @@ class Graph:
 
           # Edge BFS with random node seed
           T = list(nx.edge_bfs(self.nx, source=0, orientation='ignore'))
-          
-          Ki = []
-          Kj = []
+
+          Re = []
 
           # Walk through BFS
           for i in range(nmod):
 
-            # Preserve first or last in the BFS tree
+            # Degradation localization (first or last)
             match localization:
-              case 'first': j = len(T)-i-1
-              case 'last': j = i
+              case 'first': j = i
+              case 'last': j = self.nE-i-1
 
-            Ki.append(T[j][0])
-            Kj.append(T[j][1])
-            if not directed:
-              Ki.append(T[j][1])
-              Kj.append(T[j][0])                          
-
-          K = (np.array(Ki), np.array(Kj))
+            # Find edge index
+            Re.append(np.where(np.logical_and(self.edges[:,0]==np.minimum(T[j][0], T[j][1]), self.edges[:,1]==np.maximum(T[j][0], T[j][1])))[0][0])          
 
         else:
 
-          # Indices
-          if directed:
-            I = np.ravel_multi_index(np.where(self.Adj), (self.nV, self.nV))
-          else:
-            I = np.ravel_multi_index(np.where(np.triu(self.Adj)), (self.nV, self.nV))
+          # Indices to remove
+          Re = np.random.choice(self.nE, nmod, replace=False)
 
-          J = np.random.choice(I, nmod, replace=False)
-          K = np.unravel_index(J, (self.nV, self.nV))
-
-          if not directed:
-            K = (np.concatenate((K[0], K[1])), np.concatenate((K[1], K[0])))
-
-        # --- Create degraded graph
-
-        # Remove edges          
-        Adj[K] = 0
-
-        # Create graph
-        H = Graph(nV=nV, directed=directed, Adj=Adj)
-
-        # --- Vertices attributes
-
-        H.vrtx_attr = copy.deepcopy(self.vrtx_attr)
-        H.nVa = len(H.vrtx_attr)
-
-        # --- Edge attributes
-
-        if directed:
-          J = [np.where(np.all(self.edges==[i,j], axis=1))[0][0] for (i,j) in zip(K[0], K[1])]
-        else:
-          J = [np.where(np.all(self.edges==[min(i,j), max(i,j)], axis=1))[0][0] for (i,j) in zip(K[0], K[1])]
-          
-        for a in self.edge_attr:
-          attr = copy.deepcopy(a)
-          attr['values'] = np.delete(attr['values'], J)
-          H.add_edge_attr(attr)
-
+        # Degraded graph
+        H = self.trim(Re=Re)
+        
       case 'Me':
 
         # ------------------------------------------------------------------

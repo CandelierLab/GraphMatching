@@ -17,8 +17,8 @@ p = 0.5
 algo = 'FAQ'
 
 delta = 0.5
-# preserval = 'first'
-preserval = False
+# localization = 'first'
+localization = False
 
 # --------------------------------------------------------------------------
 
@@ -31,14 +31,15 @@ np.random.seed(0)
 # --- Random graphs
 
 Ga = Gnp(nA, p, directed=False)
-# Ga.add_vrtx_attr('rand')
-# Ga.add_edge_attr('rand')
+Ga.add_vrtx_attr('rand')
+Ga.add_edge_attr('rand')
 
-Gb = Ga.subgraph(delta=delta, preserval=preserval)
+
+Gb = Ga.trim(Rv=[0], Re=[3])
 
 Ga.print()
 Gb.print()
-pa.matrix(Ga.Adj, highlight=Ga.Adj!=Gb.Adj)
+# pa.matrix(Ga.Adj, highlight=Ga.Adj!=Gb.Adj)
 
 # C = Comparison(Ga, Gb)
 # M = C.get_matching(algorithm=algo)
