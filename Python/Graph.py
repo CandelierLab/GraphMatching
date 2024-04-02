@@ -550,7 +550,7 @@ class Graph:
         # Remove Vertices (and corresponding edges), equivalent to subgraph
         # ------------------------------------------------------------------
 
-        H = self.subgraph(delta=delta, **kwargs)
+        H = self.subgraph(delta=delta, localization=localization)
 
       case 'ed_rm' | 'er':
 
@@ -564,7 +564,7 @@ class Graph:
         if localization:
 
           # Edge BFS with random node seed
-          T = list(nx.edge_bfs(self.nx, source=0, orientation='ignore'))
+          T = list(nx.edge_bfs(self.nx, source=None, orientation='ignore'))
 
           Re = []
 
@@ -612,58 +612,55 @@ class Graph:
 
   # ========================================================================
 
-  def subgraph(self, Idx=None, delta=None, **kwargs):
+  def subgraph(self, Idx=None, delta=None, localization=False):
     '''
     Subgraph generator.
-    Remove specific nodes, localized nodes or random nodes with a degradation parameter delta. The associated edges are also removed.
-    '''
 
-    # Create subgraph
-    Sub = type(self)()
-
-    # Check
-    if Idx is None and delta is None:
-      raise Exception(f"Subgraph: either a node list or a node degradation ratio has to be provided.")
-
-    # Indexes
-    '''
-    !! Implement localization !!
-    '''
-    I = Idx if isinstance(Idx, list) else np.random.choice(range(self.nV), Idx, replace=False)
-    K = np.ix_(I,I)
-
-    # Adjacency matrix
-    Adj = self.Adj[K]
-
-    # --- Properties
-
-    Sub.nNd = len(I)
-    Sub.nEd = np.count_nonzero(Sub.Adj)
-    Sub.nNa = self.nVa
-    Sub.nEa = self.nEa
-
-     # Preparation
-    Sub.prepare()
-
-    # --- Node attributes
-
-    for attr in self.vrtx_attr:
-
-      Sub.add_node_attr( {'measurable': attr['measurable'], 'values': attr['values'][I]} )
-    
-    # --- Edge attributes
-
-    if self.nEa:
-
-      # NB: Preparation has to be done before this point.
-
-      # Compute indexes
-      J = [np.where(np.all(self.edges==[I[e[0]], I[e[1]]], axis=1))[0][0] for e in Sub.edges]
+    Idx can be:
+      - int: the number of vertices to remove
+      - list: list of vertices to remove
+      - None: In this case the degradation parameter delta is used, with ('first', 'last') or without localization (False).
       
-      for attr in self.edge_attr:
-        Sub.add_edge_attr( {'measurable': attr['measurable'], 'values': attr['values'][J]} )
+    NB: The associated edges are also removed.
 
-    return Sub if isinstance(idx, list) else (Sub, I)
+    Return: the indices of kept vertices.
+    '''
+
+    # --- Checks
+
+    if Idx is None and delta is None:
+      raise Exception(f"Subgraph: either a number or list of vertices, or a node degradation ratio, has to be provided.")
+
+    # --- Indexes to remove
+    
+    if Idx is not None:
+
+      # Indices to remove
+      Rv = Idx if isinstance(Idx, list) else np.random.choice(self.nV, Idx, replace=False)
+
+    else:
+    
+      # Number of modifications
+      nmod = round(delta*self.nV)
+
+      if localization:
+
+        # Edge BFS with random node seed
+        T = list(nx.bfs_tree(self.nxu, source=np.random.randint(self.nV)))
+
+        match localization:
+          case 'first': Rv = T[:nmod]
+          case 'last': Rv = T[nmod+1:]
+
+      else:
+
+        # Indices to remove
+        Rv = np.random.choice(self.nV, nmod, replace=False)
+      
+    # Degraded graph
+    H = self.trim(Rv=Rv)
+
+    return H if isinstance(Idx, list) else (H, np.setdiff1d(np.arange(self.nV), Rv))
   
 # ##########################################################################
 #                        Graph generation functions

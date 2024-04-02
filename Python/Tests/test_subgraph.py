@@ -17,8 +17,8 @@ p = 0.5
 algo = 'FAQ'
 
 delta = 0.5
-# localization = 'first'
-localization = False
+localization = 'last'
+# localization = False
 
 # --------------------------------------------------------------------------
 
@@ -35,10 +35,12 @@ Ga.add_vrtx_attr('rand')
 Ga.add_edge_attr('rand')
 
 
-Gb = Ga.trim(Rv=[0], Re=[3])
+Gb, Idx = Ga.subgraph(delta=0.5, localization=localization)
 
 Ga.print()
+# print(Idx)
 Gb.print()
+
 # pa.matrix(Ga.Adj, highlight=Ga.Adj!=Gb.Adj)
 
 # C = Comparison(Ga, Gb)
