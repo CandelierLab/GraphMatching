@@ -16,10 +16,9 @@ p = 0.5
 
 algo = 'FAQ'
 
-type = 'ed_rm'
 delta = 0.5
-# localization = 'first'
-localization = False
+# preserval = 'first'
+preserval = False
 
 # --------------------------------------------------------------------------
 
@@ -32,9 +31,10 @@ np.random.seed(0)
 # --- Random graphs
 
 Ga = Gnp(nA, p, directed=False)
-Ga.add_edge_attr('rand')
+# Ga.add_vrtx_attr('rand')
+# Ga.add_edge_attr('rand')
 
-Gb = Ga.degrade(type, delta, localization=localization)
+Gb = Ga.subgraph(delta=delta, preserval=preserval)
 
 Ga.print()
 Gb.print()

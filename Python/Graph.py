@@ -416,7 +416,7 @@ class Graph:
 
   # ========================================================================
 
-  def degrade(self, type, delta, preserval=False, source=None, **kwargs):
+  def degrade(self, type, delta, localization=False, source=None, **kwargs):
     '''
     Graph degradation
 
@@ -440,7 +440,7 @@ class Graph:
       'Nna': add Gaussian noise to node attribute
       'Nea': add Gaussian noise to edge attribute
 
-    + Can be at random (preserval=False) or in a given graph area. In the former case a breadth-first search is performed around a root node (source), and the algorithm can either preserve the surroundings of the root (preserval='first') or remove it (preserval='last').
+    + Can be at random (localization=False) or in a given graph area. In the former case a breadth-first search is performed around a root node (source), and the algorithm can either preserve the surroundings of the root (localization='first') or remove it (localization='last').
     '''
 
     # Checks
@@ -458,7 +458,7 @@ class Graph:
         # Remove Vertices (and corresponding edges), equivalent to subgraph
         # ------------------------------------------------------------------
 
-        H = self.subgraph(delta=delta)
+        H = self.subgraph(delta=delta, **kwargs)
 
       case 'ed_rm' | 'er':
 
@@ -472,7 +472,7 @@ class Graph:
         # Number of modifications
         nmod = round(delta*self.nE)
 
-        if preserval:
+        if localization:
 
           # Edge BFS with random node seed
           T = list(nx.edge_bfs(self.nx, source=0, orientation='ignore'))
@@ -484,7 +484,7 @@ class Graph:
           for i in range(nmod):
 
             # Preserve first or last in the BFS tree
-            match preserval:
+            match localization:
               case 'first': j = len(T)-i-1
               case 'last': j = i
 
@@ -560,10 +560,10 @@ class Graph:
 
   # ========================================================================
 
-  def subgraph(self, Idx=None, delta=None):
+  def subgraph(self, Idx=None, delta=None, **kwargs):
     '''
     Subgraph generator.
-    Remove specific nodes, or nodes at random with a degradation parameter delta.
+    Remove specific nodes, localized nodes or random nodes with a degradation parameter delta. The associated edges are also removed.
     '''
 
     # Create subgraph
@@ -575,7 +575,7 @@ class Graph:
 
     # Indexes
     '''
-    !! Implement preserval !!
+    !! Implement localization !!
     '''
     I = Idx if isinstance(Idx, list) else np.random.choice(range(self.nV), Idx, replace=False)
     K = np.ix_(I,I)
