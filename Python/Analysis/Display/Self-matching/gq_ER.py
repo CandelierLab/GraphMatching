@@ -76,4 +76,6 @@ ax[1].set_ylabel('$q$')
 ax[0].legend()
 ax[1].legend()
 
+ax[0].grid(True)
+
 plt.show()

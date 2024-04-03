@@ -11,21 +11,21 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 10
-# p = 0.9
+p = 0.1
 
-algo = 'GASM'
+algo = 'Zager'
 
-# np.random.seed(0)
+# np.random.seed(3)
 
 # --------------------------------------------------------------------------
 
-p = np.log(nA)/nA
+# p = np.log(nA)/nA
 
 # ==========================================================================
 
 # --- Random graphs
 
-Ga = Gnp(nA, p, directed=False)
+Ga = Gnp(nA, p, directed=True)
 # # Ga.add_edge_attr('rand', name='test_edge')
 # # Ga.add_node_attr('rand', name='test_node')
 
@@ -35,11 +35,11 @@ Ga.print()
 print(gt.__dict__)
 Gb.print()
 
-# C = Comparison(Ga, Gb, verbose=True)
-# M = C.get_matching(algorithm=algo)
+C = Comparison(Ga, Gb, verbose=True)
+M = C.get_matching(algorithm=algo)
 
-M = Matching(Ga, Gb)
-M.from_lists(gt.Ia, gt.Ib)
+# M = Matching(Ga, Gb)
+# M.from_lists(gt.Ia, gt.Ib)
 
 M.compute_accuracy(gt)
 

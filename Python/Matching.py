@@ -219,21 +219,20 @@ class Matching:
     Compute the matching accuracy
     '''
     
-    if not self.Ga.nV or not self.Gb.nV:
+    if not self.nA or not self.nB:
       self.accuracy = 0
 
     elif gt is None:
-      self.accuracy = np.count_nonzero(self.idxA==self.idxB)/self.idxA.size
+      self.accuracy = np.count_nonzero(self.idxA==self.idxB)/self.nA
 
     else:
 
-      # self.accuracy = np.count_nonzero(gt.Ib[self.idxB]==self.idxA)/self.idxA.size
+      # self.accuracy = np.count_nonzero(gt.Ib[self.idxB]==self.idxA)/self.nA
 
-      if self.idxA.size >= self.idxB.size:
-        self.accuracy = np.count_nonzero(self.idxA[gt.Ib]==gt.Ia[self.idxB])/self.idxB.size
+      if self.nA >= self.nB:
+        self.accuracy = np.count_nonzero(self.idxA[gt.Ib]==gt.Ia[self.idxB])/self.nB
       else:
-        self.accuracy = np.count_nonzero(self.idxB[gt.Ia]==gt.Ib[self.idxA])/self.idxA.size
-
+        self.accuracy = np.count_nonzero(self.idxB[gt.Ia]==gt.Ib[self.idxA])/self.nA
 
   def compute_score(self, X):
     '''

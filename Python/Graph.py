@@ -397,7 +397,7 @@ class Graph:
 
     # Ground Truth
     gt = GroundTruth(self, H)
-    gt.Ib = Idx
+    gt.Ib = np.argsort(Idx)
 
     return (H, gt)
 
