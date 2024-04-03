@@ -30,7 +30,7 @@ class Comparison:
     - 'GASM', Graph Attribute and Structure Matching (default)
 
     [1] J.T. Vogelstein et al., "Fast Approximate Quadratic Programming for Graph Matching",
-      PLoS One 10(4) (2015); doi:10.1371/journal.pone.012002
+      PLoS One 10(4) (2015); doi:10.1371/journal.pone.0121002
 
     [2] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
         Applied Mathematics Letters 21 (2008) 86–94; doi: 10.1016/j.aml.2007.01.006
