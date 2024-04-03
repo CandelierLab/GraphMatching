@@ -53,7 +53,7 @@ class Matching:
     mcpl = os.get_terminal_size()[0]
 
     # Maximum number of correspondences to display
-    kmax = 10
+    kmax = 20
 
     s = '╒══ Matching ' + '═'*(mcpl-13) + '\n'
     
@@ -214,19 +214,26 @@ class Matching:
       # Compute structural correspondence
       self.structural_quality = np.count_nonzero(Z @ self.Gb.Adj == self.Ga.Adj @ Z)/self.nA/self.nB
 
-  def compute_accuracy(self, Idx=None):
+  def compute_accuracy(self, gt=None):
     '''
     Compute the matching accuracy
     '''
-
+    
     if not self.Ga.nV or not self.Gb.nV:
       self.accuracy = 0
 
-    elif Idx is None:
-      self.accuracy = np.count_nonzero(self.idxB==self.idxA)/self.idxA.size
+    elif gt is None:
+      self.accuracy = np.count_nonzero(self.idxA==self.idxB)/self.idxA.size
 
     else:
-      self.accuracy = np.count_nonzero(Idx[self.idxB]==self.idxA)/self.idxA.size
+
+      # self.accuracy = np.count_nonzero(gt.Ib[self.idxB]==self.idxA)/self.idxA.size
+
+      if self.idxA.size >= self.idxB.size:
+        self.accuracy = np.count_nonzero(self.idxA[gt.Ib]==gt.Ia[self.idxB])/self.idxB.size
+      else:
+        self.accuracy = np.count_nonzero(self.idxB[gt.Ia]==gt.Ib[self.idxA])/self.idxA.size
+
 
   def compute_score(self, X):
     '''

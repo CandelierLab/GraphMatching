@@ -10,19 +10,19 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 100
+nA = 10
 # p = np.log(nA)/nA
 p = 2/nA
 
 algo = 'Zager'
 
-delta = 1
+delta = 0.5
 # localization = 'last'
 localization = False
 
 # --------------------------------------------------------------------------
 
-np.random.seed(0)
+# np.random.seed(0)
 
 # ==========================================================================
 
@@ -30,19 +30,22 @@ np.random.seed(0)
 
 # --- Random graphs
 
-Ga = Gnp(nA, p, directed=False)
-Ga.add_vrtx_attr('rand')
-Ga.add_edge_attr('rand')
+Ga = Gnp(nA, p, directed=True)
+# Ga.add_vrtx_attr('rand')
+# Ga.add_edge_attr('rand')
 
+Gb, gt = Ga.subgraph(delta=delta, localization=localization)
 
-Gb, Idx = Ga.subgraph(delta=delta, localization=localization)
+Ga.print()
+print(gt.__dict__)
+Gb.print()
 
-# Ga.print()
-# # print(Idx)
-# Gb.print()
-
-C = Comparison(Ga, Gb)
+C = Comparison(Ga, Gb, verbose=True)
 M = C.get_matching(algorithm=algo)
-M.compute_accuracy()
+
+# M = Matching(Ga, Gb)
+# M.from_lists(gt.Ia, gt.Ib)
+
+M.compute_accuracy(gt)
 
 print(M)

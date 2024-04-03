@@ -49,13 +49,13 @@ for p in l_p:
     for i in range(nRun):
 
       Ga = Gnp(nA, p)
-      Gb, Idx = Ga.shuffle()
+      Gb, gt = Ga.shuffle()
 
       # --- FAQ
 
       C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='FAQ')
-      M.compute_accuracy(Idx)
+      M.compute_accuracy(gt)
 
       g_FAQ.append(M.accuracy)
       q_FAQ.append(M.structural_quality)
@@ -64,7 +64,7 @@ for p in l_p:
 
       C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='Zager')
-      M.compute_accuracy(Idx)
+      M.compute_accuracy(gt)
 
       g_Zager.append(M.accuracy)
       q_Zager.append(M.structural_quality)
@@ -73,7 +73,7 @@ for p in l_p:
 
       C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='GASM', eta=eta)
-      M.compute_accuracy(Idx)
+      M.compute_accuracy(gt)
 
       g_GASM.append(M.accuracy)
       q_GASM.append(M.structural_quality)

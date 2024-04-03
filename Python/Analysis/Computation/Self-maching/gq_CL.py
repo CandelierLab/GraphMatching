@@ -18,7 +18,8 @@ os.system('clear')
 l_n = np.arange(1, 26)
 l_eta = [1e-10] #np.logspace(-6, -14, 3)
 
-nRun = 10000
+# nRun = 10000
+nRun = 100
 
 # ==========================================================================
 
@@ -33,7 +34,7 @@ for n in l_n:
 
   print(f'n={n:d}')
 
-  NetA = Network(nx=nx.circular_ladder_graph(n))
+  NetA = Graph(nx=nx.circular_ladder_graph(n))
 
   for eta in l_eta:
 
@@ -49,13 +50,13 @@ for n in l_n:
 
     for i in range(nRun):
 
-      NetB, Idx = NetA.shuffle()
+      NetB, gt = NetA.shuffle()
 
       # --- FAQ
 
       C = Comparison(NetA, NetB)
       M = C.get_matching(algorithm='FAQ')
-      M.compute_accuracy(Idx)
+      M.compute_accuracy(gt)
 
       g_FAQ.append(M.accuracy)
       q_FAQ.append(M.structural_quality)
@@ -64,7 +65,7 @@ for n in l_n:
 
       C = Comparison(NetA, NetB)
       M = C.get_matching(algorithm='Zager')
-      M.compute_accuracy(Idx)
+      M.compute_accuracy(gt)
 
       g_Zager.append(M.accuracy)
       q_Zager.append(M.structural_quality)
@@ -72,8 +73,8 @@ for n in l_n:
       # --- GASM
 
       C = Comparison(NetA, NetB)
-      M = C.get_matching(algorithm='GASM', eta=eta)
-      M.compute_accuracy(Idx)
+      M = C.get_matching(algorithm='GASM')
+      M.compute_accuracy(gt)
 
       g_GASM.append(M.accuracy)
       q_GASM.append(M.structural_quality)

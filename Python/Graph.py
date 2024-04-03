@@ -395,7 +395,11 @@ class Graph:
         attr['values'] = a['values'][J]
         H.add_edge_attr(attr)
 
-    return (H, Idx)
+    # Ground Truth
+    gt = GroundTruth(self, H)
+    gt.Ib = Idx
+
+    return (H, gt)
 
   # ========================================================================
 
@@ -403,7 +407,9 @@ class Graph:
     '''
     Complementary graph
 
-    NB: No edge attribute can be kept when complementing.
+    NB:
+     - No edge attribute can be kept when complementing.
+     - Vertex order is preserved
     '''
 
     # --- Complement graph object
@@ -660,8 +666,27 @@ class Graph:
     # Degraded graph
     H = self.trim(Rv=Rv)
 
-    return H if isinstance(Idx, list) else (H, np.setdiff1d(np.arange(self.nV), Rv))
+    # Ground Truth
+    gt = GroundTruth(self, H)
+    gt.Ia = np.setdiff1d(np.arange(self.nV), Rv)
+
+    # return H if isinstance(Idx, list) else (H, np.setdiff1d(np.arange(self.nV), Rv))
+    return (H, gt)
   
+
+# ##########################################################################
+#                          Ground Truth class
+# ##########################################################################
+
+class GroundTruth:
+
+  # === CONSTRUCTOR ========================================================
+
+  def __init__(self, Ga, Gb):
+    
+    self.Ia = np.arange(Ga.nV)
+    self.Ib = np.arange(Gb.nV)
+
 # ##########################################################################
 #                        Graph generation functions
 # ##########################################################################
