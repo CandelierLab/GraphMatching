@@ -10,12 +10,12 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 10
-p = 0.1
+nA = 5
+p = 0.5
 
-algo = 'Zager'
+algo = 'GASM'
 
-# np.random.seed(3)
+np.random.seed(0)
 
 # --------------------------------------------------------------------------
 
@@ -28,6 +28,8 @@ algo = 'Zager'
 Ga = Gnp(nA, p, directed=True)
 # # Ga.add_edge_attr('rand', name='test_edge')
 # # Ga.add_node_attr('rand', name='test_node')
+
+print(Ga.nV**2, Ga.nEd, Ga.nEd/Ga.nV**2)
 
 Gb, gt = Ga.shuffle()
 
@@ -42,6 +44,8 @@ M = C.get_matching(algorithm=algo)
 # M.from_lists(gt.Ia, gt.Ib)
 
 M.compute_accuracy(gt)
+
+pa.matrix(C.X)
 
 print(M)
 # pa.matrix(C.X)

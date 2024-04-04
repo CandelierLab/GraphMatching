@@ -1,3 +1,7 @@
+'''
+ER (Gnp): average gamma and q
+'''
+
 import os
 import argparse
 import numpy as np
@@ -7,12 +11,11 @@ import matplotlib.pyplot as plt
 
 import project
 
-os.system('clear')
-
 # === Parameters ===========================================================
 
 nA = 20
-nRun = 1000
+# nRun = 1000
+nRun = 100
 
 # --------------------------------------------------------------------------
 
@@ -26,6 +29,9 @@ figfile = args.filename
 datapath = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
+
+if figfile is None:
+  os.system('clear')
 
 if os.path.exists(datapath):
 
@@ -42,7 +48,7 @@ l_eta = np.array([l_eta[2]])
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')
-fig, ax = plt.subplots(1,2)
+fig, ax = plt.subplots(1, 2, figsize=(20,10))
 
 # Colors
 cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_eta.size))
@@ -90,7 +96,7 @@ ax[0].grid(True)
 #  --- Output --------------------------------------------------------------
 
 if figfile is None:
-  
+
   plt.show()
 
 else:

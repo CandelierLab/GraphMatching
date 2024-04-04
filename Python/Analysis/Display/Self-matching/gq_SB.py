@@ -3,15 +3,13 @@ Star-branched graph: average gamma and q
 '''
 
 import os
+import argparse
 import numpy as np
 import pandas as pd
+import time
 import matplotlib.pyplot as plt
 
 import project
-from Graph import *
-from  Comparison import *
-
-os.system('clear')
 
 # === Parameters ===========================================================
 
@@ -19,9 +17,19 @@ nRun = 1000
 
 # --------------------------------------------------------------------------
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--filename', help='File to save the figure')
+args = parser.parse_args()
+figfile = args.filename
+
+# --------------------------------------------------------------------------
+
 fname = project.root + f'/Files/Self-matching/SB/nRun={nRun:d}.csv'
 
 # ==========================================================================
+
+if figfile is None:
+  os.system('clear')
 
 if os.path.exists(fname):
 
@@ -37,7 +45,7 @@ if os.path.exists(fname):
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')
-fig, ax = plt.subplots(1,2, figsize=(12,6))
+fig, ax = plt.subplots(1,2, figsize=(20,10))
 
 # Colors
 cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_k.size))
@@ -58,8 +66,8 @@ for ki, k in enumerate(l_k):
   ax[1].plot(data.n, data.q_FAQ, ':', color=cm[ki], label=f'FAQ $k = {k:d}$')
   ax[1].plot(data.n, data.q_Zager, '--', color=cm[ki], label=f'Zager $k = {k:d}$')
 
-ax[0].set_ylim([0, 1.01])
-ax[1].set_ylim([0, 1.01])
+ax[0].set_ylim([0, 1])
+ax[1].set_ylim([0.9, 1])
 
 ax[0].set_xlabel('n')
 ax[1].set_xlabel('n')
@@ -72,4 +80,17 @@ ax[1].legend()
 
 ax[1].grid(True)
 
-plt.show()
+#  --- Output --------------------------------------------------------------
+
+if figfile is None:
+
+  plt.show()
+
+else:
+
+  print(f'Saving file {figfile} ...', end='', flush=True)
+  tref = time.time()
+
+  plt.savefig(project.root + '/Figures/' + figfile)
+
+  print(' {:.02f} sec'.format((time.time() - tref)))

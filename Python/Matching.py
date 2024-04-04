@@ -227,7 +227,7 @@ class Matching:
 
     else:
 
-      # self.accuracy = np.count_nonzero(gt.Ib[self.idxB]==self.idxA)/self.nA
+      # self.accuracy = np.count_nonzero(gt.Idx[self.idxB]==self.idxA)/self.nA
 
       if self.nA >= self.nB:
         self.accuracy = np.count_nonzero(self.idxA[gt.Ib]==gt.Ia[self.idxB])/self.nB
@@ -240,13 +240,3 @@ class Matching:
     '''
 
     self.score = np.sum(X[self.idxA, self.idxB])
-
-# === MATCHING SET =========================================================
-
-class MatchingSet:
-  '''
-  Set of matchings.
-  '''
-
-  def __init__(self):
-    pass

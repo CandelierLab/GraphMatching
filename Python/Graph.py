@@ -695,28 +695,11 @@ class GroundTruth:
 #                        Random graphs (Erdös-Rényi)
 # ------------------------------------------------------------------------
 
-def Gnm(n, m=None, p=None, a=None, directed=True, selfloops=True):
+def Gnm(n, m, directed=True, selfloops=True):
   '''
   G(n,m) or Erdös-Rényi random graph.
   In the ER model, the number of edges m is guaranteed.
-
-  The parameter controlling the number of edges can be either:
-  - The number of edges m (int)
-  - The proportion of edges p (float, in [0,1])
-  - The average number of edges per node a (float).
   '''
-
-  # Number of edges
-  if m is None:
-
-    if p is not None:
-      m = int(np.round(p*n**2))
-
-    elif a is not None:
-      m = int(np.round(a*n))
-
-    else:
-      raise Exception("The number of edges has to be defined with at least one of the parameters: 'm', 'p' or 'a'.") 
 
   # Check boundaries
   m = min(max(m, 0), n**2)
@@ -739,26 +722,13 @@ def Gnm(n, m=None, p=None, a=None, directed=True, selfloops=True):
 
     return Graph(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
 
-def Gnp(n, p=None, m=None, a=None, directed=True, selfloops=True):
+def Gnp(n, p, directed=True, selfloops=True):
   '''
   G(n,p) or Erdös-Rényi-Gilbert random graph.
   In the ERG model, the number of edges m is not guaranteed.
 
-  The parameter controlling the number of edges can be either:
-  - The number of edges m (int)
-  - The proportion of edges p (float, in [0,1])
-  - The average number of edges per node a (float).
+  The proportion of edges p is a float in [0,1]
   '''
-
-  # Edge proportion
-  if p is None:
-
-    if m is not None:
-      p = m/n**2
-    elif a is not None:
-      p = a/n
-    else:
-      raise Exception("The proportion of edges has to be defined with at least one of the parameters: 'p', 'm' or 'a'.") 
 
   # Check boundaries
   p = min(max(p, 0), 1)
@@ -770,8 +740,10 @@ def Gnp(n, p=None, m=None, a=None, directed=True, selfloops=True):
       Adj = np.full((n,n), False)
     elif p==1:
       Adj = np.full((n,n), True)
-    else:
+    elif directed:
       Adj = np.random.rand(n,n) < p
+    else:
+      Adj = np.triu(np.random.rand(n,n)) > 1-p
 
     # Output
     return Graph(nV=n, directed=directed, Adj=Adj)

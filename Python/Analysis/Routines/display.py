@@ -36,8 +36,7 @@ def check_folder(path):
 
 fdir = check_folder('Self-matching/')
 
-# run(fdir + 'gq_BT.png', 'Self-matching/gq_BT.py')
-# run(fdir + 'gq_CL.png', 'Self-matching/gq_CL.py')
+run(fdir + 'gq_BT.png', 'Self-matching/gq_BT.py')
+run(fdir + 'gq_CL.png', 'Self-matching/gq_CL.py')
 run(fdir + 'gq_ER.png', 'Self-matching/gq_ER.py')
-# run(fdir + 'gq_SB.png', 'Self-matching/gq_SB.py')
-
+run(fdir + 'gq_SB.png', 'Self-matching/gq_SB.py')

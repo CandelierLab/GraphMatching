@@ -3,23 +3,29 @@ Circular ladder graph: average gamma and q
 '''
 
 import os
+import argparse
 import numpy as np
 import pandas as pd
+import time
 import matplotlib.pyplot as plt
 
 import project
-from Graph import *
-from  Comparison import *
-
-os.system('clear')
 
 # === Parameters ===========================================================
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--filename', help='File to save the figure')
+args = parser.parse_args()
+figfile = args.filename
 
 # --------------------------------------------------------------------------
 
 fname = project.root + f'/Files/Self-matching/CL/CL.csv'
 
 # ==========================================================================
+
+if figfile is None:
+  os.system('clear')
 
 if os.path.exists(fname):
 
@@ -34,7 +40,7 @@ if os.path.exists(fname):
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')
-fig, ax = plt.subplots(1,2, figsize=(12,6))
+fig, ax = plt.subplots(1,2, figsize=(20,10))
 
 # --- Accuracy
 
@@ -85,4 +91,17 @@ ax[1].set_ylabel('$q$')
 ax[0].legend()
 ax[1].legend()
 
-plt.show()
+#  --- Output --------------------------------------------------------------
+
+if figfile is None:
+
+  plt.show()
+
+else:
+
+  print(f'Saving file {figfile} ...', end='', flush=True)
+  tref = time.time()
+
+  plt.savefig(project.root + '/Figures/' + figfile)
+
+  print(' {:.02f} sec'.format((time.time() - tref)))
