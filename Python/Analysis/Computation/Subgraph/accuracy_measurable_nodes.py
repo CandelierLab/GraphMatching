@@ -11,9 +11,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 100
-p = 2/nA
-nRun = 100
+nA = 15
+p = 0.2
+nRun = 500
 
 l_zeta = [0, 1] #np.arange(9)
 
@@ -21,8 +21,7 @@ force = True
 
 # --------------------------------------------------------------------------
 
-l_delta = np.linspace(0, 1, 11)
-l_delta[0] = 1/nA
+l_delta = np.arange(nA)/nA
 
 # ==========================================================================
 
@@ -49,18 +48,18 @@ for zeta in l_zeta:
 
     for i in range(nRun):
 
-      Ga = Gnp(nA, p)
-      for i in range(zeta):
-        Ga.add_vrtx_attr('gauss')
+      Ga = Gnp(nA, p, directed=zeta)
+      # for i in range(zeta):
+      #   Ga.add_vrtx_attr('gauss')
 
       # Subgraph
-      Gb, Idx = Ga.subgraph(delta=delta)
+      Gb, gt = Ga.subgraph(delta=delta)
 
       # --- Zager
 
       C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='Zager')
-      M.compute_accuracy()
+      M.compute_accuracy(gt)
 
       g_Zager.append(M.accuracy)
       q_Zager.append(M.structural_quality)
@@ -69,7 +68,7 @@ for zeta in l_zeta:
 
       C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='GASM')
-      M.compute_accuracy()
+      M.compute_accuracy(gt)
 
       g_GASM.append(M.accuracy)
       q_GASM.append(M.structural_quality)

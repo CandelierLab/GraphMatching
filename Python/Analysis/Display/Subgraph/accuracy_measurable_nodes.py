@@ -9,8 +9,8 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 100
-nRun = 100
+nA = 15
+nRun = 500
 
 # --------------------------------------------------------------------------
 
@@ -28,6 +28,8 @@ if os.path.exists(fname):
   l_delta = np.unique(df.delta)
   l_zeta = np.unique(df.zeta)
 
+# l_zeta = np.array([0])
+
 # --- Display
 
 plt.style.use('dark_background')
@@ -40,7 +42,14 @@ for i, zeta in enumerate(l_zeta):
 
   data = df.loc[df['zeta'] == zeta]
 
-  ax.plot(data.delta, data.g_Zager, '--', color=cm[i], label=f'$\zeta = {zeta}$')
-  ax.plot(data.delta, data.g_GASM, '.-', color=cm[i], label=f'$\zeta = {zeta}$')
+  ax.plot((1-data.delta)*nA, data.g_Zager, '.-', label=f'$\zeta = {zeta}$')
+
+  # ax.plot(data.delta, data.g_Zager, '--', color=cm[i], label=f'$\zeta = {zeta}$')
+  # ax.plot(data.delta, data.g_GASM, '.-', color=cm[i], label=f'$\zeta = {zeta}$')
+
+ax.set_ylim(0,1)
+
+ax.legend()
+ax.grid(True)
 
 plt.show()

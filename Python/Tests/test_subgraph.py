@@ -10,9 +10,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 10
+nA = 15
 # p = np.log(nA)/nA
-p = 2/nA
+p = 0.2
 
 algo = 'Zager'
 
