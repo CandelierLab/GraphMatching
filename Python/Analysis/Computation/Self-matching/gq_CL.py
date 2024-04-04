@@ -1,5 +1,5 @@
 '''
-Balanced tree: average gamma and q
+Circular ladder graph: average gamma and q
 '''
 
 import os
@@ -15,31 +15,25 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-r = 2
-l_h = np.arange(2,11)
+l_n = np.arange(1, 26)
+l_eta = [1e-10] #np.logspace(-6, -14, 3)
 
-# r = 3
-# l_h = np.arange(2,8)
-
-l_eta = [1e-10] #np.logspace(-6, -14, 5)
+nRun = 10000
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Self-matching/BT/r={r:d}.csv'
+fname = project.root + f'/Files/Self-matching/CL/CL.csv'
 
 # Creating dataframe
 df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
 
 k = 0
 
-for h in l_h:
+for n in l_n:
 
-  print(f'h={h:d}')
+  print(f'n={n:d}')
 
-  NetA = Network(nx=nx.balanced_tree(r, h))
-
-  # Number of runs
-  nRun = int(np.ceil(2.0**(13-h)))
+  Ga = Graph(nx=nx.circular_ladder_graph(n))
 
   for eta in l_eta:
 
@@ -55,32 +49,31 @@ for h in l_h:
 
     for i in range(nRun):
 
-      NetB, Idx = NetA.shuffle()
+      Gb, gt = Ga.shuffle()
 
       # --- FAQ
 
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='FAQ')
-      M.compute_accuracy(Idx)
+      M.compute_accuracy(gt)
 
       g_FAQ.append(M.accuracy)
       q_FAQ.append(M.structural_quality)
 
-
       # --- Zager
 
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='Zager')
-      M.compute_accuracy(Idx)
+      M.compute_accuracy(gt)
 
       g_Zager.append(M.accuracy)
       q_Zager.append(M.structural_quality)
 
       # --- GASM
 
-      C = Comparison(NetA, NetB)
-      M = C.get_matching(algorithm='GASM', eta=eta)
-      M.compute_accuracy(Idx)
+      C = Comparison(Ga, Gb)
+      M = C.get_matching(algorithm='GASM')
+      M.compute_accuracy(gt)
 
       g_GASM.append(M.accuracy)
       q_GASM.append(M.structural_quality)
@@ -88,7 +81,7 @@ for h in l_h:
     # --- Store
       
     # Parameters
-    df.loc[k, 'h'] = h
+    df.loc[k, 'n'] = n
     df.loc[k, 'eta'] = eta
 
     # Mean values

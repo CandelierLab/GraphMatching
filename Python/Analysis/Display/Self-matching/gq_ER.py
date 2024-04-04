@@ -1,6 +1,8 @@
 import os
+import argparse
 import numpy as np
 import pandas as pd
+import time
 import matplotlib.pyplot as plt
 
 import project
@@ -10,18 +12,25 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 20
-nRun = 100
+nRun = 1000
 
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--filename', help='File to save the figure')
+args = parser.parse_args()
+figfile = args.filename
+
+# --------------------------------------------------------------------------
+
+datapath = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 
-if os.path.exists(fname):
+if os.path.exists(datapath):
 
   # Load data
-  df = pd.read_csv(fname)
+  df = pd.read_csv(datapath)
 
   # Retrieve l_p and l_eta
 
@@ -78,4 +87,17 @@ ax[1].legend()
 
 ax[0].grid(True)
 
-plt.show()
+#  --- Output --------------------------------------------------------------
+
+if figfile is None:
+  
+  plt.show()
+
+else:
+
+  print(f'Saving file {figfile} ...', end='', flush=True)
+  tref = time.time()
+
+  plt.savefig(project.root + '/Figures/' + figfile)
+
+  print(' {:.02f} sec'.format((time.time() - tref)))

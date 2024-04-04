@@ -1,5 +1,5 @@
 '''
-Circular ladder graph: average gamma and q
+Erdo-Renyi: average gamma and q
 '''
 
 import os
@@ -15,26 +15,24 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-l_n = np.arange(1, 26)
-l_eta = [1e-10] #np.logspace(-6, -14, 3)
-
-# nRun = 10000
+nA = 100
+l_p = np.linspace(0,1,41)
+l_eta = np.logspace(-14, -2, 7)
+# l_eta = [1e-10]
 nRun = 100
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Self-matching/CL/CL.csv'
+fname = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
 
 # Creating dataframe
-df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
+df = pd.DataFrame(columns=['p', 'eta', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
 
 k = 0
 
-for n in l_n:
+for p in l_p:
 
-  print(f'n={n:d}')
-
-  NetA = Graph(nx=nx.circular_ladder_graph(n))
+  print(f'p={p:0.2f}')
 
   for eta in l_eta:
 
@@ -50,11 +48,12 @@ for n in l_n:
 
     for i in range(nRun):
 
-      NetB, gt = NetA.shuffle()
+      Ga = Gnp(nA, p)
+      Gb, gt = Ga.shuffle()
 
       # --- FAQ
 
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='FAQ')
       M.compute_accuracy(gt)
 
@@ -63,7 +62,7 @@ for n in l_n:
 
       # --- Zager
 
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='Zager')
       M.compute_accuracy(gt)
 
@@ -72,8 +71,8 @@ for n in l_n:
 
       # --- GASM
 
-      C = Comparison(NetA, NetB)
-      M = C.get_matching(algorithm='GASM')
+      C = Comparison(Ga, Gb)
+      M = C.get_matching(algorithm='GASM', eta=eta)
       M.compute_accuracy(gt)
 
       g_GASM.append(M.accuracy)
@@ -82,7 +81,7 @@ for n in l_n:
     # --- Store
       
     # Parameters
-    df.loc[k, 'n'] = n
+    df.loc[k, 'p'] = p
     df.loc[k, 'eta'] = eta
 
     # Mean values

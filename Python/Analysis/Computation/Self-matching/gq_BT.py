@@ -1,5 +1,5 @@
 '''
-Erdo-Renyi: average gamma and q
+Balanced tree: average gamma and q
 '''
 
 import os
@@ -15,24 +15,31 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 20
-l_p = np.linspace(0,1,41)
-l_eta = np.logspace(-14, -2, 7)
-# l_eta = [1e-10]
-nRun = 100
+r = 2
+l_h = np.arange(2,11)
+
+# r = 3
+# l_h = np.arange(2,8)
+
+l_eta = [1e-10] #np.logspace(-6, -14, 5)
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Self-matching/BT/r={r:d}.csv'
 
 # Creating dataframe
-df = pd.DataFrame(columns=['p', 'eta', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
+df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
 
 k = 0
 
-for p in l_p:
+for h in l_h:
 
-  print(f'p={p:0.2f}')
+  print(f'h={h:d}')
+
+  Ga = Graph(nx=nx.balanced_tree(r, h))
+
+  # Number of runs
+  nRun = int(np.ceil(2.0**(13-h)))
 
   for eta in l_eta:
 
@@ -48,7 +55,6 @@ for p in l_p:
 
     for i in range(nRun):
 
-      Ga = Gnp(nA, p)
       Gb, gt = Ga.shuffle()
 
       # --- FAQ
@@ -59,6 +65,7 @@ for p in l_p:
 
       g_FAQ.append(M.accuracy)
       q_FAQ.append(M.structural_quality)
+
 
       # --- Zager
 
@@ -81,7 +88,7 @@ for p in l_p:
     # --- Store
       
     # Parameters
-    df.loc[k, 'p'] = p
+    df.loc[k, 'h'] = h
     df.loc[k, 'eta'] = eta
 
     # Mean values
