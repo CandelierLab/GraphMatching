@@ -1,3 +1,5 @@
+- Add force option to Analysis.Computation programs
+
 - Tweak iteration formulaes
 
 

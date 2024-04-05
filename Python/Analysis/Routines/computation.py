@@ -12,7 +12,8 @@ run = lambda name, path : os.system(f'tsp -L {name} python Python/Analysis/{path
 os.system('clear')
 
 # Set the number of jobs on the number of CPU threads
-os.system('tsp -S 28')
+# os.system('tsp -S 28')
+os.system('tsp -S 16')
 
 # Self-matching
 run('Self-Matching_BT', 'Computation/Self-matching/gq_BT.py')
