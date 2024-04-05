@@ -76,8 +76,8 @@ class Comparison:
 
     # --- Definitions --------------------------------------------------------
 
-    GA = self.Ga
-    GB = self.Gb
+    Ga = self.Ga
+    Gb = self.Gb
 
     # Complement
     match algorithm:
@@ -86,23 +86,23 @@ class Comparison:
         pass
         
       case 'GASM':
-        complement = GA.nEd + GB.nEd > (GA.nV**2 + GB.nV**2)/2
+        complement = Ga.nEd + Gb.nEd > (Ga.nV**2 + Gb.nV**2)/2
         if complement:
-          GA = self.Ga.complement()
-          GB = self.Gb.complement()
+          Ga = self.Ga.complement()
+          Gb = self.Gb.complement()
 
     # Number of vertices
-    nA = GA.nV
-    nB = GB.nV
+    nA = Ga.nV
+    nB = Gb.nV
 
     # Number of edges
-    mA = GA.nEd
-    mB = GB.nEd
+    mA = Ga.nE
+    mB = Gb.nE
 
     # --- Algorithms parameters
 
     # Number of iterations
-    nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(GA.d, GB.d), 1)
+    nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(Ga.d, Gb.d), 1)
     self.info['nIter'] = nIter
 
     # Non-default normalization
@@ -135,9 +135,9 @@ class Comparison:
         # Base
         Xc = np.ones((nA,nB))
         
-        for k, attr in enumerate(GA.vrtx_attr):
+        for k, attr in enumerate(Ga.vrtx_attr):
 
-          bttr = GB.vrtx_attr[k]
+          bttr = Gb.vrtx_attr[k]
 
           if attr['measurable']:
             pass
@@ -171,10 +171,10 @@ class Comparison:
           # Random initial fluctuations
           Xc += np.random.rand(nA, nB)*eta
 
-          for k, attr in enumerate(GA.vrtx_attr):
+          for k, attr in enumerate(Ga.vrtx_attr):
 
             wA = attr['values']
-            wB = GB.vrtx_attr[k]['values']
+            wB = Gb.vrtx_attr[k]['values']
 
             if attr['measurable']:
 
@@ -200,10 +200,10 @@ class Comparison:
 
           if mA and mB:
 
-            for k, attr in enumerate(GA.edge_attr):
+            for k, attr in enumerate(Ga.edge_attr):
 
               wA = attr['values']
-              wB = GB.edge_attr[k]['values']
+              wB = Gb.edge_attr[k]['values']
 
               if attr['measurable']:
 
@@ -284,8 +284,13 @@ class Comparison:
         
           case 'Zager':
 
-            self.X = GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T
-            self.Y = GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At
+            if Ga.directed:
+              self.X = Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T
+              self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
+
+            else:
+              self.X = Ga.R @ self.Y @ Gb.R.T
+              self.Y = Ga.R.T @ self.X @ Gb.R
 
             if normalization is None:
               # If normalization is not explicitely specified, the default normalization is used.
@@ -295,12 +300,22 @@ class Comparison:
           case 'GASM':
 
             if i==0:
-              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1) * Xc
-              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At) * Yc
+
+              if Ga.directed:
+                self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T + 1) * Xc
+                self.Y = (Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T) * Yc
+              else:
+                self.X = (Ga.R @ self.Y @ Gb.R.T + 1) * Xc
+                self.Y = (Ga.R.T @ self.X @ Gb.R) * Yc
 
             else:
-              self.X = (GA.As @ self.Y @ GB.As.T + GA.At @ self.Y @ GB.At.T + 1)
-              self.Y = (GA.As.T @ self.X @ GB.As + GA.At.T @ self.X @ GB.At)
+
+              if Ga.directed:
+                self.X = Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T + 1
+                self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
+              else:
+                self.X = Ga.R @ self.Y @ Gb.R.T + 1
+                self.Y = Ga.R.T @ self.X @ Gb.R
 
         # --- Normalization 
               

@@ -1,12 +1,3 @@
-There is a problem. A few symptoms:
-
- - test_shuffle_repeat.py: for shuffled Gnp graphs (nA=20) 
-    * With p=0.5, the accuracy is 1.0 for directed graphs and ~0.2 for undirected graphs (?!)
-    * With p=0.95 the difference between Zager and GASM is really small
-
- - test_shuffle: Zager and GASM incapable to match an undirected Gnp with nA=5 (but perfect with directed)
-
-
 - Tweak iteration formulaes
 
 

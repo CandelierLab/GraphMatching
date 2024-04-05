@@ -303,29 +303,43 @@ class Graph:
     if list_edges:
       self.edges = np.zeros((self.nE, 2), dtype=np.int32)
 
-    # Source-edge and terminus-edge matrices
-    self.As = np.zeros((self.nV, self.nEd), dtype=bool)
-    self.At = np.zeros((self.nV, self.nEd), dtype=bool)
+    # Node-edge matrices
+    if self.directed:
+      self.S = np.zeros((self.nV, self.nE), dtype=bool)
+      self.T = np.zeros((self.nV, self.nE), dtype=bool)
+    else:
+      self.R = np.zeros((self.nV, self.nE), dtype=bool)
 
     # --- Loop through edges
 
     if self.directed:
+
       I = np.where(self.Adj)
+
+      for i in range(len(I[0])):
+
+        self.S[I[0][i], i] = 1
+        self.T[I[1][i], i] = 1
+
+        if list_edges:
+          self.edges[i,:] = [I[0][i], I[1][i]]
+
+        # Conversion to Scipy sparse
+        # Strangely slows down when there are several matrix multiplications
+        # self.As = sparse.csr_matrix(self.As)
+        # self.At = sparse.csr_matrix(self.At)
+
     else:
+
       I = np.where(np.triu(self.Adj))
 
-    for i in range(len(I[0])):
+      for i in range(len(I[0])):
 
-      self.As[I[0][i], i] = 1
-      self.At[I[1][i], i] = 1
+        self.R[I[0][i], i] = 1
+        self.R[I[1][i], i] = 1
 
-      if list_edges:
-        self.edges[i,:] = [I[0][i], I[1][i]]
-
-    # Conversion to Scipy sparse
-    # Strangely slows down when there are several matrix multiplications
-    # self.As = sparse.csr_matrix(self.As)
-    # self.At = sparse.csr_matrix(self.At)
+        if list_edges:
+          self.edges[i,:] = [I[0][i], I[1][i]]
 
     # --- Networkx graphs
         
