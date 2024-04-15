@@ -347,7 +347,10 @@ class Comparison:
           self.X = self.X * Xc
 
         case 'GASM':
-          pass
+          
+          # Isolated vertices
+          I = self.X==0
+          self.X[I] = Xc[I]
 
   # ========================================================================
   # |                                                                      |
@@ -413,7 +416,7 @@ class Comparison:
         M.time['scores'] = (time.perf_counter_ns()-tref)*1e-6
         tref = time.perf_counter_ns()
         
-        # --- Emptyness check ----------------------------------------------------
+        # --- Emptyness check ----------------------------------------------
 
         if not self.X.size:
           M.time['LAP'] = (time.perf_counter_ns()-tref)*1e-6
@@ -421,7 +424,7 @@ class Comparison:
           M.initialize()
           return M
 
-        # --- Solution search ---------------------------------------------------
+        # --- Solution search ----------------------------------------------
 
         # Jonker-Volgenant resolution of the LAP
         idxA, idxB = linear_sum_assignment(self.X, maximize=True)

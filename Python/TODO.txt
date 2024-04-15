@@ -1,12 +1,5 @@
-- Remove +1 in GASM
-  + check normalization factor
-- add isolate elements handling
 - Analyses:
   * Self-matching
-  * Degradation
   * Subgraph matching
+  * Degradation  
   * Supplementary
-
-- Tweak iteration formulaes
-
-

@@ -726,8 +726,12 @@ def Gnm(n, m, directed=True, selfloops=True):
     elif m==n**2:
       Adj = np.full((n,n), True)
     else:
-      A = np.random.rand(n,n)
-      Adj = A < np.sort(A.flatten())[m]
+      if directed:
+        A = np.random.rand(n,n)
+      else:
+        A = np.triu(np.random.rand(n,n))
+
+      Adj = A >= np.sort(A.flatten())[-m]
 
     # Output
     return Graph(nV=n, directed=directed, Adj=Adj)

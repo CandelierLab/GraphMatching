@@ -5,11 +5,10 @@ A routine to call all the important computation programs.
 '''
 
 import os
-import time
 
 # === Parameters ===========================================================
 
-force = False
+force = True
 
 # ==========================================================================
 
@@ -24,7 +23,7 @@ os.system('tsp -S 28')
 
 # Self-matching
 # run('Self-Matching_BT', 'Computation/Self-matching/gq_BT.py')
-# run('Self-Matching_CL', 'Computation/Self-matching/gq_CL.py')
+run('Self-Matching_CL', 'Computation/Self-matching/gq_CL.py')
 # run('Self-Matching_ER', 'Computation/Self-matching/gq_ER.py')
 # run('Self-Matching_SB', 'Computation/Self-matching/gq_SB.py')
 

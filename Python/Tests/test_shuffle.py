@@ -11,11 +11,11 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 10
-p = 0.5
+p = 0.1
 
 algo = 'GASM'
 
-# np.random.seed(1)
+np.random.seed(1)
 
 # --------------------------------------------------------------------------
 
@@ -26,14 +26,14 @@ algo = 'GASM'
 # --- Random graphs
 
 Ga = Gnp(nA, p, directed=False)
-# # Ga.add_edge_attr('rand', name='test_edge')
-# # Ga.add_node_attr('rand', name='test_node')
+# Ga.add_edge_attr('rand', name='test_edge')
+# Ga.add_vrtx_attr('rand', name='test_node')
 
 # print(Ga.nV**2, Ga.nEd, Ga.nEd/Ga.nV**2)
 
 Gb, gt = Ga.shuffle()
 
-# Ga.print()
+Ga.print()
 # print(gt.__dict__)
 # Gb.print()
 
@@ -45,8 +45,6 @@ M = C.get_matching(algorithm=algo)
 # M.from_lists(gt.Ia, gt.Ib)
 
 M.compute_accuracy(gt)
-
-# pa.matrix(C.X)
 
 print(M)
 # pa.matrix(C.X)
