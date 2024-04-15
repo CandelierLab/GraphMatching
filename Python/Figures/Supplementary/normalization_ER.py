@@ -9,14 +9,14 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-n = 100
-scale = 'lin'
-# scale = 'log'
+nA = 100
+# scale = 'lin'
+scale = 'log'
 nRun = 100
 
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/Normalization/ER/{scale}_n={n:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Normalization/ER/{scale}_n={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 
@@ -31,7 +31,7 @@ mv = F.mean()
 s = F.std()
 
 # Simple normalization factor
-f0 = np.minimum(4*x**2 + 1, 4*(n-x)**2 + 1)
+f0 = np.minimum(4*x**2 + 1, 4*(nA-x)**2 + 1)
 
 # === Display =================================================================
 
@@ -54,7 +54,7 @@ if scale=='log':
   ax.set_xscale('log')
 ax.set_yscale('log')
 
-ax.set_title('n = {:d}'.format(n))
+ax.set_title('n = {:d}'.format(nA))
 
 # ax.set_ylim(1, 6e4)
 

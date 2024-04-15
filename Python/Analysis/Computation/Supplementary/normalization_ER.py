@@ -1,4 +1,9 @@
-import os
+'''
+Compute normalization factors
+'''
+
+import os, sys
+import argparse
 import numpy as np
 import pandas as pd
 import time
@@ -12,9 +17,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-n = 100
-scale = 'lin'
-# scale = 'log'
+nA = 100
+# scale = 'lin'
+scale = 'log'
 
 nRun = 100
 
@@ -22,16 +27,29 @@ nRun = 100
 # Degrees (average number of edges per node)
 match scale:
   case 'lin':
-    l_deg = np.linspace(0, n, 31)
+    l_deg = np.linspace(0, nA, 31)
   case 'log':
-    l_deg = np.geomspace(1/n, n, 31)
+    l_deg = np.geomspace(1/nA, nA, 31)
 
+force = False
 
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/Normalization/ER/{scale}_n={n:d}_nRun={nRun:d}.csv'
+parser = argparse.ArgumentParser()
+
+if not force:  
+  parser.add_argument('-F', '--force', action='store_true')
+  args = parser.parse_args()
+  force = args.force
 
 # ==========================================================================
+
+
+fname = project.root + f'/Files/Normalization/ER/{scale}_n={nA:d}_nRun={nRun:d}.csv'
+
+# Check existence
+if os.path.exists(fname) and not force:
+  sys.exit()
 
 fac = pd.DataFrame()
 
@@ -46,14 +64,12 @@ for deg in l_deg:
 
     # --- Network
 
-    NetA = Network(n)
-    NetA.set_rand_edges('ER', int(deg*n))
-
-    NetB, Idx = NetA.shuffle()
+    Ga = Gnm(nA, deg*nA)
+    Gb, gt = Ga.shuffle()
 
     # --- Matching
 
-    C = Comparison(NetA, NetB)
+    C = Comparison(Ga, Gb)
     M = C.get_matching(algorithm='GASM', normalization=1, info_avgScores=True)
 
     if 'avgX' in C.info and len(C.info['avgX'])>1:

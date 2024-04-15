@@ -119,7 +119,8 @@ class Comparison:
   
         # Normalization
         if normalization is None:
-          normalization = 4*mA*mB/nA/nB + 1 if nA and nB else 1
+          normalization = 4*mA*mB/nA/nB if nA and nB else 1
+          # normalization = 4*mA*mB/nA/nB + 1 if nA and nB else 1
 
         # Noise
         eta = kwargs['eta'] if 'eta' in kwargs else 1e-10
@@ -273,7 +274,7 @@ class Comparison:
         
                 f = 2 sqrt(nA.nB.pA.pB)
 
-        Nevertheless, if one needs normalization as defined in Zager et.al., it can be performed after the iterative procedure by dividing the final score matrices X and Y by:
+        Nevertheless, if one needs normalization as defined in Zager et.al., it can also be performed after the iterative procedure by dividing the final score matrices X and Y by:
 
                 f = np.sqrt(np.sum(X**2))
 
@@ -302,19 +303,19 @@ class Comparison:
             if i==0:
 
               if Ga.directed:
-                self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T + 1) * Xc
+                self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T) * Xc
                 self.Y = (Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T) * Yc
               else:
-                self.X = (Ga.R @ self.Y @ Gb.R.T + 1) * Xc
+                self.X = (Ga.R @ self.Y @ Gb.R.T) * Xc
                 self.Y = (Ga.R.T @ self.X @ Gb.R) * Yc
 
             else:
 
               if Ga.directed:
-                self.X = Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T + 1
+                self.X = Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T
                 self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
               else:
-                self.X = Ga.R @ self.Y @ Gb.R.T + 1
+                self.X = Ga.R @ self.Y @ Gb.R.T
                 self.Y = Ga.R.T @ self.X @ Gb.R
 
         # --- Normalization 

@@ -16,11 +16,11 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 100
+nA = 20
 l_p = np.linspace(0,1,41)
 l_eta = np.logspace(-14, -2, 7)
 # l_eta = [1e-10]
-nRun = 100
+nRun = 1000
 
 force = False
 

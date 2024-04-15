@@ -716,7 +716,7 @@ def Gnm(n, m, directed=True, selfloops=True):
   '''
 
   # Check boundaries
-  m = min(max(m, 0), n**2)
+  m = round(min(max(m, 0), n**2))
 
   # Selfloops
   if selfloops:
@@ -727,7 +727,7 @@ def Gnm(n, m, directed=True, selfloops=True):
       Adj = np.full((n,n), True)
     else:
       A = np.random.rand(n,n)
-      Adj = A < np.sort(A.flatten())[p]
+      Adj = A < np.sort(A.flatten())[m]
 
     # Output
     return Graph(nV=n, directed=directed, Adj=Adj)
