@@ -2,7 +2,8 @@
 Erdo-Renyi: average gamma and q
 '''
 
-import os
+import os, sys
+import argparse
 import numpy as np
 import pandas as pd
 import time
@@ -21,10 +22,25 @@ l_eta = np.logspace(-14, -2, 7)
 # l_eta = [1e-10]
 nRun = 100
 
+force = False
+
+# --------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser()
+
+if not force:  
+  parser.add_argument('-F', '--force', action='store_true')
+  args = parser.parse_args()
+  force = args.force
+
 # ==========================================================================
 
 fname = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
 
+# Check existence
+if os.path.exists(fname) and not force:
+  sys.exit()
+  
 # Creating dataframe
 df = pd.DataFrame(columns=['p', 'eta', 'g_FAQ', 'g_Zager', 'g_GASM', 'q_FAQ',  'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std',  'q_Zager_std', 'q_GASM_std'])
 
