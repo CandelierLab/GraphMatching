@@ -16,11 +16,12 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
+directed = True
 nA = 20
-l_p = np.linspace(0,1,41)
-l_eta = np.logspace(-14, -2, 7)
-# l_eta = [1e-10]
-nRun = 1000
+l_p = np.linspace(0,1,101)
+# l_eta = np.logspace(-14, -2, 7)
+l_eta = [1e-10]
+nRun = 10000
 
 force = False
 
@@ -35,7 +36,7 @@ if not force:
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + '/Files/Self-matching/ER/' + ('' if directed else 'un') + f'directed_nA={nA:d}_nRun={nRun:d}.csv'
 
 # Check existence
 if os.path.exists(fname) and not force:
@@ -48,12 +49,10 @@ k = 0
 
 for p in l_p:
 
-  print(f'p={p:0.2f}')
+  print(f'{nRun:d} iterations: p={p:.02f} ...', end='', flush=True)
+  start = time.time()
 
   for eta in l_eta:
-
-    print(f'{nRun:d} iterations: eta={eta:.05f} ...', end='')
-    start = time.time()
     
     g_FAQ = []
     q_FAQ = []
@@ -64,7 +63,7 @@ for p in l_p:
 
     for i in range(nRun):
 
-      Ga = Gnp(nA, p)
+      Ga = Gnp(nA, p, directed=directed)
       Gb, gt = Ga.shuffle()
 
       # --- FAQ
@@ -118,7 +117,7 @@ for p in l_p:
 
     k += 1
 
-    print('{:.02f} sec'.format((time.time() - start)))
+  print('{:.02f} sec'.format((time.time() - start)))
 
 # --- Save
     

@@ -16,7 +16,7 @@ import project
 # === Parameters ===========================================================
 
 nA = 20
-nRun = 100
+nRun = 1000
 
 # --------------------------------------------------------------------------
 
@@ -59,8 +59,8 @@ for d in l_directed:
 
     data = df.loc[np.logical_and(df['directed'] == d, df['delta'] == delta)]
 
-    ax[int(d),0].plot(data.p, data.g_Zager, '.--', color=cm[i])
-    ax[int(d),0].plot(data.p, data.g_GASM, '.-', color=cm[i], label=f'$\delta = {delta:g}$')
+    ax[int(d),0].plot(data.p, data.g_Zager, '--', color=cm[i])
+    ax[int(d),0].plot(data.p, data.g_GASM, '-', color=cm[i], label=f'$\delta = {delta:g}$')
 
     ax[int(d),1].plot(data.p, data.q_Zager, '--', color=cm[i])
     ax[int(d),1].plot(data.p, data.q_GASM, '-', color=cm[i], label=f'$\delta = {delta:g}$')
@@ -105,8 +105,8 @@ ax[0,1].set_xlim(0, 1)
 ax[1,0].set_xlim(0, 1)
 ax[1,1].set_xlim(0, 1)
 
-# ax[0,0].set_yscale('log')
-# ax[1,0].set_yscale('log')
+ax[0,0].set_yscale('log')
+ax[1,0].set_yscale('log')
 
 # --- Misc display featutes (legend, grid, ...)
 

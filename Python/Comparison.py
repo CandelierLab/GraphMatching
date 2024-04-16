@@ -86,7 +86,12 @@ class Comparison:
         pass
         
       case 'GASM':
-        complement = Ga.nEd + Gb.nEd > (Ga.nV**2 + Gb.nV**2)/2
+
+        if Ga.directed:
+          complement = Ga.nE + Gb.nE > (Ga.nV**2 + Gb.nV**2)/2
+        else:
+          complement = Ga.nE + Gb.nE > (Ga.nV*(Ga.nV+1) + Gb.nV*(Gb.nV+1))/4
+
         if complement:
           Ga = self.Ga.complement()
           Gb = self.Gb.complement()

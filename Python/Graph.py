@@ -20,7 +20,7 @@ class Graph:
     self.nV = nV  # Number of verticex
     self.nVa = 0  # NUmber of vertex attributes
     self.nE = 0   # Number of edges 
-    self.nEd = 0  # Number of directed edges (nE for directed graphs, 2*nE for undirected graphs)
+    # self.nEd = 0  # Number of directed edges (nE for directed graphs, 2*nE for undirected graphs)
     self.nEa = 0  # Number of edge attributes
 
     # Edges
@@ -155,8 +155,9 @@ class Graph:
     self.nV = self.Adj.shape[0]
 
     # Edges
-    self.nEd = np.count_nonzero(self.Adj)
-    self.nE = self.nEd if self.directed else np.count_nonzero(np.triu(self.Adj))
+    # self.nEd = np.count_nonzero(self.Adj)
+    # self.nE = self.nEd if self.directed else np.count_nonzero(np.triu(self.Adj))
+    self.nE = np.count_nonzero(self.Adj) if self.directed else np.count_nonzero(np.triu(self.Adj))
 
     # Finalize preparation
     self.prepare()
@@ -180,7 +181,7 @@ class Graph:
 
     # Number of edges
     self.nE = self.nx.number_of_edges()
-    self.nEd = np.count_nonzero(self.Adj)
+    # self.nEd = np.count_nonzero(self.Adj)
 
     # Preparation
     self.prepare()
