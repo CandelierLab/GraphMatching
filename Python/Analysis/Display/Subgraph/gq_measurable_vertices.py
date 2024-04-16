@@ -14,7 +14,7 @@ nRun = 500
 
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/Subgraph/ER/Meas_nodes_nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Subgraph/ER/Meas_vertices_nA={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 
@@ -42,10 +42,12 @@ for i, zeta in enumerate(l_zeta):
 
   data = df.loc[df['zeta'] == zeta]
 
-  ax.plot((1-data.delta)*nA, data.g_Zager, '.-', label=f'$\zeta = {zeta}$')
+  rho = (1-data.delta)*nA
+
+  ax.plot(data.delta, data.g_Zager, '.-', label=f'Zager $\zeta = {zeta}$')
 
   # ax.plot(data.delta, data.g_Zager, '--', color=cm[i], label=f'$\zeta = {zeta}$')
-  # ax.plot(data.delta, data.g_GASM, '.-', color=cm[i], label=f'$\zeta = {zeta}$')
+  ax.plot(data.delta, data.g_GASM, '.-', color=cm[i], label=f'GASM $\zeta = {zeta}$')
 
 ax.set_ylim(0,1)
 

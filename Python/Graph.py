@@ -528,7 +528,7 @@ class Graph:
 
   # ========================================================================
 
-  def degrade(self, type, delta, localization=False, source=None, **kwargs):
+  def degrade(self, type, delta, shuffle=True, localization=False, source=None, **kwargs):
     '''
     Graph degradation
 
@@ -553,6 +553,8 @@ class Graph:
       'Nea': add Gaussian noise to edge attribute
 
     + Can be at random (localization=False) or in a given graph area. In the former case a breadth-first search is performed around a root node (source), and the algorithm can either preserve the surroundings of the root (localization='first') or remove it (localization='last').
+
+    * NB: shuffling is still to implement in the general case, see subgraph.
     '''
 
     # Checks
@@ -570,7 +572,7 @@ class Graph:
         # Remove Vertices (and corresponding edges), equivalent to subgraph
         # ------------------------------------------------------------------
 
-        H = self.subgraph(delta=delta, localization=localization)
+        H, gt = self.subgraph(delta=delta, localization=localization)
 
       case 'ed_rm' | 'er':
 
@@ -632,7 +634,7 @@ class Graph:
 
   # ========================================================================
 
-  def subgraph(self, Idx=None, delta=None, localization=False):
+  def subgraph(self, Idx=None, delta=None, shuffle=True, localization=False):
     '''
     Subgraph generator.
 
@@ -684,7 +686,14 @@ class Graph:
     gt = GroundTruth(self, H)
     gt.Ia = np.setdiff1d(np.arange(self.nV), Rv)
 
-    # return H if isinstance(Idx, list) else (H, np.setdiff1d(np.arange(self.nV), Rv))
+    # --- Shuffling
+
+    if shuffle:
+      H, gts = H.shuffle()
+      gt.Ib = gts.Ib[gts.Ia]
+
+    # --- Output
+
     return (H, gt)
   
 

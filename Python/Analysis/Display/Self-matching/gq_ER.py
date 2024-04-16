@@ -1,5 +1,8 @@
 '''
+-- Display --
+
 ER (Gnp): average gamma and q
+
 '''
 
 import os

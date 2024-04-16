@@ -1,4 +1,10 @@
-import os
+'''
+Subgraph degradation
+Vertices with zeta measurable attributes
+'''
+
+import os, sys
+import argparse
 import numpy as np
 import pandas as pd
 import time
@@ -23,9 +29,22 @@ force = True
 
 l_delta = np.arange(nA)/nA
 
+# --------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser()
+
+if not force:  
+  parser.add_argument('-F', '--force', action='store_true')
+  args = parser.parse_args()
+  force = args.force
+
 # ==========================================================================
 
-fname = project.root + f'/Files/Subgraph/ER/Meas_nodes_nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Subgraph/ER/Meas_vertices_nA={nA:d}_nRun={nRun:d}.csv'
+
+# Check existence
+if os.path.exists(fname) and not force:
+  sys.exit()
 
 # Creating dataframe
 df = pd.DataFrame(columns=['delta', 'zeta', 'g_Zager', 'g_GASM', 'q_Zager', 'q_GASM', 'g_Zager_std', 'g_GASM_std', 'q_Zager_std', 'q_GASM_std'])

@@ -10,15 +10,17 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 15
-# p = np.log(nA)/nA
-p = 0.2
+# nA = 5
+# p = 0.2
 
-algo = 'Zager'
+nA = 20
+p = 0.5
 
-delta = 0.5
+algo = 'GASM'
+
+delta = 0
 # localization = 'last'
-localization = False
+# localization = False
 
 # --------------------------------------------------------------------------
 
@@ -34,18 +36,14 @@ Ga = Gnp(nA, p, directed=True)
 # Ga.add_vrtx_attr('rand')
 # Ga.add_edge_attr('rand')
 
-Gb, gt = Ga.subgraph(delta=delta, localization=localization)
+Gb, gt = Ga.subgraph(delta=delta)
 
-Ga.print()
-print(gt.__dict__)
-Gb.print()
+# Ga.print()
+# print(gt.__dict__)
+# Gb.print()
 
 C = Comparison(Ga, Gb, verbose=True)
 M = C.get_matching(algorithm=algo)
-
-# M = Matching(Ga, Gb)
-# M.from_lists(gt.Ia, gt.Ib)
-
 M.compute_accuracy(gt)
 
 print(M)
