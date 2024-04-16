@@ -21,7 +21,7 @@ nA = 20
 l_directed = [False, True]
 l_p = np.linspace(0, 1, 101)
 l_delta = np.linspace(0, 0.9, 10)
-nRun = 100
+nRun = 10000
 force = False
 
 # --------------------------------------------------------------------------
