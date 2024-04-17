@@ -13,12 +13,11 @@ os.system('clear')
 
 directed = True
 l_nA = [10, 20, 50, 100, 200, 500, 1000]
-l_delta = np.linspace(0, 1, 11)
 
-# nRun = 1e4
-nRun = 100
+nRun = 10000
+# nRun = 100
 
-force = True
+force = False
 
 # --------------------------------------------------------------------------
 
@@ -29,10 +28,14 @@ dname = project.root + '/Files/Subgraph/delta/'
 for nA in l_nA:
 
   p_star = 2/nA
+
+  l_delta = np.linspace(0, 1, 11)
+  l_delta[10] = 1-1/nA
+  l_delta = np.unique(l_delta)
   
   # --------------------------------------------------------------------------
 
-  fname = dname + f'ER_nA={nA:d}_nRun={nRun:d}.csv'
+  fname = dname + f'ER_nA={nA}_nRun={nRun}.csv'
 
   # Skip if already existing
   if os.path.exists(fname) and not force: continue
