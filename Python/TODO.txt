@@ -1,5 +1,4 @@
 - Analyses:
-  * Self-matching
   * Subgraph matching
   * Degradation  
   * Supplementary

@@ -10,7 +10,7 @@ import project
 
 # === Parameters ===========================================================
 
-dname = project.root + '/Files/Success ratios/rho/'
+dname = project.root + '/Files/Subgraph/delta/'
 
 # ==========================================================================
 
@@ -38,30 +38,29 @@ for fname in os.listdir(dname):
   gamma = pd.read_csv(dname + fname, index_col=0)
 
   # x-values
-  Nsub = np.array([int(i) for i in list(gamma)])
-  rho = Nsub/Nsub[-1]
+  delta = np.array([float(i) for i in list(gamma)])
 
   # Compute mean and std
   m = gamma.mean()
   s = gamma.std()
 
-  # Approx
-  # y = np.exp((rho-1)*np.log(nA))
-
   # --- Display
 
-  ax.plot(rho, m, '.-', label=nA)
-  # ax.plot(rho, y, 'w:')
+  # ax.plot(delta, np.log(m), '.-', label=nA)
+  # ax.axhline(-np.log(nA), color='w', linestyle='--')
 
-  # ax.plot(rho, m/y, '.-')
-
+  g0 = -np.log(nA)
+  ax.plot(delta, -(np.log(m)-g0)/g0  , '.-', label=nA)
+  
+  
 # --- Misc display settings
 
+# ax.set_xscale('log')
 ax.set_yscale('log')
 
-ax.set_xlabel(r'subgraph ratio $\rho$')
-ax.set_xlim(0, 1)
-ax.set_ylabel(r'accuracy $\gamma$')
+# ax.set_xlabel('$\delta$')
+# ax.set_xlim(0, 1)
+# ax.set_ylabel('accuracy $\gamma$')
 # ax.set_ylim(0, 1.2)
 
 ax.legend()

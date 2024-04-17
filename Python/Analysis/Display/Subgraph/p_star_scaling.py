@@ -9,7 +9,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-dname = project.root + '/Files/Success ratios/p_star/'
+dname = project.root + '/Files/Subgraph/p_star/'
 
 # ==========================================================================
 

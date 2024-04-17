@@ -11,50 +11,57 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
+directed = True
 l_nA = [10, 20, 50, 100, 200, 500, 1000]
+l_delta = np.linspace(0, 1, 11)
 
-force = False
+# nRun = 1e4
+nRun = 100
+
+force = True
+
+# --------------------------------------------------------------------------
+
+dname = project.root + '/Files/Subgraph/delta/'
 
 # ==========================================================================
 
 for nA in l_nA:
 
   p_star = 2/nA
-  nRun = 10000
-
+  
   # --------------------------------------------------------------------------
 
-  fname = project.root + '/Files/Success ratios/rho/ER_nA={:d}_nRun={:d}.csv'.format(nA, nRun)
+  fname = dname + f'ER_nA={nA:d}_nRun={nRun:d}.csv'
 
   # Skip if already existing
   if os.path.exists(fname) and not force: continue
 
-  Nsub = np.linspace(0, nA, 11, dtype=int)
-  Nsub[0] = 1
-
   # Creating dataframe
   gamma = pd.DataFrame()
 
-  for n in Nsub:
+  for delta in l_delta:
 
-    print('{:d} iterations with subgraph of size {:d} ...'.format(nRun, n), end='')
+    print(f'nA={nA}, delta={delta} ...', end='', flush=True)
     start = time.time()
     
     g = np.empty(nRun)
 
     for i in range(nRun):
 
-      Net = Network(nA)
-      Net.set_rand_edges('ER', p_star)
+      # Graphs
+      Ga = Gnp(nA, p_star, directed=directed)
+      Gb, gt = Ga.subgraph(delta=delta)
 
-      Sub, Idx = Net.subnet(n)
+      # --- GASM
 
-      M = matching(Net, Sub)
+      C = Comparison(Ga, Gb)
+      M = C.get_matching(algorithm='GASM')
+      M.compute_accuracy(gt)
 
-      # Correct matches
-      g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
+      g[i] = M.accuracy
 
-      gamma[n] = g
+    gamma[delta] = g
 
     print('{:.02f} sec'.format((time.time() - start)))
 

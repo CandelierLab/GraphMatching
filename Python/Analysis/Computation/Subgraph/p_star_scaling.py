@@ -4,6 +4,7 @@ Searching for p*
 
 import os
 import numpy as np
+import time
 
 import project
 from Graph import *
@@ -13,68 +14,69 @@ from Comparison import *
 
 # === Parameters ===========================================================
 
-nA = 1000
-rho = 0.75
-nRun = 100000
+directed = True
 
-sigma = 2/nA
+# l_nA = [10, 20, 50, 100, 200, 500, 1000]
+l_nA = [1000]
 
-dname = project.root + '/Files/Success ratios/p_star/'
+delta = 0.25
+
+nRun = int(1e3)
+# nRun = int(1e5)
+
+nBin = int(1e4)
 
 force = True
 
+# --------------------------------------------------------------------------
+
+dname = project.root + '/Files/Subgraph/p_star/'
+
 # ==========================================================================
 
-fname = dname + f'nA={nA:d}.txt'
+for nA in l_nA:
 
-if force or not os.path.exists(fname):
+  fname = dname + f'nA={nA:d}.txt'
 
-  print('Searching p_star ...')
+  if force or not os.path.exists(fname):
 
-  n = int(np.round(rho*nA))
+    print(f'Searching p_star, nA={nA}', end='', flush=True)
+    start = time.time()
 
-  p = np.random.rand(nRun)*4/nA
-  g = np.empty(nRun)
+    # Definitions
+    x = np.linspace(0, 4/nA, nBin)
+    y = np.zeros(nBin)
+    sigma = 2/nA
 
-  x = np.linspace(0, 4/nA, 10000)
-  y = np.zeros(10000)
+    # Preparation
+    p = np.random.rand(nRun)*4/nA
+    g = np.empty(nRun)
 
-  for i in range(nRun):
+    for i in range(nRun):
 
-    Net = Network(nA)
-    Net.set_rand_edges('ER', p[i])
+      # Graphs
+      Ga = Gnp(nA, p[i], directed=directed)
+      Gb, gt = Ga.subgraph(delta=delta)
 
-    Sub, Idx = Net.subnet(n)
-    M = matching(Net, Sub)
+      # --- GASM
 
-    # Correct matches
-    g[i] = np.count_nonzero([Idx[m[1]]==m[0] for m in M])/n
+      C = Comparison(Ga, Gb)
+      M = C.get_matching(algorithm='GASM')
+      M.compute_accuracy(gt)
 
-    if g[i]>0:
-      y -= np.log(g[i])*np.exp(-(((x-p[i])/sigma)**2)/2)/nRun
+      g[i] = M.accuracy
+      
+      if g[i]>0:
+        y -= np.log(g[i])*np.exp(-(((x-p[i])/sigma)**2)/2)/nRun
 
-    if not i % (nRun/100):
-      print(f'{int(i*100/nRun):02d} %')
+      if not i % (nRun/20):
+        print('.', end='', flush=True)
 
-  p_star = x[np.argmax(y)]
+    p_star = x[np.argmax(y)]
 
-  print('p_star: ', p_star)
+    print(f' p_star: {p_star}' + ' ({:.02f} sec)'.format((time.time() - start)))
 
-  # --- Save
+    # --- Save
 
-  with open(fname, 'w') as f:
-    f.write(str(p_star))
-
-# --- Display --------------------------------------------------------------
-
-# import matplotlib.pyplot as plt
-
-# plt.style.use('dark_background')
-
-# fig, ax = plt.subplots()
-
-# ax.scatter(p, g, marker='.')
-
-# ax.plot(x, y, 'r-')
-
-# plt.show()
+    with open(fname, 'w') as f:
+      f.write(str(p_star))
