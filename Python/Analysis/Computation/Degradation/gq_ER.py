@@ -15,36 +15,43 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 100
+directed = False
+
+nA = 200
+p = np.log(nA)/nA
+
+# nA = 50
+# p = 0.25
+
 nRun = 200
 
 # l_delta = np.geomspace(0.01, 0.5, 10)
 l_delta = np.linspace(0, 1, 21)
 
-l_meas = [0, 1, 2, 3, 5]
+# l_meas = [0, 1, 2, 3, 5]
+l_meas = [0, 1]
 
 # --------------------------------------------------------------------------
 
-p = np.log(nA)/nA
-# p = 0.25
 # print(p, p*nA**2)
+
+ds = 'directed' if directed else 'undirected'
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Degradation/ER/nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Degradation/ER/{ds}_nA={nA:d}_p={p:.05f}_nRun={nRun:d}.csv'
 
 # --- Generative function
-def get_Nets(nA, p, m, d):
+def get_Nets(nA, p, m, delta):
   
-  NetA = Network(nA)
-  NetA.set_rand_edges('ER', p_edges=p)
-
+  Ga = Gnp(nA, p, directed=directed)
   for i in range(m):
-    NetA.add_node_attr('rand')
+    Ga.add_vrtx_attr('rand')
 
-  NetB = NetA.degrade(d)
+  # Degradation: remove edges
+  Gb, gt = Ga.degrade('ed_rm', delta)
 
-  return (NetA, NetB)
+  return (Ga, Gb, gt)
 
 
 # Creating dataframe
@@ -54,7 +61,7 @@ k = 0
 
 for d in l_delta:
 
-  print(f'delta={d:0.2f} - {nRun:d} iterations ...', end='')
+  print(f'delta={d:0.2f} - {nRun:d} iterations ...', end='', flush=True)
   start = time.time()
 
   g_GASM = [[] for m in l_meas]
@@ -67,11 +74,11 @@ for d in l_delta:
 
   for i in range(nRun):
 
-    NetA, NetB = get_Nets(nA, p, 0, d)
+    Ga, Gb, gt = get_Nets(nA, p, 0, d)
       
-    C = Comparison(NetA, NetB)
+    C = Comparison(Ga, Gb)
     M = C.get_matching(algorithm='FAQ')
-    M.compute_accuracy()
+    M.compute_accuracy(gt)
 
     g.append(M.accuracy)
     q.append(M.structural_quality)
@@ -100,11 +107,11 @@ for d in l_delta:
 
     for i in range(nRun):
 
-      NetA, NetB = get_Nets(nA, p, m, d)
+      Ga, Gb, gt = get_Nets(nA, p, m, d)
         
-      C = Comparison(NetA, NetB)
+      C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='GASM')
-      M.compute_accuracy()
+      M.compute_accuracy(gt)
 
       g.append(M.accuracy)
       q.append(M.structural_quality)

@@ -403,7 +403,7 @@ class Graph:
     if self.nEa:
 
       # Compute indexes
-      J = [np.where(np.all(self.edges==[Idx[e[0]], Idx[e[1]]], axis=1))[0][0] for e in self.edges]
+      J = [np.where(np.logical_or(np.all(self.edges==[Idx[e[0]], Idx[e[1]]], axis=1), np.all(self.edges==[Idx[e[1]], Idx[e[0]]], axis=1)))[0][0] for e in H.edges]
       
       for a in self.edge_attr:
         attr = copy.deepcopy(a)
@@ -609,6 +609,9 @@ class Graph:
 
         # Degraded graph
         H = self.trim(Re=Re)
+
+        # Ground truth
+        gt = GroundTruth(self, H)
         
       case 'Me':
 
@@ -629,9 +632,14 @@ class Graph:
         # In = np.random.choice(np.ravel_multi_index(np.where(self.Adj==1), (self.nV, self.nV)), nmod, replace=False)
         # H.Adj[np.unravel_index(In,(self.nV, self.nV))] = 0
         
+    # --- Shuffling
+
+    if shuffle:
+      H, gts = H.shuffle()
+      gt.Ib = gts.Ib[gts.Ia]
     # --- Output
 
-    return H
+    return (H, gt)
 
   # ========================================================================
 

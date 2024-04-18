@@ -85,11 +85,11 @@ ax[0].set_yscale('log')
 ax[0].set_ylim([0, 1])
 ax[1].set_ylim([0.85, 1])
 
-ax[0].set_xlabel('n')
-ax[1].set_xlabel('n')
+ax[0].set_xlabel('$n$')
+ax[1].set_xlabel('$n$')
 
 ax[0].set_ylabel('$\gamma$')
-ax[1].set_ylabel('$q$')
+ax[1].set_ylabel('$q_s$')
 
 ax[0].legend()
 ax[1].legend()

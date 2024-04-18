@@ -13,12 +13,23 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 100
+directed = False
+
+nA = 200
+p = np.log(nA)/nA
+
+# nA = 30
+# p = 0.25
+
 nRun = 200
 
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/Degradation/ER/nA={nA:d}_nRun={nRun:d}.csv'
+ds = 'directed' if directed else 'undirected'
+
+fname = project.root + f'/Files/Degradation/ER/{ds}_nA={nA:d}_p={p:.05f}_nRun={nRun:d}.csv'
+
+print(fname)
 
 # ==========================================================================
 

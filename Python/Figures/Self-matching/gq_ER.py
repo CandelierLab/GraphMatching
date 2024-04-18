@@ -13,28 +13,31 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
+directed = False
 nA = 20
-nRun = 1000
+nRun = 10000
 
 err_alpha = 0.2
 
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/Self-matching/ER/nA={nA:d}_nRun={nRun:d}.csv'
+ds = 'directed' if directed else 'undirected'
+
+fname = project.root + f'/Files/Self-matching/ER/{ds}_nA={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 
 if os.path.exists(fname):
 
   # Load data
-  df = pd.read_csv(fname)
+  data = pd.read_csv(fname)
 
   # Retrieve l_p and l_eta
 
-  l_p = np.unique(df.p)
-  l_eta = np.unique(df.eta)
+  l_p = np.unique(data.p)
+  # l_eta = np.unique(df.eta)
 
-data = df.loc[df['eta'] == l_eta[2]]
+# data = df.loc[df['eta'] == l_eta[2]]
 
 # --- Display --------------------------------------------------------------
 
@@ -71,8 +74,8 @@ ax[1].fill_between(data.p, data.q_FAQ - data.q_FAQ_std, data.q_FAQ + data.q_FAQ_
 ax[0].set_ylim([0, 1.01])
 ax[1].set_ylim([0.9, 1.001])
 
-ax[0].set_xlabel('$n$')
-ax[1].set_xlabel('$n$')
+ax[0].set_xlabel('$p$')
+ax[1].set_xlabel('$p$')
 
 ax[0].set_ylabel('$\gamma$')
 ax[1].set_ylabel('$q_s$')

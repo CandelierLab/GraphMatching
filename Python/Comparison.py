@@ -386,8 +386,18 @@ class Comparison:
 
       case 'FAQ':
 
-        # Solve the Quadratic Assignment Problem        
-        res = quadratic_assignment(self.Ga.Adj, self.Gb.Adj, options={'maximize': True})
+        # Solve the Quadratic Assignment Problem
+
+        # Check weight presence
+        if self.Ga.nEa==0:
+          A = self.Ga.Adj
+          B = self.Gb.Adj
+        else:
+          print(self.Ga.edge_attr)
+          A = self.Ga.Adj
+          B = self.Gb.Adj
+
+        res = quadratic_assignment(A, B, options={'maximize': True})
         
         # Record computing time
         M.time['total'] = (time.perf_counter_ns()-tref)*1e-6

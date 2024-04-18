@@ -29,7 +29,9 @@ figfile = args.filename
 
 # --------------------------------------------------------------------------
 
-datapath = project.root + '/Files/Self-matching/ER/' + ('' if directed else 'un') + f'directed_nA={nA:d}_nRun={nRun:d}.csv'
+ds = 'directed' if directed else 'undirected'
+
+datapath = project.root + f'/Files/Self-matching/ER/{ds}_nA={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 

@@ -10,8 +10,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
+directed = False
+
 nA = 5
-# p = np.log(nA)/nA
 p = 0.5
 
 algo = 'FAQ'
@@ -31,14 +32,18 @@ np.random.seed(0)
 
 # --- Random graphs
 
-Ga = Gnp(nA, p, directed=False)
+Ga = Gnp(nA, p, directed=directed)
 Ga.add_edge_attr('rand')
 
-Gb = Ga.degrade(type, delta, localization=localization)
+# Ga.print()
+
+Gb, gt = Ga.degrade(type, delta, localization=localization)
 
 Ga.print()
 Gb.print()
 pa.matrix(Ga.Adj, highlight=Ga.Adj!=Gb.Adj)
+
+print(gt.__dict__)
 
 # C = Comparison(Ga, Gb)
 # M = C.get_matching(algorithm=algo)

@@ -1,4 +1,16 @@
-- Analyses:
-  * Subgraph matching
-  * Degradation  
-  * Supplementary
+=== Edge degradation
+
+- FAQ with one edge measurable attribute
+- Décider figure:
+  * nA (a priori plutot grand pour diminiuer l'avance de FAQ)
+  * directed or not
+  * attributes: node / edges, categorical and measurable (FAQ: 2 curves, GASM 5 curves)
+
+- CPT: directed & undirected, nA=200
+
+
+=== Node degradation (subgraph)
+
+- degradation plots with cat. and meas. 
+
+=== Supplementary
