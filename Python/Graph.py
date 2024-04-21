@@ -471,14 +471,16 @@ class Graph:
 
     Ae = np.empty(0, dtype=int)
     for v in Rv:
+
+      # Row
       for i in np.where(self.Adj[v,:])[0]:
-        if self.directed:
+        if self.directed or i>=v:
           Ae = np.concatenate((Ae, np.where(np.all(self.edges==[v,i], axis=1))[0]))
-        else:
-          if i>v:
-            Ae = np.concatenate((Ae, np.where(np.all(self.edges==[v,i], axis=1))[0]))
-          else:
-            Ae = np.concatenate((Ae, np.where(np.all(self.edges==[i,v], axis=1))[0]))
+        
+      # Column
+      for i in np.where(self.Adj[:,v])[0]:
+        if self.directed or v>=i:
+          Ae = np.concatenate((Ae, np.where(np.all(self.edges==[i,v], axis=1))[0]))
 
     # --- Edges
       
@@ -637,13 +639,14 @@ class Graph:
     if shuffle:
       H, gts = H.shuffle()
       gt.Ib = gts.Ib[gts.Ia]
+
     # --- Output
 
     return (H, gt)
 
   # ========================================================================
 
-  def subgraph(self, Idx=None, delta=None, shuffle=True, localization=False):
+  def subgraph(self, Idx=None, delta=None, localization=False):
     '''
     Subgraph generator.
 
@@ -687,19 +690,13 @@ class Graph:
 
         # Indices to remove
         Rv = np.random.choice(self.nV, nmod, replace=False)
-      
+
     # Degraded graph
     H = self.trim(Rv=Rv)
 
     # Ground Truth
     gt = GroundTruth(self, H)
     gt.Ia = np.setdiff1d(np.arange(self.nV), Rv)
-
-    # --- Shuffling
-
-    if shuffle:
-      H, gts = H.shuffle()
-      gt.Ib = gts.Ib[gts.Ia]
 
     # --- Output
 

@@ -15,7 +15,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
+directed = True
 
 nA = 200
 p = np.log(nA)/nA
@@ -28,8 +28,8 @@ nRun = 200
 # l_delta = np.geomspace(0.01, 0.5, 10)
 l_delta = np.linspace(0, 1, 21)
 
-# l_meas = [0, 1, 2, 3, 5]
-l_meas = [0, 1]
+l_vrtx_attr_meas = [0, 1]
+l_edge_attr_meas = [0, 1]
 
 # --------------------------------------------------------------------------
 
@@ -42,11 +42,15 @@ ds = 'directed' if directed else 'undirected'
 fname = project.root + f'/Files/Degradation/ER/{ds}_nA={nA:d}_p={p:.05f}_nRun={nRun:d}.csv'
 
 # --- Generative function
-def get_Nets(nA, p, m, delta):
+def get_Nets(nA, p, nvam, neam, delta):
   
   Ga = Gnp(nA, p, directed=directed)
-  for i in range(m):
+
+  for i in range(nvam):
     Ga.add_vrtx_attr('rand')
+
+  for i in range(neam):
+    Ga.add_edge_attr('rand')
 
   # Degradation: remove edges
   Gb, gt = Ga.degrade('ed_rm', delta)
@@ -64,72 +68,78 @@ for d in l_delta:
   print(f'delta={d:0.2f} - {nRun:d} iterations ...', end='', flush=True)
   start = time.time()
 
-  g_GASM = [[] for m in l_meas]
-  q_GASM = [[] for m in l_meas]
+  for nvam in l_vrtx_attr_meas:
 
-  # --- FAQ
+    for neam in l_edge_attr_meas:
 
-  g = []
-  q = []
+      # Just one attribute at a time
+      if neam and nvam: continue
 
-  for i in range(nRun):
+      # --- FAQ
 
-    Ga, Gb, gt = get_Nets(nA, p, 0, d)
-      
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='FAQ')
-    M.compute_accuracy(gt)
+      if nvam==0 and neam<=1:
 
-    g.append(M.accuracy)
-    q.append(M.structural_quality)
+        g = []
+        q = []
 
-  # Parameters
-  df.loc[k, 'algo'] = 'FAQ'
-  df.loc[k, 'delta'] = d
-  df.loc[k, 'nMeasAttr'] = 0
+        for i in range(nRun):
 
-  # Mean values
-  df.loc[k, 'g'] = np.mean(g)
-  df.loc[k, 'q'] = np.mean(q)
+          Ga, Gb, gt = get_Nets(nA, p, nvam, neam, d)
+            
+          C = Comparison(Ga, Gb)
+          M = C.get_matching(algorithm='FAQ')
+          M.compute_accuracy(gt)
 
-  # Standard deviations
-  df.loc[k, 'g_std'] = np.std(g)
-  df.loc[k, 'q_std'] = np.std(q)
+          g.append(M.accuracy)
+          q.append(M.structural_quality)
 
-  k += 1
+        # Parameters
+        df.loc[k, 'algo'] = 'FAQ'
+        df.loc[k, 'delta'] = d
+        df.loc[k, 'nvam'] = nvam
+        df.loc[k, 'neam'] = neam
 
-  # --- GASM
+        # Mean values
+        df.loc[k, 'g'] = np.mean(g)
+        df.loc[k, 'q'] = np.mean(q)
 
-  for m in l_meas:
+        # Standard deviations
+        df.loc[k, 'g_std'] = np.std(g)
+        df.loc[k, 'q_std'] = np.std(q)
 
-    g = []
-    q = []
+        k += 1
 
-    for i in range(nRun):
+      # --- GASM
 
-      Ga, Gb, gt = get_Nets(nA, p, m, d)
-        
-      C = Comparison(Ga, Gb)
-      M = C.get_matching(algorithm='GASM')
-      M.compute_accuracy(gt)
+      g = []
+      q = []
 
-      g.append(M.accuracy)
-      q.append(M.structural_quality)
+      for i in range(nRun):
 
-    # Parameters
-    df.loc[k, 'algo'] = 'GASM'
-    df.loc[k, 'delta'] = d
-    df.loc[k, 'nMeasAttr'] = m
+        Ga, Gb, gt = get_Nets(nA, p, nvam, neam, d)
+          
+        C = Comparison(Ga, Gb)
+        M = C.get_matching(algorithm='GASM')
+        M.compute_accuracy(gt)
 
-    # Mean values
-    df.loc[k, 'g'] = np.mean(g)
-    df.loc[k, 'q'] = np.mean(q)
+        g.append(M.accuracy)
+        q.append(M.structural_quality)
 
-    # Standard deviations
-    df.loc[k, 'g_std'] = np.std(g)
-    df.loc[k, 'q_std'] = np.std(q)
+      # Parameters
+      df.loc[k, 'algo'] = 'GASM'
+      df.loc[k, 'delta'] = d
+      df.loc[k, 'nvam'] = nvam
+      df.loc[k, 'neam'] = neam
 
-    k += 1
+      # Mean values
+      df.loc[k, 'g'] = np.mean(g)
+      df.loc[k, 'q'] = np.mean(q)
+
+      # Standard deviations
+      df.loc[k, 'g_std'] = np.std(g)
+      df.loc[k, 'q_std'] = np.std(q)
+
+      k += 1
 
   print('{:.02f} sec'.format((time.time() - start)))
 

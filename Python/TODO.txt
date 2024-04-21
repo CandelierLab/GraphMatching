@@ -1,16 +1,18 @@
+Test degradation: vérifier l'effet de shuffle=True
+
 === Edge degradation
 
-- FAQ with one edge measurable attribute
-- Décider figure:
-  * nA (a priori plutot grand pour diminiuer l'avance de FAQ)
-  * directed or not
-  * attributes: node / edges, categorical and measurable (FAQ: 2 curves, GASM 5 curves)
+- Relancer avec: nRun=1000, xi=0:5 (directed & undirected) /!\ changer la distribution des arrtibuts pour 'Gauss'
 
-- CPT: directed & undirected, nA=200
-
+- paramètre sur sigma pour ajuster le ratio informationel structure/attributes 
 
 === Node degradation (subgraph)
 
+- Redo delta_p_star in logarithmic scale
 - degradation plots with cat. and meas. 
 
 === Supplementary
+
+* Accuracy vs Niterations
+* Normalization coefficient
+* Speed

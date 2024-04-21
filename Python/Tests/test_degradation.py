@@ -10,21 +10,22 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
+directed = True
 
-nA = 5
-p = 0.5
+nA = 20
+# p = 0.75
+p = 2/nA
 
-algo = 'FAQ'
+algo = 'GASM'
 
-type = 'ed_rm'
-delta = 0.5
+type = 'vx_rm'
+delta = 0.2
 # localization = 'first'
 localization = False
 
 # --------------------------------------------------------------------------
 
-np.random.seed(0)
+np.random.seed(1)
 
 # ==========================================================================
 
@@ -33,20 +34,16 @@ np.random.seed(0)
 # --- Random graphs
 
 Ga = Gnp(nA, p, directed=directed)
-Ga.add_edge_attr('rand')
+Ga.add_edge_attr('gauss')
 
-# Ga.print()
-
-Gb, gt = Ga.degrade(type, delta, localization=localization)
+Gb, gt = Ga.degrade(type, delta, shuffle=True)
 
 Ga.print()
 Gb.print()
-pa.matrix(Ga.Adj, highlight=Ga.Adj!=Gb.Adj)
-
 print(gt.__dict__)
 
-# C = Comparison(Ga, Gb)
-# M = C.get_matching(algorithm=algo)
-# M.compute_accuracy()
+C = Comparison(Ga, Gb)
+M = C.get_matching(algorithm=algo)
+M.compute_accuracy(gt)
 
-# print(M)
+print(M)

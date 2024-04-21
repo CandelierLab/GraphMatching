@@ -12,6 +12,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 dname = project.root + '/Files/Subgraph/delta/'
+nRun = 10000
 
 # ==========================================================================
 
@@ -36,9 +37,9 @@ for fname in os.listdir(dname):
   res = p.search(fname)
   if res is not None:
     nA = int(res.group(1))
-    nRun = int(res.group(2))
+    nRun_ = int(res.group(2))
 
-    if nRun!=1000: continue
+    if nRun_!=nRun: continue
 
   # Random matchings
   # ax.axhline(y = 1/nA, color = 'w', linestyle = ':')
@@ -76,7 +77,7 @@ for fname in os.listdir(dname):
   
 # --- Misc display settings ------------------------------------------------
 
-# ax.set_xscale('log')
+ax.set_xscale('log')
 ax.set_yscale('log')
 
 ax.set_xlabel('$\delta$')

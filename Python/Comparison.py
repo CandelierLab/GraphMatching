@@ -1,13 +1,10 @@
 import time
-import warnings
-from collections import Counter
 import numpy as np
-from scipy import sparse
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment, quadratic_assignment
 import time
-import paprint as pa
 
+import paprint as pa
 from Matching import *
 
 # === Comparison class =====================================================
@@ -92,6 +89,8 @@ class Comparison:
         else:
           complement = Ga.nE + Gb.nE > (Ga.nV*(Ga.nV+1) + Gb.nV*(Gb.nV+1))/4
 
+        # complement = False
+
         if complement:
           Ga = self.Ga.complement()
           Gb = self.Gb.complement()
@@ -100,7 +99,7 @@ class Comparison:
     nA = Ga.nV
     nB = Gb.nV
 
-    # Number of edges
+    # Number of edges    
     mA = Ga.nE
     mB = Gb.nE
 
@@ -139,7 +138,7 @@ class Comparison:
         # --- Node attributes
 
         # Base
-        Xc = np.ones((nA,nB))
+        N = np.ones((nA,nB))
         
         for k, attr in enumerate(Ga.vrtx_attr):
 
@@ -151,14 +150,14 @@ class Comparison:
             # Build contraint attribute
             A = np.tile(attr['values'], (nB,1)).transpose()
             B = np.tile(bttr['values'], (nA,1))
-            Xc *= A==B
+            N *= A==B
         
         # Remapping in [-1, 1]
-        Xc = Xc*2 - 1
+        N = N*2 - 1
 
         # --- Edge attributes
         
-        Yc = np.ones((mA,mB))
+        E = np.ones((mA,mB))
 
       case 'GASM':
 
@@ -166,16 +165,13 @@ class Comparison:
         
         if not nA or not nB:
 
-          Xc = np.empty(0)
-          Yc = np.empty(0)
+          N = np.empty(0)
+          E = np.empty(0)
 
         else:
 
           # Base
-          Xc = np.ones((nA,nB))
-
-          # Random initial fluctuations
-          Xc += np.random.rand(nA, nB)*eta
+          N = np.ones((nA,nB))
 
           for k, attr in enumerate(Ga.vrtx_attr):
 
@@ -191,18 +187,18 @@ class Comparison:
 
               sigma2 = np.var(W)
               if sigma2>0:
-                Xc *= np.exp(-W**2/2/sigma2)
+                N *= np.exp(-W**2/2/sigma2)
 
             else:
 
               # --- Categorical attributes
 
-              Xc *= np.equal.outer(wA, wB)
-              
+              N *= np.equal.outer(wA, wB)
+
           # --- Edge attributes
 
           # Base
-          Yc = np.ones((mA,mB))
+          E = np.ones((mA,mB))
 
           if mA and mB:
 
@@ -218,21 +214,29 @@ class Comparison:
                 # Edge weights differences
                 W = np.subtract.outer(wA, wB)
 
-                sigma2 = np.var(W)
-                if sigma2>0:
-                  Yc *= np.exp(-W**2/2/sigma2)
+                E = W==0
+                
+                # sigma2 = np.var(W)
+                # if sigma2>0:
+                #   E *= np.exp(-W**2/2/sigma2)
 
               else:
                 # --- Categorical attributes
 
-                Yc *= np.equal.outer(wA, wB)
+                E *= np.equal.outer(wA, wB)
+
+        # Random initial fluctuations
+        H = np.random.rand(nA, nB)*eta
 
     # --- Computation --------------------------------------------------------
+    
+    # pa.matrix(N)
+    # pa.matrix(E, title='E')
 
     if not mA or not mB:
 
-      self.X = Xc
-      self.Y = Yc
+      self.X = N
+      self.Y = E
 
     else:
 
@@ -305,23 +309,50 @@ class Comparison:
             
           case 'GASM':
 
-            if i==0:
+            if Ga.directed:
 
-              if Ga.directed:
-                self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T) * Xc
-                self.Y = (Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T) * Yc
+              if i==0:
+                X0 = (Ga.S @ E @ Gb.S.T + Ga.T @ E @ Gb.T.T) * (N+H)
+                self.Y = Ga.S.T @ X0 @ Gb.S + Ga.T.T @ X0 @ Gb.T
               else:
-                self.X = (Ga.R @ self.Y @ Gb.R.T) * Xc
-                self.Y = (Ga.R.T @ self.X @ Gb.R) * Yc
+                self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
+
+              self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T)
+
+              # pa.line(str(i))
+              # if i==0:
+              #   pa.matrix(X0)
+              # pa.matrix(self.X)
+              # pa.matrix(self.Y)
 
             else:
 
-              if Ga.directed:
-                self.X = Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T
-                self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
+              if i==0:
+                X0 = (Ga.R @ E @ Gb.R.T) * (N+H)
+                self.Y = Ga.R.T @ X0 @ Gb.R
               else:
-                self.X = Ga.R @ self.Y @ Gb.R.T
                 self.Y = Ga.R.T @ self.X @ Gb.R
+
+              self.X = Ga.R @ self.Y @ Gb.R.T
+
+
+            # if i==0:
+
+            #   if Ga.directed:
+            #     self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T) * Xc
+            #     self.Y = (Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T) * Yc
+            #   else:
+            #     self.X = (Ga.R @ self.Y @ Gb.R.T) * Xc
+            #     self.Y = (Ga.R.T @ self.X @ Gb.R) * Yc
+
+            # else:
+
+            #   if Ga.directed:
+            #     self.X = Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T
+            #     self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
+            #   else:
+            #     self.X = Ga.R @ self.Y @ Gb.R.T
+            #     self.Y = Ga.R.T @ self.X @ Gb.R
 
         # --- Normalization 
               
@@ -349,13 +380,14 @@ class Comparison:
       match algorithm:
         
         case 'Zager':
-          self.X = self.X * Xc
+
+          self.X = self.X * N
 
         case 'GASM':
           
           # Isolated vertices
           I = self.X==0
-          self.X[I] = Xc[I]
+          self.X[I] = N[I]
 
   # ========================================================================
   # |                                                                      |
@@ -393,9 +425,18 @@ class Comparison:
           A = self.Ga.Adj
           B = self.Gb.Adj
         else:
-          print(self.Ga.edge_attr)
-          A = self.Ga.Adj
-          B = self.Gb.Adj
+
+          A = np.zeros((self.Ga.nV, self.Ga.nV), dtype=float)
+          for i, e in enumerate(self.Ga.edges):
+            A[e[0], e[1]] = self.Ga.edge_attr[0]['values'][i]
+            if not self.Ga.directed:
+              A[e[1], e[0]] = A[e[0], e[1]]
+
+          B = np.zeros((self.Gb.nV, self.Gb.nV), dtype=float)
+          for i, e in enumerate(self.Gb.edges):
+            B[e[0], e[1]] = self.Gb.edge_attr[0]['values'][i]
+            if not self.Gb.directed:
+              B[e[1], e[0]] = B[e[0], e[1]]
 
         res = quadratic_assignment(A, B, options={'maximize': True})
         

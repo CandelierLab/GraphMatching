@@ -1,6 +1,6 @@
 '''
 Subgraph degradation
-Vertices with zeta_m measurable attributes
+Edges with xi_m measurable attributes
 '''
 
 import os, sys
@@ -19,15 +19,18 @@ os.system('clear')
 
 directed = True
 nA = 20
-nRun = 1000
+nRun = 500
+# nRun = 1000
 
-l_zeta_m = np.arange(9)
+l_xi_m = np.arange(3)
+# l_xi_m = np.arange(9)
 
 force = True
 
 # --------------------------------------------------------------------------
 
-p_star = 2/nA 
+# p_star = 2/nA
+p_star = 0.5
 l_delta = np.linspace(0, 1, 11)
 l_delta[-1] = 1-1/nA
 
@@ -44,7 +47,7 @@ if not force:
 
 ds = 'directed' if directed else 'undirected'
 
-fname = project.root + f'/Files/Subgraph/ER/{ds}_vertices_measurable_nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Subgraph/ER/{ds}_edges_measurable_nA={nA:d}_nRun={nRun:d}.csv'
 
 # Check existence
 if os.path.exists(fname) and not force:
@@ -55,9 +58,9 @@ df = pd.DataFrame(columns=['delta', 'zeta_m', 'g_Zager', 'g_GASM', 'q_Zager', 'q
 
 k = 0
 
-for zeta_m in l_zeta_m:
+for xi_m in l_xi_m:
 
-  print(f'--- zeta_m = {zeta_m}')
+  print(f'--- Xi_m = {xi_m}') 
 
   for delta in l_delta:
 
@@ -72,15 +75,15 @@ for zeta_m in l_zeta_m:
     for i in range(nRun):
 
       Ga = Gnp(nA, p_star, directed=directed)
-      for i in range(zeta_m):
-        Ga.add_vrtx_attr('gauss')
+      for i in range(xi_m):
+        Ga.add_edge_attr('gauss')
 
       # Subgraph
       Gb, gt = Ga.degrade('vx_rm', delta=delta)
 
       # --- Zager
 
-      if not zeta_m:
+      if not xi_m:
         
         C = Comparison(Ga, Gb)
         M = C.get_matching(algorithm='Zager')
@@ -102,17 +105,17 @@ for zeta_m in l_zeta_m:
       
     # Parameters
     df.loc[k, 'delta'] = delta
-    df.loc[k, 'zeta_m'] = zeta_m
+    df.loc[k, 'xi_m'] = xi_m
 
     # Mean values
-    if not zeta_m:
+    if not xi_m:
       df.loc[k, 'g_Zager'] = np.mean(g_Zager)
       df.loc[k, 'q_Zager'] = np.mean(q_Zager)
     df.loc[k, 'g_GASM'] = np.mean(g_GASM)
     df.loc[k, 'q_GASM'] = np.mean(q_GASM)
 
     # Standard deviations
-    if not zeta_m:
+    if not xi_m:
       df.loc[k, 'g_Zager_std'] = np.std(g_Zager)
       df.loc[k, 'q_Zager_std'] = np.std(q_Zager)
     df.loc[k, 'g_GASM_std'] = np.std(g_GASM)

@@ -41,29 +41,44 @@ if os.path.exists(fname):
   # Retrieve l_delta and l_meas
 
   l_delta = np.unique(df.delta)
-  l_meas = np.unique(df.nMeasAttr)
+  l_nvam = np.unique(df.nvam).astype(int)
+  l_neam = np.unique(df.neam).astype(int)
 
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')
-fig, ax = plt.subplots(1,2)
+fig, ax = plt.subplots(1,2, figsize=(12,6))
 
 # --- FAQ
 
-data = df.loc[df['algo'] == 'FAQ']
-ax[0].plot(l_delta, data.g, '--', color='w', label=f'FAQ')
-ax[1].plot(l_delta, data.q, '--', color='w', label=f'FAQ')
+for neam in l_neam:
+
+  data = df.loc[np.logical_and(df['algo']=='FAQ',
+                               df['neam']==neam)]
+  
+  ax[0].plot(l_delta, data.g, '--', label=f'FAQ, $\\zeta_m=0$, $\\xi_m={neam}$')
+  ax[1].plot(l_delta, data.q, '--', label=f'FAQ, $\\zeta_m=0$, $\\xi_m={neam}$')
 
 # --- GASM
 
-for m in l_meas:
-  data = df.loc[np.logical_and(df['algo']=='GASM', df['nMeasAttr']==m)]
-  ax[0].plot(l_delta, data.g, '-', label=f'GASM {m}')
-  ax[1].plot(l_delta, data.q, '-', label=f'GASM {m}')
+for nvam in l_nvam:
+  for neam in l_neam:
 
+    # Just one attribute at a time
+    if nvam and neam: continue
+
+    data = df.loc[np.logical_and(np.logical_and(df['algo']=='GASM', df['nvam']==nvam), df['neam']==neam)]
+    
+    ax[0].plot(l_delta, data.g, '-', label=f'GASM, $\\zeta_m={nvam}$, $\\xi_m={neam}$')
+    ax[1].plot(l_delta, data.q, '-', label=f'GASM, $\\zeta_m={nvam}$, $\\xi_m={neam}$')
+
+# ax[0].set_xscale('log')
 ax[0].set_yscale('log')
 
+ax[0].set_xlim([0, 1])
 ax[0].set_ylim([0.005, 1])
+
+ax[1].set_xlim([0, 1])
 ax[1].set_ylim([0.9, 1])
 
 ax[0].axhline(1/nA, linestyle=':')
