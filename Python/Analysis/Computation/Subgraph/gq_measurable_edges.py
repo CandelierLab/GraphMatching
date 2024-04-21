@@ -17,7 +17,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = True
+directed = False
 nA = 20
 nRun = 500
 # nRun = 1000
@@ -29,8 +29,7 @@ force = True
 
 # --------------------------------------------------------------------------
 
-# p_star = 2/nA
-p_star = 0.5
+p_star = 2/nA
 l_delta = np.linspace(0, 1, 11)
 l_delta[-1] = 1-1/nA
 

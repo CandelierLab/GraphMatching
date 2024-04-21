@@ -13,37 +13,45 @@ os.system('clear')
 directed = True
 
 nA = 20
-# p = 0.75
 p = 2/nA
 
 algo = 'GASM'
 
 type = 'vx_rm'
-delta = 0.2
+delta = 0.1
 # localization = 'first'
 localization = False
 
 # --------------------------------------------------------------------------
 
-np.random.seed(1)
+# np.random.seed(1)
 
 # ==========================================================================
 
 # print('p', p)
 
-# --- Random graphs
+res = []
+nIter = 100
 
-Ga = Gnp(nA, p, directed=directed)
-Ga.add_edge_attr('gauss')
+for iter in range(nIter):
 
-Gb, gt = Ga.degrade(type, delta, shuffle=True)
+  # --- Random graphs
 
-Ga.print()
-Gb.print()
-print(gt.__dict__)
+  Ga = Gnp(nA, p, directed=directed)
+  Ga.add_edge_attr('gauss')
 
-C = Comparison(Ga, Gb)
-M = C.get_matching(algorithm=algo)
-M.compute_accuracy(gt)
+  Gb, gt = Ga.degrade(type, delta, shuffle=True)
 
-print(M)
+  # Ga.print()
+  # Gb.print()
+  # print(gt.__dict__)
+
+  C = Comparison(Ga, Gb)
+  M = C.get_matching(algorithm=algo)
+  M.compute_accuracy(gt)
+
+  # print(M)
+
+  res.append(M.accuracy)
+
+print(f'{nIter} iterations, <gamma> = {np.mean(res)}')

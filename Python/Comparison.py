@@ -77,23 +77,16 @@ class Comparison:
     Gb = self.Gb
 
     # Complement
-    match algorithm:
+    if algorithm=='GASM':
 
-      case 'Zager':
-        pass
-        
-      case 'GASM':
+      if Ga.directed:
+        complement = Ga.nE + Gb.nE > (Ga.nV**2 + Gb.nV**2)/2
+      else:
+        complement = Ga.nE + Gb.nE > (Ga.nV*(Ga.nV+1) + Gb.nV*(Gb.nV+1))/4
 
-        if Ga.directed:
-          complement = Ga.nE + Gb.nE > (Ga.nV**2 + Gb.nV**2)/2
-        else:
-          complement = Ga.nE + Gb.nE > (Ga.nV*(Ga.nV+1) + Gb.nV*(Gb.nV+1))/4
-
-        # complement = False
-
-        if complement:
-          Ga = self.Ga.complement()
-          Gb = self.Gb.complement()
+      if complement:
+        Ga = self.Ga.complement()
+        Gb = self.Gb.complement()
 
     # Number of vertices
     nA = Ga.nV
@@ -161,14 +154,14 @@ class Comparison:
 
       case 'GASM':
 
-        # --- Node attributes
-        
         if not nA or not nB:
 
           N = np.empty(0)
           E = np.empty(0)
 
         else:
+
+          # --- Node attributes
 
           # Base
           N = np.ones((nA,nB))
@@ -202,10 +195,10 @@ class Comparison:
 
           if mA and mB:
 
-            for k, attr in enumerate(Ga.edge_attr):
+            for k, attr in enumerate(self.Ga.edge_attr):
 
               wA = attr['values']
-              wB = Gb.edge_attr[k]['values']
+              wB = self.Gb.edge_attr[k]['values']
 
               if attr['measurable']:
 
@@ -312,7 +305,7 @@ class Comparison:
             if Ga.directed:
 
               if i==0:
-                X0 = (Ga.S @ E @ Gb.S.T + Ga.T @ E @ Gb.T.T) * (N+H)
+                X0 = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
                 self.Y = Ga.S.T @ X0 @ Gb.S + Ga.T.T @ X0 @ Gb.T
               else:
                 self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
@@ -328,7 +321,7 @@ class Comparison:
             else:
 
               if i==0:
-                X0 = (Ga.R @ E @ Gb.R.T) * (N+H)
+                X0 = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
                 self.Y = Ga.R.T @ X0 @ Gb.R
               else:
                 self.Y = Ga.R.T @ self.X @ Gb.R
