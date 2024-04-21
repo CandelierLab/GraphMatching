@@ -12,7 +12,7 @@ os.system('clear')
 
 directed = True
 
-nA = 20
+nA = 10
 p = 2/nA
 
 algo = 'GASM'
@@ -24,14 +24,14 @@ localization = False
 
 # --------------------------------------------------------------------------
 
-# np.random.seed(1)
+np.random.seed(0)
 
 # ==========================================================================
 
 # print('p', p)
 
 res = []
-nIter = 100
+nIter = 1
 
 for iter in range(nIter):
 
@@ -40,11 +40,11 @@ for iter in range(nIter):
   Ga = Gnp(nA, p, directed=directed)
   Ga.add_edge_attr('gauss')
 
-  Gb, gt = Ga.degrade(type, delta, shuffle=True)
+  Gb, gt = Ga.degrade(type, delta, shuffle=False)
 
-  # Ga.print()
-  # Gb.print()
-  # print(gt.__dict__)
+  Ga.print()
+  Gb.print()
+  print(gt.__dict__)
 
   C = Comparison(Ga, Gb)
   M = C.get_matching(algorithm=algo)

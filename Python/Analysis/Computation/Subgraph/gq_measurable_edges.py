@@ -17,7 +17,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
+directed = True
 nA = 20
 nRun = 500
 # nRun = 1000
@@ -78,7 +78,7 @@ for xi_m in l_xi_m:
         Ga.add_edge_attr('gauss')
 
       # Subgraph
-      Gb, gt = Ga.degrade('vx_rm', delta=delta)
+      Gb, gt = Ga.degrade('vx_rm', delta=delta, shuffle=False)
 
       # --- Zager
 

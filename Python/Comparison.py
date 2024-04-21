@@ -224,7 +224,7 @@ class Comparison:
     # --- Computation --------------------------------------------------------
     
     # pa.matrix(N)
-    # pa.matrix(E, title='E')
+    pa.matrix(E, title='E', maxrow=100)
 
     if not mA or not mB:
 
@@ -312,11 +312,11 @@ class Comparison:
 
               self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T)
 
-              # pa.line(str(i))
-              # if i==0:
-              #   pa.matrix(X0)
-              # pa.matrix(self.X)
-              # pa.matrix(self.Y)
+              pa.line(str(i))
+              if i==0:
+                pa.matrix(X0, maxrow=100)
+              pa.matrix(self.Y, maxrow=100)
+              pa.matrix(self.X, maxrow=100)
 
             else:
 
@@ -327,25 +327,6 @@ class Comparison:
                 self.Y = Ga.R.T @ self.X @ Gb.R
 
               self.X = Ga.R @ self.Y @ Gb.R.T
-
-
-            # if i==0:
-
-            #   if Ga.directed:
-            #     self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T) * Xc
-            #     self.Y = (Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T) * Yc
-            #   else:
-            #     self.X = (Ga.R @ self.Y @ Gb.R.T) * Xc
-            #     self.Y = (Ga.R.T @ self.X @ Gb.R) * Yc
-
-            # else:
-
-            #   if Ga.directed:
-            #     self.X = Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T
-            #     self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
-            #   else:
-            #     self.X = Ga.R @ self.Y @ Gb.R.T
-            #     self.Y = Ga.R.T @ self.X @ Gb.R
 
         # --- Normalization 
               

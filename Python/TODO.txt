@@ -1,4 +1,6 @@
-Test degradation: vérifier l'effet de shuffle=True
+Pb potentiels:
+- problème de shuffle=True ?
+- problème dans l'algorithme ?
 
 === Edge degradation
 
