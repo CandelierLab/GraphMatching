@@ -1,4 +1,10 @@
-import os
+'''
+Subgraph degradation
+Erdo-Renyi: average gamma and q as a function of delta, nA for p=p_star
+'''
+
+import os, sys
+import argparse
 import numpy as np
 import pandas as pd
 import time
@@ -19,6 +25,15 @@ nRun = 10000
 
 force = False
 
+# --------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser()
+
+if not force:  
+  parser.add_argument('-F', '--force', action='store_true')
+  args = parser.parse_args()
+  force = args.force
+  
 # --------------------------------------------------------------------------
 
 dname = project.root + '/Files/Subgraph/delta/'

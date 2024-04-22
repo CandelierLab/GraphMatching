@@ -36,6 +36,9 @@ if os.path.exists(fname):
 
 # --- Display --------------------------------------------------------------
 
+plt.rcParams.update({'font.size': 24})
+lw = 3
+
 fig, ax = plt.subplots(1,2, figsize=(12,6))
 
 # Colors
@@ -45,31 +48,34 @@ c = {'GASM': '#1B2ACC', 'eGASM': '#089FFF',
 
 # --- Accuracy
 
-ax[0].plot(df.h, df.g_GASM, '-', color=c['GASM'], label=f'GASM')
-# ax[0].fill_between(df.h, df.g_GASM - df.g_GASM_std, df.g_GASM + df.g_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
-
-ax[0].plot(df.h, df.g_Zager, '-', color=c['Zager'], label=f'Zager')
-# ax[0].fill_between(df.h, df.g_Zager - df.g_Zager_std, df.g_Zager + df.g_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
-
-ax[0].plot(df.h, df.g_FAQ, '-', color=c['FAQ'], label=f'FAQ')
+ax[0].plot(df.h, df.g_FAQ, '-', color=c['FAQ'], linewidth=lw, label=f'FAQ')
 # ax[0].fill_between(df.h, df.g_FAQ - df.g_FAQ_std, df.g_FAQ + df.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
+ax[0].plot(df.h, df.g_Zager, '-', color=c['Zager'], linewidth=lw, label=f'Zager')
+# ax[0].fill_between(df.h, df.g_Zager - df.g_Zager_std, df.g_Zager + df.g_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
+
+ax[0].plot(df.h, df.g_GASM, '-', color=c['GASM'], linewidth=lw, label=f'GASM')
+# ax[0].fill_between(df.h, df.g_GASM - df.g_GASM_std, df.g_GASM + df.g_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
+
 # ax[0].plot(l_h, np.exp(-l_h/2), '--', color='k', label='Th')
-ax[0].plot(l_h, (l_h+1)/(2**(l_h+1) - 1), '--', color='k', label='Th')
+ax[0].plot(l_h, (l_h+1)/(2**(l_h+1) - 1), '--', color='k', linewidth=lw, label='Th')
 
 # --- Structural quality
 
-ax[1].plot(df.h, df.q_GASM, '-', color=c['GASM'], label=f'GASM')
+ax[1].plot(df.h, df.q_GASM, '-', color=c['GASM'], linewidth=lw, label=f'GASM')
 ax[1].fill_between(df.h, df.q_GASM - df.q_GASM_std, df.q_GASM + df.q_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
 
-ax[1].plot(df.h, df.q_Zager, '-', color=c['Zager'], label=f'Zager')
+ax[1].plot(df.h, df.q_Zager, '-', color=c['Zager'], linewidth=lw, label=f'Zager')
 ax[1].fill_between(df.h, df.q_Zager - df.q_Zager_std, df.q_Zager + df.q_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
 
-ax[1].plot(df.h, df.q_FAQ, '-', color=c['FAQ'], label=f'FAQ')
+ax[1].plot(df.h, df.q_FAQ, '-', color=c['FAQ'], linewidth=lw, label=f'FAQ')
 ax[1].fill_between(df.h, df.q_FAQ - df.q_FAQ_std, df.q_FAQ + df.q_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
 
 
 ax[0].set_yscale('log')
+
+ax[0].set_xticks(range(2,11,2))
+ax[1].set_xticks(range(2,11,2))
 
 ax[0].set_ylim([0, 1])
 ax[1].set_ylim([0.75, 1])

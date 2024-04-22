@@ -2,7 +2,8 @@
 Searching for p*
 '''
 
-import os
+import os, sys
+import argparse
 import numpy as np
 import time
 
@@ -16,8 +17,7 @@ from Comparison import *
 
 directed = True
 
-# l_nA = [10, 20, 50, 100, 200, 500, 1000]
-l_nA = [1000]
+l_nA = [10, 20, 50, 100, 200, 500, 1000]
 
 delta = 0.25
 
@@ -26,7 +26,16 @@ nRun = int(1e3)
 
 nBin = int(1e4)
 
-force = True
+force = False
+
+# --------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser()
+
+if not force:  
+  parser.add_argument('-F', '--force', action='store_true')
+  args = parser.parse_args()
+  force = args.force
 
 # --------------------------------------------------------------------------
 
@@ -38,6 +47,7 @@ for nA in l_nA:
 
   fname = dname + f'nA={nA:d}.txt'
 
+  # Check existence
   if force or not os.path.exists(fname):
 
     print(f'Searching p_star, nA={nA}', end='', flush=True)
