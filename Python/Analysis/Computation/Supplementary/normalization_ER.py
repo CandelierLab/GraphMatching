@@ -18,8 +18,8 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 100
-scale = 'lin'
-# scale = 'log'
+# scale = 'lin'
+scale = 'log'
 
 nRun = 100
 
@@ -31,9 +31,7 @@ match scale:
   case 'log':
     l_deg = np.geomspace(1/nA, nA, 31)
 
-l_deg = [51]
-
-force = True
+force = False
 
 # --------------------------------------------------------------------------
 

@@ -137,9 +137,8 @@ class Comparison:
 
           bttr = Gb.vrtx_attr[k]
 
-          if attr['measurable']:
-            pass
-          else:
+          if  attr['precision'] is None or attr['precision']:
+
             # Build contraint attribute
             A = np.tile(attr['values'], (nB,1)).transpose()
             B = np.tile(bttr['values'], (nA,1))
@@ -171,16 +170,20 @@ class Comparison:
             wA = attr['values']
             wB = Gb.vrtx_attr[k]['values']
 
-            if attr['measurable']:
+            if attr['precision'] is None or attr['precision']:
 
               # --- Measurable attributes
 
               # Edge weights differences
               W = np.subtract.outer(wA, wB)
 
-              sigma2 = np.var(W)
-              if sigma2>0:
-                N *= np.exp(-W**2/2/sigma2)
+              if attr['precision'] is None:
+                rho_a2 = np.var(W)
+              else:
+                rho_a2 = attr['precision']**2
+
+              if rho_a2>0:
+                N *= np.exp(-W**2/2/rho_a2)
 
             else:
 
@@ -200,18 +203,20 @@ class Comparison:
               wA = attr['values']
               wB = self.Gb.edge_attr[k]['values']
 
-              if attr['measurable']:
+              if attr['precision'] is None or attr['precision']:
 
                 # --- Measurable attributes
 
                 # Edge weights differences
                 W = np.subtract.outer(wA, wB)
 
-                # E = W==0
+                if attr['precision'] is None:
+                  rho_a2 = np.var(W)
+                else:
+                  rho_a2 = attr['precision']**2
 
-                sigma2 = np.var(W)
-                if sigma2>0:
-                  E *= np.exp(-W**2/2/sigma2)
+                if rho_a2>0:
+                  E *= np.exp(-W**2/2/rho_a2)
 
               else:
                 # --- Categorical attributes
@@ -225,8 +230,6 @@ class Comparison:
     
     # pa.matrix(N)
     # pa.matrix(E, title='E', maxrow=100)
-
-    print(E.shape)
 
     if not mA or not mB:
 
