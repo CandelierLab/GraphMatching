@@ -40,11 +40,11 @@ for iter in range(nIter):
   Ga = Gnp(nA, p, directed=directed)
   Ga.add_edge_attr('gauss')
 
-  Gb, gt = Ga.degrade(type, delta, shuffle=False)
+  Gb, gt = Ga.degrade(type, delta, shuffle=True)
 
   Ga.print()
   Gb.print()
-  print(gt.__dict__)
+  print(gt)
 
   C = Comparison(Ga, Gb)
   M = C.get_matching(algorithm=algo)

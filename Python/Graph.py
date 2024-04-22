@@ -1,3 +1,4 @@
+import os
 import copy
 import numpy as np
 from scipy import sparse
@@ -403,8 +404,11 @@ class Graph:
     if self.nEa:
 
       # Compute indexes
-      J = [np.where(np.logical_or(np.all(self.edges==[Idx[e[0]], Idx[e[1]]], axis=1), np.all(self.edges==[Idx[e[1]], Idx[e[0]]], axis=1)))[0][0] for e in H.edges]
-      
+      if self.directed:
+        J = [np.where(np.all(self.edges==[Idx[e[0]], Idx[e[1]]], axis=1))[0][0] for e in H.edges]
+      else:
+        J = [np.where(np.logical_or(np.all(self.edges==[Idx[e[0]], Idx[e[1]]], axis=1), np.all(self.edges==[Idx[e[1]], Idx[e[0]]], axis=1)))[0][0] for e in H.edges]
+        
       for a in self.edge_attr:
         attr = copy.deepcopy(a)
         attr['values'] = a['values'][J]
@@ -715,6 +719,82 @@ class GroundTruth:
     
     self.Ia = np.arange(Ga.nV)
     self.Ib = np.arange(Gb.nV)
+
+  def __str__(self):
+    '''
+    Print function
+    '''
+
+    # --- Parameters -------------------------------------------------------
+
+    # max caracters per line 
+    mcpl = os.get_terminal_size()[0]
+
+    # Maximum number of correspondences to display
+    kmax = 20
+
+    s = '╒══ Ground Truth ' + '═'*(mcpl-17) + '\n'
+    
+    s += '│\n'
+
+    # Number of correspondences to display
+    km = self.Ia.size
+
+    if not km:
+
+      s += '│ Empty list of correspondences.\n'
+      
+    else:
+
+      if km > kmax:
+        km = kmax
+        suff = f'│ ... and {self.Ia.size-kmax} more.\n'
+      else:
+        suff = ''
+
+      # --- Display correspondences
+      
+      l0 = '│ '
+      l1 = '│ '
+      l2 = '│ '
+
+      for k in range(km):
+
+        # --- Buffers
+
+        bl = len(f'{max(self.Ia[k], self.Ib[k])}')
+
+        b0 = f' \033[7m {self.Ia[k]:{bl}d} \033[0m'
+        b1 = f'  {self.Ib[k]:{bl}d} '
+        b2 = '─'*(bl+3)
+
+        if len(l1+b1)<mcpl:
+
+          l0 += b0
+          l1 += b1
+          l2 += b2
+
+        else:
+
+          # Flush
+          s += l0 + '\n'
+          s += l1 + '\n'
+          s += l2 + '─\n'
+
+          # Restart
+          l0 = '│ ' + b0 
+          l1 = '│ ' + b1
+          l2 = '│ ' + b2
+
+      # Flush
+      s += l0 + '\n'
+      s += l1 + '\n'
+
+      s += suff
+
+    s += '╘' + '═'*(mcpl-1) + '\n'
+
+    return s
 
 # ##########################################################################
 #                        Graph generation functions

@@ -208,7 +208,7 @@ class Comparison:
                 W = np.subtract.outer(wA, wB)
 
                 E = W==0
-                
+
                 # sigma2 = np.var(W)
                 # if sigma2>0:
                 #   E *= np.exp(-W**2/2/sigma2)
@@ -223,6 +223,8 @@ class Comparison:
 
     # --- Computation --------------------------------------------------------
     
+    print(np.sum(E))
+
     # pa.matrix(N)
     pa.matrix(E, title='E', maxrow=100)
 
@@ -234,8 +236,25 @@ class Comparison:
     else:
 
       # --- Initialization
+        
+      match algorithm:
+      
+        case 'GASM':
 
-      if not nIter: self.X = np.ones((nA, nB))  
+          # Define X0
+          if Ga.directed:
+            X0 = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
+          else:
+            X0 = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
+
+          if not nIter:
+            self.X = X0
+
+        case _:
+          
+          if not nIter:
+            self.X = np.ones((nA, nB))  
+
       self.Y = np.ones((mA, mB))
 
       # --- Iterations
@@ -305,23 +324,21 @@ class Comparison:
             if Ga.directed:
 
               if i==0:
-                X0 = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
                 self.Y = Ga.S.T @ X0 @ Gb.S + Ga.T.T @ X0 @ Gb.T
               else:
                 self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
 
               self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T)
 
-              pa.line(str(i))
-              if i==0:
-                pa.matrix(X0, maxrow=100)
-              pa.matrix(self.Y, maxrow=100)
-              pa.matrix(self.X, maxrow=100)
+              # pa.line(str(i))
+              # if i==0:
+              #   pa.matrix(X0, maxrow=100)
+              # # pa.matrix(self.Y, maxrow=100)
+              # pa.matrix(self.X, maxrow=100, highlight=X0>0.5)
 
             else:
 
               if i==0:
-                X0 = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
                 self.Y = Ga.R.T @ X0 @ Gb.R
               else:
                 self.Y = Ga.R.T @ self.X @ Gb.R
