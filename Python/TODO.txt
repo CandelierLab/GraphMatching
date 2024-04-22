@@ -1,7 +1,3 @@
-Pb potentiels:
-- problème de shuffle=True ?
-- problème dans l'algorithme ?
-
 === Edge degradation
 
 - Relancer avec: nRun=1000, xi=0:5 (directed & undirected) /!\ changer la distribution des arrtibuts pour 'Gauss'

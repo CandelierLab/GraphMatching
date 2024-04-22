@@ -10,9 +10,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
-nA = 5
-p = 0.25
+directed = True
+nA = 20
+p = 0.6
 
 algo = 'GASM'
 
@@ -34,6 +34,8 @@ Ga = Gnp(nA, p, directed=directed)
 
 Gb, gt = Ga.shuffle()
 
+Ga.print()
+Gb.print()
 
 
 C = Comparison(Ga, Gb, verbose=True)

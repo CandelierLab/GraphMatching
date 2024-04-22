@@ -17,7 +17,7 @@ os.system('clear')
 
 directed = True
 
-nA = 200
+nA = 20
 p = np.log(nA)/nA
 
 # nA = 50

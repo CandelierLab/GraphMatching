@@ -22,8 +22,8 @@ nA = 20
 nRun = 500
 # nRun = 1000
 
-l_xi_m = np.arange(3)
-# l_xi_m = np.arange(9)
+# l_xi_m = np.arange(3)
+l_xi_m = np.arange(9)
 
 force = True
 
@@ -78,7 +78,7 @@ for xi_m in l_xi_m:
         Ga.add_edge_attr('gauss')
 
       # Subgraph
-      Gb, gt = Ga.degrade('vx_rm', delta=delta, shuffle=False)
+      Gb, gt = Ga.degrade('vx_rm', delta=delta)
 
       # --- Zager
 

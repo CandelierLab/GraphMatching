@@ -191,9 +191,9 @@ class Comparison:
           # --- Edge attributes
 
           # Base
-          E = np.ones((mA,mB))
+          E = np.ones((self.Ga.nE, self.Gb.nE))
 
-          if mA and mB:
+          if self.Ga.nE and self.Gb.nE:
 
             for k, attr in enumerate(self.Ga.edge_attr):
 
@@ -207,11 +207,11 @@ class Comparison:
                 # Edge weights differences
                 W = np.subtract.outer(wA, wB)
 
-                E = W==0
+                # E = W==0
 
-                # sigma2 = np.var(W)
-                # if sigma2>0:
-                #   E *= np.exp(-W**2/2/sigma2)
+                sigma2 = np.var(W)
+                if sigma2>0:
+                  E *= np.exp(-W**2/2/sigma2)
 
               else:
                 # --- Categorical attributes
@@ -225,6 +225,8 @@ class Comparison:
     
     # pa.matrix(N)
     # pa.matrix(E, title='E', maxrow=100)
+
+    print(E.shape)
 
     if not mA or not mB:
 
