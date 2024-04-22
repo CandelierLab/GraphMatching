@@ -223,10 +223,8 @@ class Comparison:
 
     # --- Computation --------------------------------------------------------
     
-    print(np.sum(E))
-
     # pa.matrix(N)
-    pa.matrix(E, title='E', maxrow=100)
+    # pa.matrix(E, title='E', maxrow=100)
 
     if not mA or not mB:
 
@@ -246,6 +244,8 @@ class Comparison:
             X0 = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
           else:
             X0 = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
+
+          # pa.matrix(X0, title='X0', maxrow=100, highlight=X0>0.5)
 
           if not nIter:
             self.X = X0
@@ -331,8 +331,6 @@ class Comparison:
               self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T)
 
               # pa.line(str(i))
-              # if i==0:
-              #   pa.matrix(X0, maxrow=100)
               # # pa.matrix(self.Y, maxrow=100)
               # pa.matrix(self.X, maxrow=100, highlight=X0>0.5)
 

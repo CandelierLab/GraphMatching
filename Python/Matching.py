@@ -65,6 +65,10 @@ class Matching:
       s += f'│ Algorithm: \t\t\033[31m{self.algorithm}\033[0m\n'
       param_suff = '│\n'
 
+    # Number of iterations
+    if self.info is not None:
+      s += f'│ Number of iterations: {self.info["nIter"]:d}\n'
+
     # Computation time
     if self.time is not None:
 
@@ -227,12 +231,11 @@ class Matching:
 
     else:
 
-      # self.accuracy = np.count_nonzero(gt.Idx[self.idxB]==self.idxA)/self.nA
+      k = 0
+      for a, b in zip(self.idxA, self.idxB):
+        k += np.any(np.logical_and(a==gt.Ia, b==gt.Ib))
 
-      if self.nA >= self.nB:
-        self.accuracy = np.count_nonzero(self.idxA[gt.Ib]==gt.Ia[self.idxB])/self.nB
-      else:
-        self.accuracy = np.count_nonzero(self.idxB[gt.Ia]==gt.Ib[self.idxA])/self.nA
+      self.accuracy = k/min(self.nA, self.nB)
 
   def compute_score(self, X):
     '''
