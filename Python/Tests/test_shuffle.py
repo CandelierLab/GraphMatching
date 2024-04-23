@@ -12,9 +12,10 @@ os.system('clear')
 
 directed = True
 nA = 20
-p = 0.6
+p = 0.5
 
-algo = 'GASM'
+# algo = 'GASM'
+algo = '2opt'
 
 # np.random.seed(0)
 

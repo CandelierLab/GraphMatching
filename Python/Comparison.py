@@ -22,14 +22,18 @@ class Comparison:
     Comparison of two graphs.
 
     The algorithm parameters can be:
+    - random, (fast but not very efficient)
     - 'FAQ', as in [1]
-    - 'Zager', as in [2]
+    - '2opt', as in [2]
+    - 'Zager', as in [3]
     - 'GASM', Graph Attribute and Structure Matching (default)
 
     [1] J.T. Vogelstein et al., "Fast Approximate Quadratic Programming for Graph Matching",
       PLoS One 10(4) (2015); doi:10.1371/journal.pone.0121002
 
-    [2] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
+    [2] D. E. Fishkind et al., "See de d graph matching", Pattern recognition 87, 203-215 (2019); doi:10.1016/j.patcog.2018.09.014
+
+    [3] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
         Applied Mathematics Letters 21 (2008) 86–94; doi: 10.1016/j.aml.2007.01.006
     '''
 
@@ -399,7 +403,7 @@ class Comparison:
     # Measure time
     tref = time.perf_counter_ns()
 
-    match algorithm:
+    match algorithm.lower():
 
       case 'random':
 
@@ -410,14 +414,16 @@ class Comparison:
 
         M.time['total'] = (time.perf_counter_ns()-tref)*1e-6
 
-      case 'FAQ':
+      case 'faq' | '2opt':
 
         # Solve the Quadratic Assignment Problem
 
-        # Check weight presence
+        # Check attributes
         if self.Ga.nEa==0:
+
           A = self.Ga.Adj
           B = self.Gb.Adj
+
         else:
 
           A = np.zeros((self.Ga.nV, self.Ga.nV), dtype=float)
@@ -432,7 +438,7 @@ class Comparison:
             if not self.Gb.directed:
               B[e[1], e[0]] = B[e[0], e[1]]
 
-        res = quadratic_assignment(A, B, options={'maximize': True})
+        res = quadratic_assignment(A, B, method=algorithm.lower(), options={'maximize': True})
         
         # Record computing time
         M.time['total'] = (time.perf_counter_ns()-tref)*1e-6
@@ -441,7 +447,7 @@ class Comparison:
         M.from_lists(np.arange(self.Ga.nV), res.col_ind)
         M.score = res.fun
 
-      case 'Zager' | 'GASM':
+      case 'zager' | 'gasm':
 
         # --- Similarity scores --------------------------------------------------
 
