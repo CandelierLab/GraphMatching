@@ -116,7 +116,7 @@ class Graph:
       attr = self.vrtx_attr[0]
 
       if 'name' in attr:
-        print("\nVertex attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
+        print("\nVertex attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['presicion'] else 'not '))
       else:
         print('\nVertex attribute {:d}:'.format(i))
 
@@ -129,7 +129,7 @@ class Graph:
       attr = self.edge_attr[0]
 
       if 'name' in attr:
-        print("\nEdge attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
+        print("\nEdge attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['precision'] else 'not '))
       else:
         print('\nEdge attribute {:d}:'.format(i))
 
@@ -522,7 +522,7 @@ class Graph:
     for attr in self.vrtx_attr:
 
       # Attribute reproduction
-      a = {'measurable': attr['measurable'], 'values': attr['values'][Kv]}
+      a = {'precision': attr['precision'], 'values': attr['values'][Kv]}
       if 'name' in attr: a['name'] = attr['name']
 
       H.add_vrtx_attr(a)
@@ -531,7 +531,7 @@ class Graph:
     for attr in self.edge_attr:
 
       # Attribute reproduction
-      a = {'measurable': attr['measurable'], 'values': attr['values'][Ke]}
+      a = {'precision': attr['precision'], 'values': attr['values'][Ke]}
       if 'name' in attr: a['name'] = attr['name']
 
       H.add_edge_attr(a)
