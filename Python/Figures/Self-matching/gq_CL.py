@@ -15,58 +15,48 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
+
+# --- Plot parameters
+
 err_alpha = 0.2
+lw = 3
+fontsize = 24
+markersize = 10
 
-# --------------------------------------------------------------------------
-
-fname = project.root + f'/Files/Self-matching/CL/CL.csv'
+# Colors
+c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
+     'FAQ': '#FFA500', 'eFAQ': '#FACC2E',
+     'Zager': '#1B2ACC', 'eZager': '#089FFF',
+     'GASM': '#3F7F4C', 'eGASM':'#7EFF99'}
 
 # ==========================================================================
 
-if os.path.exists(fname):
+plt.rcParams.update({'font.size': fontsize})
+fig, ax = plt.subplots(1,2, figsize=(20,10))
 
-  # Load data
-  df = pd.read_csv(fname)
+for algo in l_algo:
 
-  # Retrieve l_h
+  fname = project.root + f'/Files/Self-matching/CL/{algo}_CL.csv'
 
-  l_n = np.unique(df.n)
+  if os.path.exists(fname):
 
-print(df)
+    # Load data
+    data = pd.read_csv(fname)
 
-# --- Display --------------------------------------------------------------
+    # Retrieve l_h
+    l_n = np.unique(data.n)
 
-fig, ax = plt.subplots(1,2, figsize=(12,6))
+    # Accuracy
+    ax[0].plot(data.n, data.g, '.', color=c[algo], linewidth=lw, markersize=markersize, label=algo)
 
-# Colors
-c = {'GASM': '#1B2ACC', 'eGASM': '#089FFF',
-     'Zager': '#CC4F1B', 'eZager': '#FF9848',
-     'FAQ': '#3F7F4C', 'eFAQ':'#7EFF99'}
+    # Structural quality
+    ax[1].plot(data.n, data.q, '-', color=c[algo], linewidth=lw, label=algo)
+    ax[1].fill_between(data.n, data.q - data.q_std, data.q + data.q_std, alpha=err_alpha, facecolor=c['e'+algo])
 
-# --- Accuracy
+ax[0].plot(l_n, 1/2/l_n, '--', color='k', linewidth=lw, label='Theoretical')
 
-ax[0].plot(df.n, df.g_GASM, '-', color=c['GASM'], label=f'GASM')
-# ax[0].fill_between(df.h, df.g_GASM - df.g_GASM_std, df.g_GASM + df.g_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
-
-ax[0].plot(df.n, df.g_Zager, '-', color=c['Zager'], label=f'Zager')
-# ax[0].fill_between(df.h, df.g_Zager - df.g_Zager_std, df.g_Zager + df.g_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
-
-ax[0].plot(df.n, df.g_FAQ, '-', color=c['FAQ'], label=f'FAQ')
-# ax[0].fill_between(df.h, df.g_FAQ - df.g_FAQ_std, df.g_FAQ + df.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
-
-ax[0].plot(l_n, 1/2/l_n, '--', color='k', label='$\\frac{1}{2n}$')
-
-# --- Structural quality
-
-ax[1].plot(df.n, df.q_GASM, '-', color=c['GASM'], label=f'GASM')
-ax[1].fill_between(df.n, df.q_GASM - df.q_GASM_std, df.q_GASM + df.q_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
-
-ax[1].plot(df.n, df.q_Zager, '-', color=c['Zager'], label=f'Zager')
-ax[1].fill_between(df.n, df.q_Zager - df.q_Zager_std, df.q_Zager + df.q_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
-
-ax[1].plot(df.n, df.q_FAQ, '-', color=c['FAQ'], label=f'FAQ')
-ax[1].fill_between(df.n, df.q_FAQ - df.q_FAQ_std, df.q_FAQ + df.q_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
-
+# --- Figure options -------------------------------------------------------
 
 ax[0].set_xscale('log')
 ax[0].set_yscale('log')

@@ -58,7 +58,7 @@ for algo in l_algo:
     ax[1].plot(data.h, data.q, '-', label=algo)
     
 if l_h is not None:
-  ax[0].plot(l_h, np.exp(-l_h/2), '--', color='w', label='Th')
+  ax[0].plot(l_h, (l_h+1)/(2**(l_h+1) - 1), '--', color='w', label='Th')
 
 ax[0].set_yscale('log')
 

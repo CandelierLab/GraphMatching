@@ -40,7 +40,6 @@ for algo in l_algo:
     data = pd.read_csv(fname)
 
     # Retrieve l_n and l_eta
-
     l_n = np.unique(data.n)
 
     # Accuracy
