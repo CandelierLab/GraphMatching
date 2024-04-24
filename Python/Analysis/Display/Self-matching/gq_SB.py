@@ -16,7 +16,6 @@ import project
 l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
 
 directed = False
-nRun = 1000
 
 ls = {'FAQ': '--', '2opt': '-.', 'Zager': ':', 'GASM':'-'}
 
@@ -39,7 +38,7 @@ fig, ax = plt.subplots(1,2, figsize=(20,10))
 
 for algo in l_algo:
 
-  fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}_nRun={nRun:d}.csv'
+  fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}.csv'
   
   # print(fname)
 

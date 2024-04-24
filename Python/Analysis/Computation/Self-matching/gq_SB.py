@@ -29,7 +29,7 @@ directed = False
 l_k = np.arange(2,6)
 l_n = np.arange(1,11)
 
-nRun = 1000
+nRun = 10000
 
 force = True
 
@@ -45,7 +45,7 @@ if not force:
 # ==========================================================================
 
 ds = 'directed' if directed else 'undirected'
-fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}.csv'
 
 # Check existence
 if os.path.exists(fname) and not force:
@@ -57,6 +57,7 @@ pa.line(f'SB - {algo}')
 df = pd.DataFrame(columns=['n', 'k', 'nRun', 'g', 'q', 'g_std', 'q_std'])
 
 i = 0
+ref = time.time()
 
 for k in l_k:
   for n in l_n:
@@ -101,6 +102,8 @@ for k in l_k:
     i += 1
 
     print('{:.02f} sec'.format((time.time() - start)))
+
+print('Total time: {:.02f} sec'.format((time.time() - ref)))
 
 # --- Save
     
