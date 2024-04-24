@@ -33,58 +33,34 @@ figfile = args.filename
 
 ds = 'directed' if directed else 'undirected'
 
-datapath = project.root + f'/Files/Self-matching/ER/{algo}_{ds}_nA={nA:d}_nRun={nRun:d}.csv'
-
 # ==========================================================================
 
 if figfile is None:
   os.system('clear')
-
-if os.path.exists(datapath):
-
-  # Load data
-  df = pd.read_csv(datapath)
-
-  # Retrieve l_p and l_eta
-
-  l_p = np.unique(df.p)
-  l_eta = np.unique(df.eta)
-
-# l_eta = np.array([l_eta[2]])
 
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')
 fig, ax = plt.subplots(1, 2, figsize=(20,10))
 
-# Colors
-cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_eta.size))
+for algo in l_algo:
 
-g_FAQ = np.zeros(l_p.size)
-q_FAQ = np.zeros(l_p.size)
+  datapath = project.root + f'/Files/Self-matching/ER/{algo}_{ds}_nA={nA:d}_nRun={nRun:d}.csv'
 
-g_Zager = np.zeros(l_p.size)
-q_Zager = np.zeros(l_p.size)
+  if os.path.exists(datapath):
 
-for i, eta in enumerate(l_eta):
+    # Load data
+    data = pd.read_csv(datapath)
 
-  data = df.loc[df['eta'] == eta]
+    # Retrieve l_p
 
-  # Accuracy
-  g_FAQ += data.g_FAQ.to_list()
-  g_Zager += data.g_Zager.to_list()
-  ax[0].plot(data.p, data.g_GASM, '-', color=cm[i], label=f'$\eta = {eta:g}$')
+    l_p = np.unique(data.p)
 
-  # Structural quality
-  q_FAQ += data.q_FAQ.to_list()
-  q_Zager += data.q_Zager.to_list()
-  ax[1].plot(data.p, data.q_GASM, '-', color=cm[i], label=f'$\eta = {eta:g}$')
+    # Accuracy
+    ax[0].plot(data.p, data.g, '-', label=algo)
 
-ax[0].plot(l_p, g_FAQ/l_eta.size, '-', color='c', label='FAQ')
-ax[1].plot(l_p, q_FAQ/l_eta.size, '-', color='c', label='FAQ')
-
-ax[0].plot(l_p, g_Zager/l_eta.size, '--', color='w', label='Zager')
-ax[1].plot(l_p, q_Zager/l_eta.size, '--', color='w', label='Zager')
+    # Structural quality
+    ax[1].plot(data.p, data.q, '-', label=algo)
 
 ax[0].set_ylim([0, 1])
 ax[1].set_ylim([0.9, 1.001])

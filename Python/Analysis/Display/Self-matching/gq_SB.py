@@ -44,8 +44,6 @@ for algo in l_algo:
     # Load data
     df = pd.read_csv(fname)
 
-    print(df.to_string())
-
     # Retrieve l_k and l_n
 
     l_k = np.unique(df.k).astype(int)
@@ -84,8 +82,7 @@ ax[1].grid(True)
 
 if figfile is None:
 
-  pass
-  # plt.show()
+  plt.show()
 
 else:
 
