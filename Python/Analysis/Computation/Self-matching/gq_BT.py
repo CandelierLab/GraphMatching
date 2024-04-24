@@ -12,9 +12,16 @@ import project
 from Graph import *
 from Comparison import *
 
+import paprint as pa
+
 os.system('clear')
 
 # === Parameters ===========================================================
+
+# algo = 'FAQ'
+algo = '2opt'
+# algo = 'Zager'
+# algo = 'GASM'
 
 r = 2
 l_h = np.arange(2,11)
@@ -24,7 +31,7 @@ l_h = np.arange(2,11)
 
 l_eta = [1e-10] #np.logspace(-6, -14, 5)
 
-force = True
+force = False
 
 # --------------------------------------------------------------------------
 
@@ -37,14 +44,18 @@ if not force:
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Self-matching/BT/r={r:d}.csv'
+fname = project.root + f'/Files/Self-matching/BT/{algo}_r={r:d}.csv'
 
 # Check existence
 if os.path.exists(fname) and not force:
   sys.exit()
 
+pa.line(f'BT - {algo}')
+
 # Creating dataframe
-df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_FAQ', 'g_2opt', 'g_Zager', 'g_GASM', 'q_FAQ', 'g_2opt', 'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_2opt_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std', 'g_2opt_std',  'q_Zager_std', 'q_GASM_std'])
+# df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g_FAQ', 'g_2opt', 'g_Zager', 'g_GASM', 'q_FAQ', 'g_2opt', 'q_Zager', 'q_GASM', 'g_FAQ_std', 'g_2opt_std', 'g_Zager_std', 'g_GASM_std', 'q_FAQ_std', 'g_2opt_std',  'q_Zager_std', 'q_GASM_std'])
+
+df = pd.DataFrame(columns=['h', 'eta', 'nRun', 'g', 'q', 'g_std', 'q_std'])
 
 k = 0
 
@@ -62,14 +73,8 @@ for h in l_h:
     print(f'{nRun:d} iterations: eta={eta:.05f} ...', end='')
     start = time.time()
     
-    g_FAQ = []
-    q_FAQ = []
-    g_2opt = []
-    q_2opt = []
-    g_Zager = []
-    q_Zager = []
-    g_GASM = []
-    q_GASM = []
+    g = []
+    q = []
 
     for i in range(nRun):
 
@@ -78,38 +83,11 @@ for h in l_h:
       # --- FAQ
 
       C = Comparison(Ga, Gb)
-      M = C.get_matching(algorithm='FAQ')
+      M = C.get_matching(algorithm=algo)
       M.compute_accuracy(gt)
 
-      g_FAQ.append(M.accuracy)
-      q_FAQ.append(M.structural_quality)
-
-      # --- 2opt
-
-      C = Comparison(Ga, Gb)
-      M = C.get_matching(algorithm='2opt')
-      M.compute_accuracy(gt)
-
-      g_2opt.append(M.accuracy)
-      q_2opt.append(M.structural_quality)
-
-      # --- Zager
-
-      C = Comparison(Ga, Gb)
-      M = C.get_matching(algorithm='Zager')
-      M.compute_accuracy(gt)
-
-      g_Zager.append(M.accuracy)
-      q_Zager.append(M.structural_quality)
-
-      # --- GASM
-
-      C = Comparison(Ga, Gb)
-      M = C.get_matching(algorithm='GASM', eta=eta)
-      M.compute_accuracy(gt)
-
-      g_GASM.append(M.accuracy)
-      q_GASM.append(M.structural_quality)
+      g.append(M.accuracy)
+      q.append(M.structural_quality)
 
     # --- Store
       
@@ -119,24 +97,12 @@ for h in l_h:
     df.loc[k, 'nRun'] = nRun
 
     # Mean values
-    df.loc[k, 'g_FAQ'] = np.mean(g_FAQ)
-    df.loc[k, 'q_FAQ'] = np.mean(q_FAQ)
-    df.loc[k, 'g_2opt'] = np.mean(g_2opt)
-    df.loc[k, 'q_2opt'] = np.mean(q_2opt)
-    df.loc[k, 'g_Zager'] = np.mean(g_Zager)
-    df.loc[k, 'q_Zager'] = np.mean(q_Zager)
-    df.loc[k, 'g_GASM'] = np.mean(g_GASM)
-    df.loc[k, 'q_GASM'] = np.mean(q_GASM)
+    df.loc[k, 'g'] = np.mean(g)
+    df.loc[k, 'q'] = np.mean(q)
 
     # Standard deviations
-    df.loc[k, 'g_FAQ_std'] = np.std(g_FAQ)
-    df.loc[k, 'q_FAQ_std'] = np.std(q_FAQ)
-    df.loc[k, 'g_2opt_std'] = np.std(g_2opt)
-    df.loc[k, 'q_2opt_std'] = np.std(q_2opt)
-    df.loc[k, 'g_Zager_std'] = np.std(g_Zager)
-    df.loc[k, 'q_Zager_std'] = np.std(q_Zager)
-    df.loc[k, 'g_GASM_std'] = np.std(g_GASM)
-    df.loc[k, 'q_GASM_std'] = np.std(q_GASM)
+    df.loc[k, 'g_std'] = np.std(g)
+    df.loc[k, 'q_std'] = np.std(q)
 
     k += 1
 

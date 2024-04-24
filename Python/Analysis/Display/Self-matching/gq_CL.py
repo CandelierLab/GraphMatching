@@ -13,62 +13,46 @@ import project
 
 # === Parameters ===========================================================
 
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
+
+# --------------------------------------------------------------------------
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--filename', help='File to save the figure')
 args = parser.parse_args()
 figfile = args.filename
-
-# --------------------------------------------------------------------------
-
-fname = project.root + f'/Files/Self-matching/CL/CL.csv'
 
 # ==========================================================================
 
 if figfile is None:
   os.system('clear')
 
-if os.path.exists(fname):
-
-  # Load data
-  df = pd.read_csv(fname)
-
-  # Retrieve l_n and l_eta
-
-  l_n = np.unique(df.n)
-  l_eta = np.unique(df.eta)
-
-# --- Display --------------------------------------------------------------
-
 plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2, figsize=(20,10))
 
-# --- Accuracy
+for algo in l_algo:
 
-g_FAQ = np.zeros(l_n.size)
-q_FAQ = np.zeros(l_n.size)
+  fname = project.root + f'/Files/Self-matching/CL/{algo}_CL.csv'
 
-g_Zager = np.zeros(l_n.size)
-q_Zager = np.zeros(l_n.size)
+  if os.path.exists(fname):
 
-for i, eta in enumerate(l_eta):
+    # Load data
+    data = pd.read_csv(fname)
 
-  data = df.loc[df['eta'] == eta]
+    # Retrieve l_n and l_eta
 
-  # Accuracy
-  g_FAQ += data.g_FAQ.to_list()
-  g_Zager += data.g_Zager.to_list()
-  ax[0].plot(data.n, data.g_GASM, '.', label=f'$\eta = {eta:g}$')
+    l_n = np.unique(data.n)
+    l_eta = np.unique(data.eta)
 
-  # Structural quality
-  q_FAQ += data.q_FAQ.to_list()
-  q_Zager += data.q_Zager.to_list()
-  ax[1].plot(data.n, data.q_GASM, '.-', label=f'$\eta = {eta:g}$')
+    # --- Accuracy
 
-ax[0].plot(l_n, g_FAQ/l_eta.size, '.', label='FAQ')
-ax[1].plot(l_n, q_FAQ/l_eta.size, '.-', label='FAQ')
+    for i, eta in enumerate(l_eta):
 
-ax[0].plot(l_n, g_Zager/l_eta.size, '.', label='Zager')
-ax[1].plot(l_n, q_Zager/l_eta.size, '.-', label='Zager')
+      # Accuracy
+      ax[0].plot(data.n, data.g, '.', label=algo)
+
+      # Structural quality
+      ax[1].plot(data.n, data.q, '.-', label=algo)
 
 ax[0].plot(l_n, 0.5/l_n, '--', color='white', label='$\\frac{1}{2n}$')
 

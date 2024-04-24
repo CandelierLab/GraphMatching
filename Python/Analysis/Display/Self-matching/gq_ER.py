@@ -16,6 +16,8 @@ import project
 
 # === Parameters ===========================================================
 
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
+
 directed = False
 nA = 20
 nRun = 10000
@@ -31,7 +33,7 @@ figfile = args.filename
 
 ds = 'directed' if directed else 'undirected'
 
-datapath = project.root + f'/Files/Self-matching/ER/{ds}_nA={nA:d}_nRun={nRun:d}.csv'
+datapath = project.root + f'/Files/Self-matching/ER/{algo}_{ds}_nA={nA:d}_nRun={nRun:d}.csv'
 
 # ==========================================================================
 

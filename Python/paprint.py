@@ -27,7 +27,10 @@ def line(text=None, thickness=1, char=None, color=Style.DIM):
   '''
 
   # Terminal width
-  tw = os.get_terminal_size().columns
+  try:
+    tw = os.get_terminal_size().columns
+  except:
+    tw = 50
 
   # Thickness
   if char is None:

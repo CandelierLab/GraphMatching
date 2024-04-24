@@ -13,6 +13,7 @@ import project
 
 # === Parameters ===========================================================
 
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
 r = 2
 
 # --------------------------------------------------------------------------
@@ -22,24 +23,10 @@ parser.add_argument('-f', '--filename', help='File to save the figure')
 args = parser.parse_args()
 figfile = args.filename
 
-# --------------------------------------------------------------------------
-
-datapath = project.root + f'/Files/Self-matching/BT/r={r:d}.csv'
-
 # ==========================================================================
 
 if figfile is None:
   os.system('clear')
-
-if os.path.exists(datapath):
-
-  # Load data
-  df = pd.read_csv(datapath)
-
-  # Retrieve l_h l_eta
-
-  l_h = np.unique(df.h)
-  l_eta = np.unique(df.eta)
 
 # --- Display --------------------------------------------------------------
 
@@ -49,34 +36,31 @@ fig, ax = plt.subplots(1, 2, figsize=(20,10))
 # Colors
 # cm = plt.cm.rainbow(np.linspace(0, 1, l_eta.size))
 
-# --- Accuracy
+for algo in l_algo:
 
-g_FAQ = np.zeros(l_h.size)
-q_FAQ = np.zeros(l_h.size)
+  # --- Load data ----------------------------------------------------------
 
-g_Zager = np.zeros(l_h.size)
-q_Zager = np.zeros(l_h.size)
+  datapath = project.root + f'/Files/Self-matching/BT/{algo}_r={r:d}.csv'
 
-for i, eta in enumerate(l_eta):
+  if os.path.exists(datapath):
 
-  data = df.loc[df['eta'] == eta]
+    # Load data
+    data = pd.read_csv(datapath)
 
-  # Accuracy
-  g_FAQ += data.g_FAQ.to_list()
-  g_Zager += data.g_Zager.to_list()
-  ax[0].plot(data.h, data.g_GASM, '-', label=f'$\eta = {eta:g}$')
+    # Retrieve l_h, l_eta and l_nRun
+    l_h = np.unique(data.h)
+    l_eta = np.unique(data.eta)
 
-  # Structural quality
-  q_FAQ += data.q_FAQ.to_list()
-  q_Zager += data.q_Zager.to_list()
-  ax[1].plot(data.h, data.q_GASM, '-', label=f'$\eta = {eta:g}$')
+    # --- Plots ------------------------------------------------------------
 
-ax[0].plot(l_h, g_FAQ/l_eta.size, '-', label='FAQ')
-ax[1].plot(l_h, q_FAQ/l_eta.size, '-', label='FAQ')
+    for i, eta in enumerate(l_eta):
 
-ax[0].plot(l_h, g_Zager/l_eta.size, '-', label='Zager')
-ax[1].plot(l_h, q_Zager/l_eta.size, '-', label='Zager')
-
+      # Accuracy
+      ax[0].plot(data.h, data.g, '-', label=algo)
+      
+      # Structural quality
+      ax[1].plot(data.h, data.q, '-', label=algo)
+    
 ax[0].plot(l_h, np.exp(-l_h/2), '--', label='Th')
 
 ax[0].set_yscale('log')

@@ -13,7 +13,12 @@ import project
 
 # === Parameters ===========================================================
 
-nRun = 1000
+# l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
+l_algo = ['FAQ']
+
+nRun = 10
+
+ls = {'FAQ': '--', '2opt': '.-', 'Zager': ':', 'GASM':'-'}
 
 # --------------------------------------------------------------------------
 
@@ -22,49 +27,44 @@ parser.add_argument('-f', '--filename', help='File to save the figure')
 args = parser.parse_args()
 figfile = args.filename
 
-# --------------------------------------------------------------------------
-
-fname = project.root + f'/Files/Self-matching/SB/nRun={nRun:d}.csv'
-
 # ==========================================================================
 
 if figfile is None:
   os.system('clear')
 
-if os.path.exists(fname):
-
-  # Load data
-  df = pd.read_csv(fname)
-
-  # Retrieve l_k, l_n and l_eta
-
-  l_k = np.unique(df.k)
-  l_n = np.unique(df.n)
-  l_eta = np.unique(df.eta)
-
-# --- Display --------------------------------------------------------------
-
 plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2, figsize=(20,10))
 
-# Colors
-cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_k.size))
+for algo in l_algo:
 
-# --- Plots
+  fname = project.root + f'/Files/Self-matching/SB/{algo}_nRun={nRun:d}.csv'
+  
+  if os.path.exists(fname):
 
-for ki, k in enumerate(l_k):
+    # Load data
+    df = pd.read_csv(fname)
 
-  data = df.loc[df['k'] == k]
+    print(df.to_string())
 
-  # Accuracy    
-  ax[0].plot(data.n, data.g_GASM, '-', color=cm[ki], label=f'GASM $k = {k:d}$')
-  ax[0].plot(data.n, data.g_FAQ, ':', color=cm[ki], label=f'FAQ $k = {k:d}$')
-  ax[0].plot(data.n, data.g_Zager, '--', color=cm[ki], label=f'Zager $k = {k:d}$')
+    # Retrieve l_k and l_n
 
-  # Structural quality  
-  ax[1].plot(data.n, data.q_GASM, '-', color=cm[ki], label=f'GASM $k = {k:d}$')
-  ax[1].plot(data.n, data.q_FAQ, ':', color=cm[ki], label=f'FAQ $k = {k:d}$')
-  ax[1].plot(data.n, data.q_Zager, '--', color=cm[ki], label=f'Zager $k = {k:d}$')
+    l_k = np.unique(df.k).astype(int)
+    l_n = np.unique(df.n).astype(int)
+
+    # Colors
+    cm = plt.cm.gist_rainbow(np.linspace(0, 1, l_k.size))
+
+    # --- Plots
+
+    for ki, k in enumerate(l_k):
+
+      data = df.loc[df['k'] == k]
+
+      # Accuracy    
+      ax[0].plot(data.n, data.g, linestyle=ls[algo], color=cm[ki], label=f'{algo} $k = {k:d}$')
+
+      # Structural quality  
+      ax[1].plot(data.n, data.q, linestyle=ls[algo], color=cm[ki], label=f'{algo} $k = {k:d}$')
 
 ax[0].set_ylim([0, 1])
 ax[1].set_ylim([0.9, 1])
@@ -84,7 +84,8 @@ ax[1].grid(True)
 
 if figfile is None:
 
-  plt.show()
+  pass
+  # plt.show()
 
 else:
 

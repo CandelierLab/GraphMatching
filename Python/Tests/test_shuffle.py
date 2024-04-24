@@ -10,12 +10,12 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = True
+directed = False
 nA = 20
 p = 0.5
 
-# algo = 'GASM'
-algo = '2opt'
+algo = 'GASM'
+# algo = '2opt'
 
 # np.random.seed(0)
 
@@ -25,9 +25,11 @@ algo = '2opt'
 
 # ==========================================================================
 
+Ga = star_branched(3, 3, directed=directed)
+
 # --- Random graphs
 
-Ga = Gnp(nA, p, directed=directed)
+# Ga = Gnp(nA, p, directed=directed)
 # Ga.add_edge_attr('rand', name='test_edge')
 # Ga.add_vrtx_attr('rand', name='test_node')
 
@@ -38,10 +40,10 @@ Gb, gt = Ga.shuffle()
 Ga.print()
 Gb.print()
 
-
 C = Comparison(Ga, Gb, verbose=True)
 M = C.get_matching(algorithm=algo)
 M.compute_accuracy(gt)
 
 print(M)
 
+# Ga.display()
