@@ -20,7 +20,6 @@ l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
 
 directed = False
 nA = 20
-nRun = 10000
 
 # --------------------------------------------------------------------------
 
@@ -45,7 +44,7 @@ fig, ax = plt.subplots(1, 2, figsize=(20,10))
 
 for algo in l_algo:
 
-  datapath = project.root + f'/Files/Self-matching/ER/{algo}_{ds}_nA={nA:d}_nRun={nRun:d}.csv'
+  datapath = project.root + f'/Files/Self-matching/ER/{algo}_{ds}_nA={nA:d}.csv'
 
   if os.path.exists(datapath):
 
@@ -63,7 +62,7 @@ for algo in l_algo:
     ax[1].plot(data.p, data.q, '-', label=algo)
 
 ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.9, 1.001])
+ax[1].set_ylim([0.7, 1.001])
 
 ax[0].set_xlabel('p')
 ax[1].set_xlabel('p')
