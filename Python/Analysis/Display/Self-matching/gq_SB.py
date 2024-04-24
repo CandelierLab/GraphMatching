@@ -13,14 +13,16 @@ import project
 
 # === Parameters ===========================================================
 
-# l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
-l_algo = ['FAQ']
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
 
-nRun = 10
+directed = False
+nRun = 1000
 
-ls = {'FAQ': '--', '2opt': '.-', 'Zager': ':', 'GASM':'-'}
+ls = {'FAQ': '--', '2opt': '-.', 'Zager': ':', 'GASM':'-'}
 
 # --------------------------------------------------------------------------
+
+ds = 'directed' if directed else 'undirected'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--filename', help='File to save the figure')
@@ -37,8 +39,10 @@ fig, ax = plt.subplots(1,2, figsize=(20,10))
 
 for algo in l_algo:
 
-  fname = project.root + f'/Files/Self-matching/SB/{algo}_nRun={nRun:d}.csv'
+  fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}_nRun={nRun:d}.csv'
   
+  # print(fname)
+
   if os.path.exists(fname):
 
     # Load data
