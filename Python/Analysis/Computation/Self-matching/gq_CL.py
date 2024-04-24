@@ -24,11 +24,10 @@ algo = '2opt'
 # algo = 'GASM'
 
 l_n = np.arange(1, 26)
-l_eta = [1e-10] #np.logspace(-6, -14, 3)
 
 nRun = 10000
 
-force = False
+force = True
 
 # --------------------------------------------------------------------------
 
@@ -56,49 +55,44 @@ k = 0
 
 for n in l_n:
 
-  print(f'n={n:d}')
+  print(f'n={n:d}, {nRun:d} iterations ...', end='', flush=True)
+  start = time.time()
 
   Ga = Graph(nx=nx.circular_ladder_graph(n))
+  
+  g = []
+  q = []
 
-  for eta in l_eta:
+  for i in range(nRun):
 
-    print(f'{nRun:d} iterations: eta={eta:.05f} ...', end='')
-    start = time.time()
+    Gb, gt = Ga.shuffle()
+
+    # --- FAQ
+
+    C = Comparison(Ga, Gb)
+    M = C.get_matching(algorithm=algo)
+    M.compute_accuracy(gt)
+
+    g.append(M.accuracy)
+    q.append(M.structural_quality)
+
+  # --- Store
     
-    g = []
-    q = []
+  # Parameters
+  df.loc[k, 'n'] = n
+  df.loc[k, 'nRun'] = nRun
 
-    for i in range(nRun):
+  # Mean values
+  df.loc[k, 'g'] = np.mean(g)
+  df.loc[k, 'q'] = np.mean(q)
 
-      Gb, gt = Ga.shuffle()
+  # Standard deviations
+  df.loc[k, 'g_std'] = np.std(g)
+  df.loc[k, 'q_std'] = np.std(q)
 
-      # --- FAQ
+  k += 1
 
-      C = Comparison(Ga, Gb)
-      M = C.get_matching(algorithm=algo)
-      M.compute_accuracy(gt)
-
-      g.append(M.accuracy)
-      q.append(M.structural_quality)
-
-    # --- Store
-      
-    # Parameters
-    df.loc[k, 'n'] = n
-    df.loc[k, 'eta'] = eta
-    df.loc[k, 'nRun'] = nRun
-
-    # Mean values
-    df.loc[k, 'g'] = np.mean(g)
-    df.loc[k, 'q'] = np.mean(q)
-
-    # Standard deviations
-    df.loc[k, 'g_std'] = np.std(g)
-    df.loc[k, 'q_std'] = np.std(q)
-
-    k += 1
-
-    print('{:.02f} sec'.format((time.time() - start)))
+  print('{:.02f} sec'.format((time.time() - start)))
 
 # --- Save
     

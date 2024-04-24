@@ -42,23 +42,18 @@ for algo in l_algo:
     # Retrieve l_n and l_eta
 
     l_n = np.unique(data.n)
-    l_eta = np.unique(data.eta)
 
-    # --- Accuracy
+    # Accuracy
+    ax[0].plot(data.n, data.g, '.', label=algo)
 
-    for i, eta in enumerate(l_eta):
-
-      # Accuracy
-      ax[0].plot(data.n, data.g, '.', label=algo)
-
-      # Structural quality
-      ax[1].plot(data.n, data.q, '.-', label=algo)
+    # Structural quality
+    ax[1].plot(data.n, data.q, '.-', label=algo)
 
 ax[0].plot(l_n, 0.5/l_n, '--', color='white', label='$\\frac{1}{2n}$')
 
 # Plot 0 scales 
-# ax[0].set_yscale('log')
-# ax[0].set_xscale('log')
+ax[0].set_yscale('log')
+ax[0].set_xscale('log')
 ax[0].set_xlim([0, np.max(l_n)+1])
 ax[0].set_ylim([0, 1.01])
 

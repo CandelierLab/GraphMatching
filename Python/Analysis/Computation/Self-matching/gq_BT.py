@@ -26,7 +26,7 @@ algo = '2opt'
 r = 2
 l_h = np.arange(2,11)
 
-force = True
+force = False
 
 # --------------------------------------------------------------------------
 
@@ -57,6 +57,17 @@ for h in l_h:
   # Number of runs
   match algo:
     case '2opt':
+
+      '''
+      Running times for 2opt:
+      h=2, 512 iterations ... 0.32 sec    0.0006 s/run
+      h=3, 256 iterations ... 0.84 sec    0.003 s/run
+      h=4, 128 iterations ... 3.51 sec    0.03  s/run
+      h=5, 64 iterations ... 20.93 sec    0.33 s/run
+      h=6, 32 iterations ... 176.74 sec   5,5 s/run
+      h=7, 16 iterations ... 2212.20 sec  138 s/run
+      h=8, 1 iterations ... 4774.68 sec   4775 s/run
+      '''
 
       if h<8:
         nRun = int(np.ceil(2.0**(11-h)))
