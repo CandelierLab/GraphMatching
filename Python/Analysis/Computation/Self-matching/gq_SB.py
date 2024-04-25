@@ -26,12 +26,13 @@ algo = '2opt'
 directed = False
 
 # l_k = np.arange(2,11)
-l_k = np.arange(2,6)
+# l_k = np.arange(2,6)
+l_k = [2, 5, 10]
 l_n = np.arange(1,11)
 
-nRun = 10000
+nRun = 1000
 
-force = False
+force = True
 
 # --------------------------------------------------------------------------
 

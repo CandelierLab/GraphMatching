@@ -14,6 +14,7 @@ import project
 # === Parameters ===========================================================
 
 l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
+# l_algo = ['2opt']
 
 directed = False
 
@@ -67,7 +68,9 @@ for algo in l_algo:
       # Structural quality  
       ax[1].plot(data.n, data.q, linestyle=ls[algo], color=cm[ki], label=f'{algo} $k = {k:d}$')
 
-ax[0].set_ylim([0, 1])
+ax[0].set_yscale('log')
+
+# ax[0].set_ylim([0, 1])
 ax[1].set_ylim([0.9, 1])
 
 ax[0].set_xlabel('n')

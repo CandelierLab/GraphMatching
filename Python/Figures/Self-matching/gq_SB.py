@@ -15,13 +15,16 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nRun = 1000
+directed = False
 
 l_k = [2, 5, 10]
 err_alpha = 0.2
 ks = ['-', '--', ':']
 
 # --------------------------------------------------------------------------
+
+# algo = '2opt'
+# ds = 'directed' if directed else 'undirected'
 
 fname = project.root + f'/Files/Self-matching/SB/nRun={nRun:d}.csv'
 
