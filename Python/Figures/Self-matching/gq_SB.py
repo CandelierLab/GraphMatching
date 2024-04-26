@@ -61,6 +61,8 @@ for algo in l_algo:
     # l_k = np.unique(df.k).astype(int)
     l_n = np.unique(df.n).astype(int)
 
+    print(algo, np.unique(df.nRun))
+
     # --- Plots
 
     for ki, k in enumerate(l_k):

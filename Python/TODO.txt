@@ -1,3 +1,9 @@
+=== Include the QAPlib dataset
+
+https://coral.ise.lehigh.edu/data-sets/qaplib/
+
+- Benchmark the self-matching with the 4 algorithms (g,q)
+
 === Edge degradation
 
 - Relancer avec: nRun=1000, xi=0:5 (directed & undirected) /!\ changer la distribution des arrtibuts pour 'Gauss'
