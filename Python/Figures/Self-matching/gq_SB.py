@@ -15,78 +15,74 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
 directed = False
 
-l_k = [2, 5, 10]
+l_k = np.array([2, 5, 10])
+
+# --- Plot parameters
+
 err_alpha = 0.2
+lw = 3
+fontsize = 48
+
+# Colors
+c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
+     'FAQ': '#FFA500', 'eFAQ': '#FACC2E',
+     'Zager': '#1B2ACC', 'eZager': '#089FFF',
+     'GASM': '#3F7F4C', 'eGASM':'#7EFF99'}
+
 ks = ['-', '--', ':']
 
 # --------------------------------------------------------------------------
 
-# algo = '2opt'
-# ds = 'directed' if directed else 'undirected'
-
-fname = project.root + f'/Files/Self-matching/SB/nRun={nRun:d}.csv'
+ds = 'directed' if directed else 'undirected'
 
 # ==========================================================================
 
-if os.path.exists(fname):
+plt.rcParams.update({'font.size': fontsize})
+fig, ax = plt.subplots(1, 2, figsize=(25,10))
 
-  # Load data
-  df = pd.read_csv(fname)
+l_h = None
 
-  # Retrieve l_k, l_n and l_eta
+for algo in l_algo:
 
-  # l_k = np.unique(df.k)
-  l_n = np.unique(df.n)
-  # l_eta = np.unique(df.eta)
+  # --- Load data ----------------------------------------------------------
 
+  datapath = project.root + f'/Files/Self-matching/SB/{algo}_{ds}.csv'
 
+  if os.path.exists(datapath):
 
-# --- Display --------------------------------------------------------------
+    # Load data
+    df = pd.read_csv(datapath)
 
-fig, ax = plt.subplots(1,2, figsize=(12,6))
+    # Retrieve l_k and l_n
 
-# Colors
-c = {'GASM': '#1B2ACC', 'eGASM': '#089FFF',
-     'Zager': '#CC4F1B', 'eZager': '#FF9848',
-     'FAQ': '#3F7F4C', 'eFAQ':'#7EFF99'}
+    # l_k = np.unique(df.k).astype(int)
+    l_n = np.unique(df.n).astype(int)
 
-# --- Plots
+    # --- Plots
 
-for ki, k in enumerate(l_k):
+    for ki, k in enumerate(l_k):
 
-  data = df.loc[df['k'] == k]
+      data = df.loc[df['k'] == k]
 
-  # --- Accuracy
+      # Accuracy    
+      ax[0].plot(data.n, data.g, linestyle=ks[ki], linewidth=lw, color=c[algo], label=f'{algo} $k = {k:d}$')
 
-  ax[0].plot(data.n, data.g_GASM, '-', color=c['GASM'], linestyle=ks[ki], label=f'GASM')
-  # ax[0].fill_between(data.n, data.g_GASM - data.g_GASM_std, data.g_GASM + data.g_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
+      # Structural quality
+      if ki==0:
+        ax[1].plot(data.n, data.q, linestyle=ks[ki], linewidth=lw, color=c[algo], label=f'{algo} $k = {k:d}$')
+        ax[1].fill_between(data.n, data.q - data.q_std, data.q + data.q_std, alpha=err_alpha, facecolor=c['e'+algo])
 
-  ax[0].plot(data.n, data.g_Zager, '-', color=c['Zager'], linestyle=ks[ki], label=f'Zager')
-  # ax[0].fill_between(data.n, data.g_Zager - data.g_Zager_std, data.g_Zager + data.g_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
-
-  ax[0].plot(data.n, data.g_FAQ, '-', color=c['FAQ'], linestyle=ks[ki], label=f'FAQ')
-  # ax[0].fill_between(data.n, data.g_FAQ - data.g_FAQ_std, data.g_FAQ + data.g_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
-
-  # ax[0].plot(l_h, np.exp(-l_h/2), '--', color='k', label='Th')
-
-  # --- Structural quality
-
-  ax[1].plot(data.n, data.q_GASM, '-', color=c['GASM'], linestyle=ks[ki], label=f'GASM')
-  ax[1].fill_between(data.n, data.q_GASM - data.q_GASM_std, data.q_GASM + data.q_GASM_std, alpha=err_alpha, facecolor=c['eGASM'])
-
-  ax[1].plot(data.n, data.q_Zager, '-', color=c['Zager'], linestyle=ks[ki], label=f'Zager')
-  ax[1].fill_between(data.n, data.q_Zager - data.q_Zager_std, data.q_Zager + data.q_Zager_std,  alpha=err_alpha, facecolor=c['eZager'])
-
-  ax[1].plot(data.n, data.q_FAQ, '-', color=c['FAQ'], linestyle=ks[ki], label=f'FAQ')
-  ax[1].fill_between(data.n, data.q_FAQ - data.q_FAQ_std, data.q_FAQ + data.q_FAQ_std, alpha=err_alpha, facecolor=c['eFAQ'])
+ax[0].set_xticks(range(1,11,3))
+ax[1].set_xticks(range(1,11,3))
 
 # ax[0].set_xscale('log')
 ax[0].set_yscale('log')
 
 ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.85, 1])
+ax[1].set_ylim([0.4, 1])
 
 ax[0].set_xlabel('$n$')
 ax[1].set_xlabel('$n$')
@@ -95,6 +91,5 @@ ax[0].set_ylabel('$\gamma$')
 ax[1].set_ylabel('$q_s$')
 
 ax[0].legend()
-ax[1].legend()
 
 plt.show()

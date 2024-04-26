@@ -22,7 +22,7 @@ r = 2
 
 err_alpha = 0.2
 lw = 3
-fontsize = 24
+fontsize = 48
 
 # Colors
 c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
@@ -33,7 +33,7 @@ c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
 # ==========================================================================
 
 plt.rcParams.update({'font.size': fontsize})
-fig, ax = plt.subplots(1, 2, figsize=(20,10))
+fig, ax = plt.subplots(1, 2, figsize=(25,10))
 
 l_h = None
 
@@ -71,7 +71,7 @@ ax[0].set_xticks(range(2,11,2))
 ax[1].set_xticks(range(2,11,2))
 
 ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.75, 1])
+ax[1].set_ylim([0.4, 1])
 
 ax[0].set_xlabel('$h$')
 ax[1].set_xlabel('$h$')
@@ -80,6 +80,5 @@ ax[0].set_ylabel('$\gamma$')
 ax[1].set_ylabel('$q_s$')
 
 ax[0].legend()
-ax[1].legend()
 
 plt.show()
