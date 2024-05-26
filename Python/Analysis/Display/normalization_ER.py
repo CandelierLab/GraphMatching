@@ -48,7 +48,6 @@ f0 = np.minimum(4*x**2 + 1, 4*(nA-x)**2 + 1)
 # === Display =================================================================
 
 plt.style.use('dark_background')
-
 fig, ax = plt.subplots()
 
 ax.plot(x, f0, '--', linewidth=1)
