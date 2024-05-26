@@ -6,7 +6,7 @@ https://coral.ise.lehigh.edu/data-sets/qaplib/
 
 === Edge degradation
 
-- Relancer avec: nRun=1000, xi=0:5 (directed & undirected) /!\ changer la distribution des arrtibuts pour 'Gauss'
+- Relancer avec: nRun=1000, xi=0:5 (directed & undirected) /!\ changer la distribution des attributs pour 'Gauss'
 
 - paramètre sur sigma pour ajuster le ratio informationel structure/attributes 
 
@@ -20,3 +20,7 @@ https://coral.ise.lehigh.edu/data-sets/qaplib/
 * Accuracy vs Niterations
 * Normalization coefficient
 * Speed
+
+=== To check
+
+3.3: "... the matching obtained via the update equations (14-15) and (17-18) are rigorously equal."
