@@ -898,3 +898,14 @@ def star_branched(k, n, directed=False):
       z+=1
 
   return Graph(nV, directed=directed, Adj=Adj)
+
+# ------------------------------------------------------------------------
+#                                QAPLIB
+# ------------------------------------------------------------------------
+
+def qaplib(n):
+
+  from QAPLIB import QAPLIB
+
+  Q = QAPLIB()
+  return Q.get(n)

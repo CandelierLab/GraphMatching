@@ -52,6 +52,8 @@ for algo in l_algo:
 
     l_p = np.unique(data.p)
 
+    print(algo, np.unique(data.nRun))
+
     # Accuracy
     ax[0].plot(data.p, data.g, '-', color=c[algo], linewidth=lw, label=algo)
 

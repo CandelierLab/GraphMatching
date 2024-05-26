@@ -47,6 +47,8 @@ for algo in l_algo:
     # Retrieve l_h
     l_n = np.unique(data.n)
 
+    # print(algo, np.unique(data.nRun))
+
     # Accuracy
     ax[0].plot(data.n, data.g, '.', color=c[algo], linewidth=lw, markersize=markersize, label=algo)
 
