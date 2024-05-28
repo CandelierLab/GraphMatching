@@ -10,13 +10,14 @@ from Graph import *
 
 class Instance:
 
-  def __init__(self, name, n, A, B, s):
+  def __init__(self, name, n, A, B, s, score):
 
     self.name = name
     self.n = n
     self.A = A
     self.B = B
     self.s = s
+    self.score = score
 
 class QAPLIB:
 
@@ -108,8 +109,8 @@ class QAPLIB:
     
     with open(f_sol, 'r') as f:
 
-      # Skip first line
-      f.readline()
+      # First line
+      score = int(f.readline().strip().split()[1])
 
       s = []
 
@@ -119,7 +120,7 @@ class QAPLIB:
 
         s += [int(x)-1 for x in line.strip().split()]
     
-    return Instance(iname, n, A, B, s)
+    return Instance(iname, n, A, B, s, score)
 
   def get_graphs(self, id, precision=(None, None)):
     '''
@@ -129,6 +130,7 @@ class QAPLIB:
     I = self.get(id)
 
     # --- Check symmetry
+
     directed = not ((I.A==I.A.T).all() and (I.B==I.B.T).all())
 
     # --- Create graphs
@@ -138,7 +140,7 @@ class QAPLIB:
 
     # --- Edge attributes
 
-    Ga.add_edge_attr({'precision':precision[0], 'values':[-I.A[e[0], e[1]] for e in Ga.edges]})
+    Ga.add_edge_attr({'precision':precision[0], 'values':[I.A[e[0], e[1]] for e in Ga.edges]})
     Gb.add_edge_attr({'precision':precision[1], 'values':[I.B[e[0], e[1]] for e in Gb.edges]})
 
     # --- Ground truth

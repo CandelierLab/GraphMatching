@@ -13,7 +13,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-id = 7 #'lipa20a'
+id = 'esc128'
 
 algo = 'GASM'
 
@@ -24,20 +24,24 @@ np.random.seed(0)
 Q = QAPLIB()
 I = Q.get(id)
 
+print(I.s)
+
 print('Sol: ', np.trace(I.A.T @ I.B[I.s, :][:, I.s]))
 
 res = quadratic_assignment(I.A, I.B)
 P = res['col_ind']
 print('FAQ: ', np.trace(I.A.T @ I.B[P, :][:, P]))
 
+# print(P)
+
 Ga, Gb, gt = Q.get_graphs(id)
 
 C = Comparison(Ga, Gb)
-M = C.get_matching(algorithm=algo, eta=1e-10)
+M = C.get_matching(algorithm=algo)
 
 sGASM = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
 
-print('GASM min:', np.min(y))
+print('GASM:', sGASM)
 
 # plt.style.use('dark_background')
 # fig, ax = plt.subplots(1, 1, figsize=(10,10))
