@@ -41,7 +41,8 @@ for id in Q.l_inst:
 
   # === Solution
 
-  s_sol = np.trace(I.A.T @ I.B[I.s, :][:, I.s])
+  # s_sol = np.trace(I.A.T @ I.B[I.s, :][:, I.s])
+  s_sol = I.score
 
   M = Matching(Ga, Gb)
   M.from_lists(list(range(I.n)), I.s)
@@ -82,7 +83,7 @@ for id in Q.l_inst:
   # === GASM
 
   C = Comparison(Ga, Gb)
-  M = C.get_matching(algorithm='GASM')
+  M = C.get_matching(algorithm='GASM', eta=0)
   M.compute_accuracy(gt)
 
   s_GASM = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])

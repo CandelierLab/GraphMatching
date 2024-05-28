@@ -8,6 +8,7 @@ QAPLIB: scores, gamma and q
 import os
 import argparse
 import numpy as np
+from scipy.stats import ecdf
 import pandas as pd
 import time
 import matplotlib.pyplot as plt
@@ -17,9 +18,6 @@ import project
 # === Parameters ===========================================================
 
 l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
-
-directed = False
-nA = 20
 
 # --------------------------------------------------------------------------
 
@@ -69,42 +67,32 @@ s_GASM = np.sort(data.s_GASM/data.s_sol)
 g_GASM = np.flip(np.sort(data.g_GASM))
 q_GASM = np.flip(np.sort(data.q_GASM))
 
+# NaN handling
+s_FAQ[np.isnan(s_FAQ)] = 1
+s_2opt[np.isnan(s_2opt)] = 1
+s_Zager[np.isnan(s_Zager)] = 1
+s_GASM[np.isnan(s_GASM)] = 1
 
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')
-fig, ax = plt.subplots(1, 3, figsize=(20,8))
+fig, ax = plt.subplots()
 
-# --- Scores
+# --- Score ratios
 
-ax[0].plot(s_FAQ, '-', label='FAQ')
-ax[0].plot(s_2opt, '-', label='2opt')
-ax[0].plot(s_Zager, '-', label='Zager')
-ax[0].plot(s_GASM, '-', label='GASM')
+cdf_FAQ = ecdf(s_FAQ)
+cdf_2opt = ecdf(s_2opt)
+cdf_Zager = ecdf(s_Zager)
+cdf_GASM = ecdf(s_GASM)
+cdf_FAQ.cdf.plot(ax, label='FAQ')
+cdf_2opt.cdf.plot(ax, label='2opt')
+cdf_Zager.cdf.plot(ax, label='Zager')
+cdf_GASM.cdf.plot(ax, label='GASM')
 
-ax[0].legend()
-ax[0].set_yscale('log')
-
-# --- Accuracy
-
-ax[1].plot(g_FAQ, '-', label='FAQ')
-ax[1].plot(g_2opt, '-', label='2opt')
-ax[1].plot(g_Zager, '-', label='Zager')
-ax[1].plot(g_GASM, '-', label='GASM')
-
-ax[1].legend()
-ax[1].set_ylim(0, 1)
-
-# --- Structural quality
-
-ax[2].plot(q_FAQ, '-', label='FAQ')
-ax[2].plot(q_2opt, '-', label='2opt')
-ax[2].plot(q_Zager, '-', label='Zager')
-ax[2].plot(q_GASM, '-', label='GASM')
-
-ax[2].legend()
-ax[2].set_ylim(0, 1)
-
+ax.legend()
+ax.set_xscale('log')
+ax.set_xlim(1, 80)
+ax.set_ylim(0, 1)
 
 #  --- Output --------------------------------------------------------------
 
