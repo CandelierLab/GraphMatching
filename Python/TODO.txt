@@ -1,12 +1,7 @@
-=== QAPlib
-
-- Make clean figure (cdf)
-
 === Edge degradation
 
-- Relancer avec: nRun=1000, xi=0:5 (directed & undirected) /!\ changer la distribution des attributs pour 'Gauss'
-
-- paramètre sur sigma pour ajuster le ratio informationel structure/attributes 
+- Lancer gq_ER_ksi=1 with nRun=1000 (directed/undirected)
+- Lancer gq_ER_zeta=1 with nRun=1000 (directed/undirected)
 
 === Node degradation (subgraph)
 

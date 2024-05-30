@@ -20,6 +20,9 @@ directed = True
 nA = 200
 p = np.log(nA)/nA
 
+# Precision
+rho_a = 0.01
+
 # nA = 50
 # p = 0.25
 
@@ -39,7 +42,7 @@ ds = 'directed' if directed else 'undirected'
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Degradation/ER/{ds}_nA={nA:d}_p={p:.05f}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Degradation/ER/{ds}_nA={nA:d}_p={p:.05f}_rhoa={rho_a:.02f}_nRun={nRun:d}.csv'
 
 # --- Generative function
 def get_Nets(nA, p, nvam, neam, delta):
@@ -47,16 +50,15 @@ def get_Nets(nA, p, nvam, neam, delta):
   Ga = Gnp(nA, p, directed=directed)
 
   for i in range(nvam):
-    Ga.add_vrtx_attr('rand')
+    Ga.add_vrtx_attr('gauss', precision=0.01)
 
   for i in range(neam):
-    Ga.add_edge_attr('rand')
+    Ga.add_edge_attr('gauss', precision=0.01)
 
   # Degradation: remove edges
   Gb, gt = Ga.degrade('ed_rm', delta)
 
   return (Ga, Gb, gt)
-
 
 # Creating dataframe
 df = pd.DataFrame(columns=['algo', 'delta', 'algo', 'nMeasAttr', 'g', 'q', 'g_std', 'q_std'])

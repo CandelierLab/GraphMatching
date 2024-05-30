@@ -79,7 +79,7 @@ s_GASM[np.isnan(s_GASM)] = 1
 # --- Display --------------------------------------------------------------
 
 plt.style.use('dark_background')
-fig, ax = plt.subplots(1, 3, figsize=(20,8))
+fig, ax = plt.subplots(1, 2, figsize=(10,5))
 
 # --- Scores
 
@@ -87,6 +87,7 @@ cdf_FAQ = ecdf(s_FAQ)
 cdf_2opt = ecdf(s_2opt)
 cdf_Zager = ecdf(s_Zager)
 cdf_GASM = ecdf(s_GASM)
+
 cdf_FAQ.cdf.plot(ax[0], label='FAQ')
 cdf_2opt.cdf.plot(ax[0], label='2opt')
 cdf_Zager.cdf.plot(ax[0], label='Zager')
@@ -95,25 +96,35 @@ cdf_GASM.cdf.plot(ax[0], label='GASM')
 ax[0].legend()
 ax[0].set_xscale('log')
 
-# --- Accuracy
+# --- Scores
 
-ax[1].plot(g_FAQ, '-', label='FAQ')
-ax[1].plot(g_2opt, '-', label='2opt')
-ax[1].plot(g_Zager, '-', label='Zager')
-ax[1].plot(g_GASM, '-', label='GASM')
+s_FAQ = data.s_FAQ/data.s_sol
+s_GASM = data.s_GASM/data.s_sol
+
+ax[1].plot(s_FAQ, label='FAQ')
+ax[1].plot(s_GASM, label='GASM')
 
 ax[1].legend()
-ax[1].set_ylim(0, 1)
 
-# --- Structural quality
+# # --- Accuracy
 
-ax[2].plot(q_FAQ, '-', label='FAQ')
-ax[2].plot(q_2opt, '-', label='2opt')
-ax[2].plot(q_Zager, '-', label='Zager')
-ax[2].plot(q_GASM, '-', label='GASM')
+# ax[1].plot(g_FAQ, '-', label='FAQ')
+# ax[1].plot(g_2opt, '-', label='2opt')
+# ax[1].plot(g_Zager, '-', label='Zager')
+# ax[1].plot(g_GASM, '-', label='GASM')
 
-ax[2].legend()
-ax[2].set_ylim(0, 1)
+# ax[1].legend()
+# ax[1].set_ylim(0, 1)
+
+# # --- Structural quality
+
+# ax[2].plot(q_FAQ, '-', label='FAQ')
+# ax[2].plot(q_2opt, '-', label='2opt')
+# ax[2].plot(q_Zager, '-', label='Zager')
+# ax[2].plot(q_GASM, '-', label='GASM')
+
+# ax[2].legend()
+# ax[2].set_ylim(0, 1)
 
 
 #  --- Output --------------------------------------------------------------

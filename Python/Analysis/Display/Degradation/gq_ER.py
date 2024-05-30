@@ -18,6 +18,9 @@ directed = True
 nA = 200
 p = np.log(nA)/nA
 
+# Precision
+rho_a = 0.01
+
 # nA = 30
 # p = 0.25
 
@@ -27,7 +30,7 @@ nRun = 200
 
 ds = 'directed' if directed else 'undirected'
 
-fname = project.root + f'/Files/Degradation/ER/{ds}_nA={nA:d}_p={p:.05f}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Degradation/ER/{ds}_nA={nA:d}_p={p:.05f}_rhoa={rho_a:.02f}_nRun={nRun:d}.csv'
 
 print(fname)
 
