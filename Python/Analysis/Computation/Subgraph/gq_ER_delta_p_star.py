@@ -44,9 +44,11 @@ for nA in l_nA:
 
   p_star = 2/nA
 
-  l_delta = np.linspace(0, 1, 11)
-  l_delta[10] = 1-1/nA
-  l_delta = np.unique(l_delta)
+  # l_delta = np.linspace(0, 1, 11)
+  # l_delta[10] = 1-1/nA
+  # l_delta = np.unique(l_delta)
+
+  l_delta = np.geomspace(max(0.01,1/nA), 1-1/nA, 11)
   
   # --------------------------------------------------------------------------
 
