@@ -1,18 +1,6 @@
 === Edge degradation
 
-- To run:
-
-  directed
-    🮱 ksi=0 
-    🮱 ksi=1
-    x zeta=1 
-
-  undirected
-    🮱 ksi=0
-    x ksi=1
-    x zeta=1 
-
-- Figure
+- Finalization figure 
 
 === Node degradation (subgraph)
 
@@ -25,7 +13,9 @@
   x n=500 
   x n=1000 
 
-- degradation plots with cat. and meas. 
+- degradation plots measurable attibutes
+
+- degradation plots categorical ?
 
 === Portage GPU
 

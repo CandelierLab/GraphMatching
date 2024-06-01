@@ -17,10 +17,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = True
+directed = False
 nA = 20
-nRun = 500
-# nRun = 1000
+nRun = 1000
 
 # l_xi_m = np.arange(3)
 l_xi_m = np.arange(9)

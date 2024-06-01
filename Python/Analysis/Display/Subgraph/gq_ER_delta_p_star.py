@@ -87,12 +87,20 @@ for fname in os.listdir(dname):
 # --- Fit coefficients -----------------------------------------------------
  
 I = np.argsort(nA)
-print(I)
 nA = np.array(nA)[I]
 a = np.array(a)[I]
 b = np.array(b)[I]
 ax[1].plot(nA, a, '.-')
 ax[2].plot(nA, b, '.-')
+
+# Fit of a
+def affine(x, a, b):
+    return a*x**b
+
+popt, pcov = curve_fit(affine, nA, a)
+
+print(popt)
+ax[1].plot(nA, affine(nA, 0.5, -1/4), 'r-')
 
 
 # --- Misc display settings ------------------------------------------------
@@ -103,6 +111,9 @@ ax[0].set_xscale('log')
 ax[0].set_xlabel('$\delta$')
 ax[0].set_xlim(0, 1)
 ax[0].set_ylabel('accuracy $\gamma$')
+
+ax[1].set_xscale('log')
+ax[1].set_yscale('log')
 
 ax[1].set_xlabel('$n_A$')
 ax[2].set_xlabel('$n_A$')

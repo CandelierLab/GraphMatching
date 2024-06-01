@@ -13,11 +13,11 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
+directed = True
 
 nA = 200
 
-nRun = 10
+nRun = 1000
 
 # --------------------------------------------------------------------------
 
@@ -64,8 +64,8 @@ for p in l_precision:
 
   data = df.loc[(df['algo']=='GASM') & (df['precision']==p)]
   
-  ax[0].plot(l_delta, data.g, '-', label=f'GASM $p={p:.03f}$')
-  ax[1].plot(l_delta, data.q, '-', label=f'GASM $p={p:.03f}$')
+  ax[0].plot(l_delta, data.g, '-', label=f'GASM $\\rho={p:.03f}$')
+  ax[1].plot(l_delta, data.q, '-', label=f'GASM $\\rho={p:.03f}$')
 
 # ax[0].set_xscale('log')
 ax[0].set_yscale('log')
