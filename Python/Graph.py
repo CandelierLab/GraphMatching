@@ -1,7 +1,6 @@
 import os
 import copy
 import numpy as np
-from scipy import sparse
 import networkx as nx
 
 import paprint as pa
@@ -187,6 +186,44 @@ class Graph:
     # Preparation
     self.prepare()
     
+  # ========================================================================
+  #                              EXPORT
+  # ========================================================================
+
+  def to_CUDA_arrays(self, dtype=np.int64):
+
+    if self.directed:
+
+      src = np.empty(0, dtype=dtype)
+      tgt = np.empty(0, dtype=dtype)
+
+    else:
+
+      src = np.empty(0, dtype=dtype)
+
+      # --- Temporary list of list
+
+      tmp = [[] for k in range(self.nV)]
+      for k in range(self.nE):
+        tmp[self.edges[k,0]].append(k)
+        if self.edges[k,1]!=self.edges[k,0]:
+          tmp[self.edges[k,1]].append(k)
+
+      # --- Start and number
+
+      A_sn = np.empty((self.nV, 2), dtype=dtype)
+      k = 0  
+      for u in range(self.nV):
+        A_sn[u,0] = k
+        A_sn[u,1] = len(tmp[u])
+        k += A_sn[u,1]
+
+      tgt = np.concatenate([np.array(x) for x in tmp]).astype(dtype)
+
+    # --- Output
+
+    return (A_sn, src, tgt)
+
   # ========================================================================
   #                             GENERATION
   # ========================================================================
