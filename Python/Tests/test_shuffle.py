@@ -11,7 +11,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 directed = False
-nA = 5
+nA = 500
 p = 0.5
 
 algo = 'GASM'
@@ -42,8 +42,10 @@ Gb.print()
 
 C = Comparison(Ga, Gb, verbose=True)
 
-M = C.compute_scores_GASM(GPU=False, nIter=1)
-M = C.compute_scores_GASM(nIter=1)
+nIter = 1
+
+M = C.compute_scores_GASM(GPU=False, nIter=nIter)
+M = C.compute_scores_GASM(nIter=nIter)
 
 # M = C.get_matching(algorithm=algo, GPU=False)
 # M = C.get_matching(algorithm=algo, GPU=True, force=True)

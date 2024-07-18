@@ -876,16 +876,16 @@ class Comparison:
                                    d_A_edges, d_B_edges,
                                    directed)
 
-        # Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
-        #                          d_A_sn, d_A_src, d_A_tgt,
-        #                          d_B_sn, d_B_src, d_B_tgt, 
-        #                          directed, False)
+        Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
+                                 d_A_sn, d_A_src, d_A_tgt,
+                                 d_B_sn, d_B_src, d_B_tgt, 
+                                 directed, False)
 
-        self.Y = d_Y.copy_to_host()
-        pa.line(str(i) + ' GPU')
-        # pa.matrix(X0, maxrow=100)
-        pa.matrix(self.Y, maxrow=100)
-        # pa.matrix(self.X, maxrow=100, highlight=X0>0.5)
+      self.X = d_X.copy_to_host()
+      pa.line(str(i) + ' GPU')
+      # pa.matrix(X0, maxrow=100)
+      # pa.matrix(self.Y, maxrow=100)
+      pa.matrix(self.X, maxrow=20, highlight=self.X>0.5)
 
         # --- Normalization 
               
@@ -894,7 +894,7 @@ class Comparison:
 
       # --- Get back scores to the host
 
-      self.X = d_X.copy_to_host()
+      # self.X = d_X.copy_to_host()
 
     else:
 
@@ -938,15 +938,15 @@ class Comparison:
 
           self.X = Ga.R @ self.Y @ Gb.R.T
 
-        pa.line(str(i) + ' CPU')
-        # pa.matrix(X0, maxrow=100)
-        pa.matrix(self.Y, maxrow=100)
-        # pa.matrix(self.X, maxrow=100, highlight=X0>0.5)
-
         # --- Normalization 
               
         if normalization is not None:
           self.Y /= normalization
+
+      pa.line(str(i) + ' CPU')
+      # pa.matrix(X0, maxrow=100)
+      # pa.matrix(self.Y, maxrow=100)
+      pa.matrix(self.X, maxrow=20, highlight=X0>0.5)
 
       # --- Information
           
