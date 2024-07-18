@@ -22,8 +22,7 @@ def line(text=None, thickness=1, char=None, color=Style.DIM):
 
   By default it is a single line (─) but other characters can be used: 
     Double line: ═
-    Trople line: ≡
-
+    Triple line: ≡
   '''
 
   # Terminal width
