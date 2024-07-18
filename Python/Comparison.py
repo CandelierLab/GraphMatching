@@ -863,6 +863,8 @@ class Comparison:
                                  d_B_sn, d_B_src, d_B_tgt, 
                                  directed, True)
        
+      # X0 = d_X.copy_to_host()
+
       # --- Iterations
 
       for i in range(nIter):
@@ -874,13 +876,14 @@ class Comparison:
                                    d_A_edges, d_B_edges,
                                    directed)
 
-        Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
-                                 d_A_sn, d_A_src, d_A_tgt,
-                                 d_B_sn, d_B_src, d_B_tgt, 
-                                 directed, False)
+        # Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
+        #                          d_A_sn, d_A_src, d_A_tgt,
+        #                          d_B_sn, d_B_src, d_B_tgt, 
+        #                          directed, False)
 
         self.Y = d_Y.copy_to_host()
         pa.line(str(i) + ' GPU')
+        # pa.matrix(X0, maxrow=100)
         pa.matrix(self.Y, maxrow=100)
         # pa.matrix(self.X, maxrow=100, highlight=X0>0.5)
 
@@ -936,6 +939,7 @@ class Comparison:
           self.X = Ga.R @ self.Y @ Gb.R.T
 
         pa.line(str(i) + ' CPU')
+        # pa.matrix(X0, maxrow=100)
         pa.matrix(self.Y, maxrow=100)
         # pa.matrix(self.X, maxrow=100, highlight=X0>0.5)
 
@@ -982,7 +986,7 @@ class Comparison:
 def X2Y(X, Y, A_edges, B_edges, directed):
 
   i, j = cuda.grid(2)
-  if i < X.shape[0] and j < X.shape[1]:
+  if i < Y.shape[0] and j < Y.shape[1]:
 
     if A_edges[i,0]==A_edges[i,1]:
 
