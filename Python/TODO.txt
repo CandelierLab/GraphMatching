@@ -1,3 +1,14 @@
+=== Supplementary
+
+* Influence of noise
+* Accuracy vs Niterations
+* Normalization coefficient
+
+=== Speed benchmark
+
+* ER with p=nlog(n)
+* QAPLIB total time (4 algorithms + GASM_GPU)
+  
 === Edge degradation
 
 - Finalization figure 
@@ -17,17 +28,6 @@
 
 - degradation plots categorical ?
 
-=== Portage GPU
-
-- Implementation
-- Speed benchmark
-  * QAPLIB total time (4 algorithms + GASM_GPU)
-  * ER with p=nlog(n)
-
-=== Supplementary
-
-* Accuracy vs Niterations
-* Normalization coefficient
 
 === To check
 

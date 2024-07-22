@@ -1,5 +1,10 @@
 '''
-Erdo-Renyi: average gamma and q
+Speed test on ER graphs
+
+- Separate per algorithm
+- directed + undirected
+- Add 2opt
+
 '''
 
 import os
@@ -15,8 +20,10 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
+directed = False
+
 # l_n = np.linspace(0,400,21, dtype=int)
-l_n = np.logspace(1,np.log10(400),21, dtype=int)
+l_n = np.logspace(1,np.log10(400), 21, dtype=int)
 l_n[0] = 1
 
 eta = 1e-10
@@ -31,7 +38,7 @@ l_p = np.log(l_n)/l_n
 fname = project.root + f'/Files/Speed/ER_nRun={nRun:d}.csv'
 
 # Creating dataframe
-df = pd.DataFrame(columns=['n', 'FAQ', 'Zager', 'GASM', 'FAQ_std',  'Zager_std', 'GASM_std'])
+df = pd.DataFrame(columns=['n', 'FAQ', 'Zager', 'GASM_CPU','GASM_GPU', 'FAQ_std',  'Zager_std', 'GASM_CPU_std', 'GASM_GPU_std'])
 
 k = 0
 
@@ -42,41 +49,46 @@ for i, nA in enumerate(l_n):
   
   FAQ = []
   Zager = []
-  GASM = []
-  GASM_scores = []
-  GASM_LAP = []
+  GASM_CPU = []
+  GASM_GPU = []
 
   for r in range(nRun):
 
-    NetA = Network(nA)
-    NetA.set_rand_edges('ER', p_edges=l_p[i])
-    NetB, Idx = NetA.shuffle()
+    Ga = Gnp(nA, l_p[i], directed=directed)
+    Gb, gt = Ga.shuffle()
 
     # --- FAQ
 
-    C = Comparison(NetA, NetB)
+    C = Comparison(Ga, Gb)
     M = C.get_matching(algorithm='FAQ')
-    M.compute_accuracy(Idx)
+    M.compute_accuracy(gt)
 
     FAQ.append(M.time['total'])
 
     # --- Zager
 
-    C = Comparison(NetA, NetB)
+    C = Comparison(Ga, Gb)
     M = C.get_matching(algorithm='Zager')
-    M.compute_accuracy(Idx)
+    M.compute_accuracy(gt)
 
     Zager.append(M.time['total'])
 
-    # --- GASM
+    # --- GASM (CPU)
 
-    C = Comparison(NetA, NetB)
-    M = C.get_matching(algorithm='GASM', eta=eta)
-    M.compute_accuracy(Idx)
+    C = Comparison(Ga, Gb)
+    M = C.get_matching(algorithm='GASM', GPU=False)
+    M.compute_accuracy(gt)
 
-    GASM.append(M.time['total'])
-    GASM_scores.append(M.time['scores'])
-    GASM_LAP.append(M.time['LAP'])
+    GASM_CPU.append(M.time['total'])
+
+    # --- GASM (GPU)
+
+    C = Comparison(Ga, Gb)
+    M = C.get_matching(algorithm='GASM', GPU=True)
+    M.compute_accuracy(gt)
+
+    GASM_GPU.append(M.time['total'])
+
 
   # --- Store
     
@@ -86,16 +98,14 @@ for i, nA in enumerate(l_n):
   # Mean values
   df.loc[k, 'FAQ'] = np.mean(FAQ)
   df.loc[k, 'Zager'] = np.mean(Zager)
-  df.loc[k, 'GASM'] = np.mean(GASM)
-  df.loc[k, 'GASM_scores'] = np.mean(GASM_scores)
-  df.loc[k, 'GASM_LAP'] = np.mean(GASM_LAP)
+  df.loc[k, 'GASM_CPU'] = np.mean(GASM_CPU)
+  df.loc[k, 'GASM_GPU'] = np.mean(GASM_GPU)
 
   # Standard deviations
   df.loc[k, 'FAQ_std'] = np.std(FAQ)
   df.loc[k, 'Zager_std'] = np.std(Zager)
-  df.loc[k, 'GASM_std'] = np.std(GASM)
-  df.loc[k, 'GASM_scores_std'] = np.std(GASM_scores)
-  df.loc[k, 'GASM_LAP_std'] = np.std(GASM_LAP)
+  df.loc[k, 'GASM_CPU_std'] = np.std(GASM_CPU)
+  df.loc[k, 'GASM_GPU_std'] = np.std(GASM_GPU)
 
   k += 1
 

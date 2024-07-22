@@ -137,11 +137,7 @@ class Comparison:
 
             case 'gasm':
 
-              # self.compute_scores(algorithm=algorithm, **kwargs)
-
               self.compute_scores_GASM(**kwargs)
-
-              # self.compute_scores_GASM_GPU(**kwargs)
 
           # Informations
           M.info = self.info
@@ -679,7 +675,7 @@ class Comparison:
     Score computation with GASM (CPU and GPU)
     
     Parameters:
-      'GPU' (bool): Run computations on CPU or GPU
+      'GPU' (bool): Run computations on CPU or GPU (default: True)
       'nIter' (int): Number of iterations
       'normalization' (float or np.Array): normalization factor(s)
       'eta' (float): Noise level (default 1e-10)
@@ -818,9 +814,6 @@ class Comparison:
 
     # === Computation ======================================================
     
-    # pa.matrix(N)
-    # pa.matrix(E, title='E', maxrow=100)
-
     if self.verbose:
       t0 = time.perf_counter_ns()
 
@@ -828,12 +821,11 @@ class Comparison:
 
       directed = Ga.directed
 
-      blockDim = (32, 32)
+      blockDim = (16, 16)
       gridDim_X2Y = ((Ga.nV+(blockDim[0]-1))//blockDim[0], 
                      (Gb.nV+(blockDim[1]-1))//blockDim[1])
       gridDim_Y2X = ((Ga.nE+(blockDim[0]-1))//blockDim[0], 
                      (Gb.nE+(blockDim[1]-1))//blockDim[1])
-
 
       # --- CUDA Arrays ----------------------------------------------------
       
@@ -861,16 +853,11 @@ class Comparison:
       Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
                                  d_A_sn, d_A_src, d_A_tgt,
                                  d_B_sn, d_B_src, d_B_tgt, 
-                                 directed, True)
+                                 directed, 1, True)
        
-      # X0 = d_X.copy_to_host()
-
       # --- Iterations
 
       for i in range(nIter):
-
-        if self.verbose:
-          ti = time.perf_counter_ns()
 
         X2Y[gridDim_X2Y, blockDim](d_X, d_Y, 
                                    d_A_edges, d_B_edges,
@@ -879,22 +866,11 @@ class Comparison:
         Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
                                  d_A_sn, d_A_src, d_A_tgt,
                                  d_B_sn, d_B_src, d_B_tgt, 
-                                 directed, False)
-
-      self.X = d_X.copy_to_host()
-      pa.line(str(i) + ' GPU')
-      # pa.matrix(X0, maxrow=100)
-      # pa.matrix(self.Y, maxrow=100)
-      pa.matrix(self.X, maxrow=20, highlight=self.X>0.5)
-
-        # --- Normalization 
-              
-        # if normalization is not None:
-        #   self.Y /= normalization
+                                 directed, normalization, False)
 
       # --- Get back scores to the host
 
-      # self.X = d_X.copy_to_host()
+      self.X = d_X.copy_to_host()
 
     else:
 
@@ -902,14 +878,9 @@ class Comparison:
       
       # Define X0
       if Ga.directed:
-        X0 = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
+        self.X = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
       else:
-        X0 = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
-
-      # pa.matrix(X0, title='X0', maxrow=100, highlight=X0>0.5)
-
-      if not nIter:
-        self.X = X0
+        self.X = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
 
       self.Y = np.ones((mA, mB))
 
@@ -917,36 +888,20 @@ class Comparison:
 
       for i in range(nIter):
 
-        if self.verbose:
-          ti = time.perf_counter_ns()
-
         if Ga.directed:
 
-          if i==0:
-            self.Y = Ga.S.T @ X0 @ Gb.S + Ga.T.T @ X0 @ Gb.T
-          else:
-            self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
-
+          self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
           self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T)
 
         else:
 
-          if i==0:
-            self.Y = Ga.R.T @ X0 @ Gb.R
-          else:
-            self.Y = Ga.R.T @ self.X @ Gb.R
-
+          self.Y = Ga.R.T @ self.X @ Gb.R
           self.X = Ga.R @ self.Y @ Gb.R.T
 
         # --- Normalization 
               
         if normalization is not None:
-          self.Y /= normalization
-
-      pa.line(str(i) + ' CPU')
-      # pa.matrix(X0, maxrow=100)
-      # pa.matrix(self.Y, maxrow=100)
-      pa.matrix(self.X, maxrow=20, highlight=X0>0.5)
+          self.X /= normalization
 
       # --- Information
           
@@ -988,37 +943,61 @@ def X2Y(X, Y, A_edges, B_edges, directed):
   i, j = cuda.grid(2)
   if i < Y.shape[0] and j < Y.shape[1]:
 
-    if A_edges[i,0]==A_edges[i,1]:
+    if directed:
 
-      if B_edges[j,0]==B_edges[j,1]:
-
-        Y[i,j] = X[A_edges[i,0], B_edges[j,0]]
-
-      else:
-
-        Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,0], B_edges[j,1]]
+      Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,1]]
 
     else:
 
-      if B_edges[j,0]==B_edges[j,1]:
+      if A_edges[i,0]==A_edges[i,1]:
 
-        Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]]
+        if B_edges[j,0]==B_edges[j,1]:
+
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]]
+
+        else:
+
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,0], B_edges[j,1]]
 
       else:
 
-        Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]] + \
-                 X[A_edges[i,0], B_edges[j,1]] + X[A_edges[i,1], B_edges[j,1]]
+        if B_edges[j,0]==B_edges[j,1]:
+
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]]
+
+        else:
+
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]] + \
+                   X[A_edges[i,0], B_edges[j,1]] + X[A_edges[i,1], B_edges[j,1]]
     
 @cuda.jit(cache=True)
-def Y2X(X, Y, A_sn, A_src, A_tgt, B_sn, B_src, B_tgt, directed, initialization):
+def Y2X(X, Y, A_sn, A_src, A_tgt, B_sn, B_src, B_tgt, directed, normalization, initialization):
 
   u, v = cuda.grid(2)
   if u < X.shape[0] and v < X.shape[1]:
 
     x = 0
-    for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
-      for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
-        x += Y[A_tgt[i], B_tgt[j]]
+
+    if directed:
+
+      # Sources
+      for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
+        for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
+          x += Y[A_src[i], B_src[j]]
+
+      # Targets
+      for i in range(A_sn[u,2], A_sn[u,2]+A_sn[u,3]):
+        for j in range(B_sn[v,2], B_sn[v,2]+B_sn[v,3]):
+          x += Y[A_tgt[i], B_tgt[j]]
+
+    else:
+
+      for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
+        for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
+          x += Y[A_tgt[i], B_tgt[j]]
+
+    if normalization!=1:
+      x /= normalization
 
     if initialization:
       X[u, v] *= x

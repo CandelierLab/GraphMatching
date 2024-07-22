@@ -197,17 +197,45 @@ class Graph:
       src = np.empty(0, dtype=dtype)
       tgt = np.empty(0, dtype=dtype)
 
+      # --- Temporary lists of lists
+
+      src_ = [[] for k in range(self.nV)]
+      tgt_ = [[] for k in range(self.nV)]
+      for k in range(self.nE):
+        src_[self.edges[k,1]].append(k)
+        tgt_[self.edges[k,0]].append(k)
+
+      # --- Start and number
+
+      A_sn = np.empty((self.nV, 4), dtype=dtype)
+      ks = 0  
+      kt = 0
+      for u in range(self.nV):
+
+        # Sources
+        A_sn[u,0] = ks
+        A_sn[u,1] = len(src_[u])
+        ks += A_sn[u,1]
+
+        # Targets
+        A_sn[u,2] = kt
+        A_sn[u,3] = len(tgt_[u])
+        kt += A_sn[u,3]
+
+      src = np.concatenate([np.array(x) for x in src_]).astype(dtype)
+      tgt = np.concatenate([np.array(x) for x in tgt_]).astype(dtype)
+
     else:
 
       src = np.empty(0, dtype=dtype)
 
       # --- Temporary list of list
 
-      tmp = [[] for k in range(self.nV)]
+      tgt_ = [[] for k in range(self.nV)]
       for k in range(self.nE):
-        tmp[self.edges[k,0]].append(k)
+        tgt_[self.edges[k,0]].append(k)
         if self.edges[k,1]!=self.edges[k,0]:
-          tmp[self.edges[k,1]].append(k)
+          tgt_[self.edges[k,1]].append(k)
 
       # --- Start and number
 
@@ -215,10 +243,10 @@ class Graph:
       k = 0  
       for u in range(self.nV):
         A_sn[u,0] = k
-        A_sn[u,1] = len(tmp[u])
+        A_sn[u,1] = len(tgt_[u])
         k += A_sn[u,1]
 
-      tgt = np.concatenate([np.array(x) for x in tmp]).astype(dtype)
+      tgt = np.concatenate([np.array(x) for x in tgt_]).astype(dtype)
 
     # --- Output
 

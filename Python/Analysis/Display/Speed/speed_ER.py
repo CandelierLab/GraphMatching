@@ -32,8 +32,8 @@ fig, ax = plt.subplots()
 
 ax.plot(l_n, df.FAQ, '.-', label='FAQ')
 ax.plot(l_n, df.Zager, '.-', label='Zager')
-ax.plot(l_n, df.GASM, '.-', label='GASM')
-ax.plot(l_n, df.GASM_LAP, '--', label='GASM_LAP')
+ax.plot(l_n, df.GASM_CPU, '.-', label='GASM (CPU)')
+ax.plot(l_n, df.GASM_GPU, '--', label='GASM (GPU)')
 
 # ax.set_xscale('log')
 # ax.set_yscale('log')

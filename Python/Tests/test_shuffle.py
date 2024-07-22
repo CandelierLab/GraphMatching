@@ -10,14 +10,14 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
-nA = 500
+directed = True
+nA = 5
 p = 0.5
 
 algo = 'GASM'
 # algo = '2opt'
 
-np.random.seed(2)
+np.random.seed(0)
 
 # --------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ np.random.seed(2)
 
 # --- Random graphs
 
-Ga = Gnp(nA, p, directed=directed)
+Ga = Gnp(nA, 0, directed=directed)
 # Ga.add_edge_attr('rand', name='test_edge')
 # Ga.add_vrtx_attr('rand', name='test_node')
 
@@ -38,20 +38,14 @@ Ga = Gnp(nA, p, directed=directed)
 Gb, gt = Ga.shuffle()
 
 Ga.print()
-Gb.print()
+# Gb.print()
 
 C = Comparison(Ga, Gb, verbose=True)
 
-nIter = 1
+M = C.get_matching(algorithm=algo, GPU=False)
+M.compute_accuracy(gt)
+print(M)
 
-M = C.compute_scores_GASM(GPU=False, nIter=nIter)
-M = C.compute_scores_GASM(nIter=nIter)
-
-# M = C.get_matching(algorithm=algo, GPU=False)
-# M = C.get_matching(algorithm=algo, GPU=True, force=True)
-
-# M.compute_accuracy(gt)
-
-# print(M)
-
-# Ga.display()
+M = C.get_matching(algorithm=algo, GPU=True, force=True)
+M.compute_accuracy(gt)
+print(M)
