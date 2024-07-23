@@ -1,7 +1,7 @@
 === Supplementary
 
-* Influence of noise
-* Accuracy vs Niterations
+* Influence of noise (directed / undirected)
+* Accuracy and qS vs Niterations
 * Normalization coefficient
 
 === Speed benchmark

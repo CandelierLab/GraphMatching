@@ -7,7 +7,7 @@ Speed test on ER graphs
 
 '''
 
-import os
+import os, sys
 import numpy as np
 import pandas as pd
 import time
@@ -20,103 +20,96 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
+l_directed = [False, True]
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU']
 
-# l_n = np.linspace(0,400,21, dtype=int)
-l_n = np.logspace(1,np.log10(400), 21, dtype=int)
-l_n[0] = 1
+l_n = np.unique(np.logspace(0,np.log10(10000), 101, dtype=int))
 
-eta = 1e-10
 nRun = 10
+
+# Maximal time (s)
+mt = 10
+
+force = True
 
 # --------------------------------------------------------------------------
 
 l_p = np.log(l_n)/l_n
 
+# Maximal time per graph
+mtpg = mt/nRun
+
 # ==========================================================================
 
-fname = project.root + f'/Files/Speed/ER_nRun={nRun:d}.csv'
+for directed in l_directed:
 
-# Creating dataframe
-df = pd.DataFrame(columns=['n', 'FAQ', 'Zager', 'GASM_CPU','GASM_GPU', 'FAQ_std',  'Zager_std', 'GASM_CPU_std', 'GASM_GPU_std'])
+  sdir = 'directed' if directed else 'undirected'
 
-k = 0
+  for algo in l_algo:
 
-for i, nA in enumerate(l_n):
+    fname = project.root + f'/Files/Speed/ER_{algo}_{sdir:s}.csv'
 
-  print(f'nA={nA:d} - {nRun:d} iterations ...', end='')
-  start = time.time()
-  
-  FAQ = []
-  Zager = []
-  GASM_CPU = []
-  GASM_GPU = []
+    # Skip if already existing
+    if os.path.exists(fname) and not force: continue
 
-  for r in range(nRun):
+    # Creating dataframe
+    df = pd.DataFrame(columns=['n', 'p', 't'])
 
-    Ga = Gnp(nA, l_p[i], directed=directed)
-    Gb, gt = Ga.shuffle()
+    k = 0
+    tcheck = False
 
-    # --- FAQ
+    for i, nA in enumerate(l_n):
 
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='FAQ')
-    M.compute_accuracy(gt)
+      # Time check
+      if tcheck: break
 
-    FAQ.append(M.time['total'])
+      print(f'{algo} {sdir:s} nA={nA:d} - {nRun:d} iterations ...', end='')
+      start = time.time()
+      
+      for r in range(nRun):
 
-    # --- Zager
+        '''
+        !! Set seed !! @ r+nA*nRun
+        '''
 
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='Zager')
-    M.compute_accuracy(gt)
+        Ga = Gnp(nA, l_p[i], directed=directed)
+        Gb, gt = Ga.shuffle()
 
-    Zager.append(M.time['total'])
+        # --- FAQ
 
-    # --- GASM (CPU)
+        C = Comparison(Ga, Gb)
 
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='GASM', GPU=False)
-    M.compute_accuracy(gt)
+        match algo:
+          case 'GASM_CPU':
+            M = C.get_matching(algorithm='GASM', GPU=False)
+          case 'GASM_GPU':
+            M = C.get_matching(algorithm='GASM', GPU=True)
+          case _:
+            M = C.get_matching(algorithm=algo)
 
-    GASM_CPU.append(M.time['total'])
+        M.compute_accuracy(gt)
 
-    # --- GASM (GPU)
+        # --- Store
+          
+        # Parameters
+        df.loc[k, 'n'] = nA
+        df.loc[k, 'p'] = l_p[i]
+        df.loc[k, 't'] = M.time['total']
 
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='GASM', GPU=True)
-    M.compute_accuracy(gt)
+        k += 1
 
-    GASM_GPU.append(M.time['total'])
+        # Time check
+        if M.time['total']/1000>mtpg:
+          tcheck = True
 
+      print(' {:.02f} sec'.format((time.time() - start)))
 
-  # --- Store
-    
-  # Parameters
-  df.loc[k, 'n'] = nA
+    # --- Save
+        
+    print('Saving ...', end='')
+    start = time.time()
 
-  # Mean values
-  df.loc[k, 'FAQ'] = np.mean(FAQ)
-  df.loc[k, 'Zager'] = np.mean(Zager)
-  df.loc[k, 'GASM_CPU'] = np.mean(GASM_CPU)
-  df.loc[k, 'GASM_GPU'] = np.mean(GASM_GPU)
+    df.to_csv(fname)
 
-  # Standard deviations
-  df.loc[k, 'FAQ_std'] = np.std(FAQ)
-  df.loc[k, 'Zager_std'] = np.std(Zager)
-  df.loc[k, 'GASM_CPU_std'] = np.std(GASM_CPU)
-  df.loc[k, 'GASM_GPU_std'] = np.std(GASM_GPU)
-
-  k += 1
-
-  print('{:.02f} sec'.format((time.time() - start)))
-
-# --- Save
-    
-print('Saving ...', end='')
-start = time.time()
-
-df.to_csv(fname)
-
-print('{:.02f} sec'.format((time.time() - start)))
+    print('{:.02f} sec'.format((time.time() - start)))
 
