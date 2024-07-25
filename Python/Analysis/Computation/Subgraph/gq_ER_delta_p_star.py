@@ -8,6 +8,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import time
+from alive_progress import alive_bar
 
 import project
 from Graph import *
@@ -18,12 +19,13 @@ os.system('clear')
 # === Parameters ===========================================================
 
 directed = True
-l_nA = [10, 20, 50, 100, 200, 500, 1000]
+# l_nA = [10, 20, 50, 100, 200, 500, 1000]
+l_nA = [50]
 
 nRun = 10000
 # nRun = 100
 
-force = False
+force = True
 
 # --------------------------------------------------------------------------
 
@@ -62,29 +64,30 @@ for nA in l_nA:
 
   for delta in l_delta:
 
-    print(f'nA={nA}, delta={delta} ...', end='', flush=True)
-    start = time.time()
-    
     g = np.empty(nRun)
 
-    for i in range(nRun):
+    with alive_bar(nRun) as bar:
 
-      # Graphs
-      Ga = Gnp(nA, p_star, directed=directed)
-      Gb, gt = Ga.subgraph(delta=delta)
+      bar.title = f'delta={delta}'
 
-      # --- GASM
+      for i in range(nRun):
 
-      C = Comparison(Ga, Gb)
-      M = C.get_matching(algorithm='GASM')
-      M.compute_accuracy(gt)
+        # Graphs
+        Ga = Gnp(nA, p_star, directed=directed)
+        Gb, gt = Ga.subgraph(delta=delta)
 
-      g[i] = M.accuracy
+        # --- GASM
 
-    gamma[delta] = g
+        C = Comparison(Ga, Gb)
+        M = C.get_matching(algorithm='GASM')
+        M.compute_accuracy(gt)
 
-    print('{:.02f} sec'.format((time.time() - start)))
+        g[i] = M.accuracy
 
-  # === Save =================================================================
+        bar()
 
-  gamma.to_csv(fname)
+      gamma[delta] = g
+
+    # === Save =================================================================
+
+    gamma.to_csv(fname)

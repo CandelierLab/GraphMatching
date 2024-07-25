@@ -9,7 +9,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
+directed = True
 nA = 20
 nRun = 1000
 
@@ -60,6 +60,12 @@ ax[0].set_ylim(0,1)
 ax[0].set_xlim(0,1)
 ax[1].set_xlim(0,1)
 ax[1].set_ylim(0,1)
+
+ax[0].set_xlabel(r'$\delta$')
+ax[0].set_ylabel(r'$\gamma$')
+
+ax[1].set_xlabel(r'$\delta$')
+ax[1].set_ylabel(r'$q_s$')
 
 ax[0].legend()
 ax[1].legend()
