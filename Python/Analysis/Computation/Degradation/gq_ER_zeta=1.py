@@ -40,7 +40,7 @@ def get_Nets(nA, p, delta):
   
   Ga = Gnp(nA, p, directed=directed)
 
-  # Edge atrribute
+  # Vertex attribute
   Ga.add_vrtx_attr('gauss')
 
   # Degradation: remove edges

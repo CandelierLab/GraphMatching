@@ -212,7 +212,7 @@ class Matching:
       # Matching matrix
       Z = np.full((self.nA, self.nB), False)
       for (i,j) in zip(self.idxA, self.idxB):
-        if j is not None:
+        if j is not None and i<self.nA and j<self.nB:
           Z[i,j] = True
 
       # Compute structural correspondence

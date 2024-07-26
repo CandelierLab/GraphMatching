@@ -1,3 +1,8 @@
+=== CUDA
+
+* Sport and fix error
+* Speedup
+
 === Supplementary
 
 * Influence of noise (directed / undirected)
@@ -20,10 +25,14 @@
   🮱 n=500 
   x n=1000 
 
-- degradation plots measurable attibutes
+- Same for undirected ?
 
-- degradation plots categorical ?
+- Finish degradation figure
 
+=== Attribute degradation (add noise)
+
+x Edge degradation: FAQ and GASM
+x Vertex degradation: GASM only
 
 === To check
 

@@ -16,9 +16,9 @@ os.system('clear')
 nA = 20
 p = 0.5
 
-algo = 'GASM'
+algo = 'FAQ'
 
-delta = 0
+delta = 0.5
 # localization = 'last'
 # localization = False
 
@@ -36,7 +36,7 @@ Ga = Gnp(nA, p, directed=True)
 # Ga.add_vrtx_attr('rand')
 # Ga.add_edge_attr('rand')
 
-Gb, gt = Ga.subgraph(delta=delta)
+Gb, gt = Ga.degrade('vx_rm', delta)
 
 # Ga.print()
 # print(gt.__dict__)

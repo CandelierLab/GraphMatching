@@ -6,6 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 import time
+from alive_progress import alive_bar
 
 import project
 from Graph import *
@@ -18,7 +19,6 @@ os.system('clear')
 directed = False
 
 nA = 200
-p = np.log(nA)/nA
 
 nRun = 1000
 
@@ -28,23 +28,25 @@ l_precision = np.r_[0, l_precision]
 
 # --------------------------------------------------------------------------
 
+# p = np.log(nA)/nA
+p = 2/nA
+
 ds = 'directed' if directed else 'undirected'
 
 # ==========================================================================
 
-fname = project.root + f'/Files/Degradation/ER/{ds}_zeta=1_nA={nA:d}_nRun={nRun:d}.csv'
+fname = project.root + f'/Files/Subgraph/ER/{ds}_zeta=1_nA={nA:d}_nRun={nRun:d}.csv'
 
 # --- Generative function
-
 def get_Nets(nA, p, delta):
   
   Ga = Gnp(nA, p, directed=directed)
 
-  # Edge atrribute
+  # Vertex attribute
   Ga.add_vrtx_attr('gauss')
 
   # Degradation: remove edges
-  Gb, gt = Ga.degrade('ed_rm', delta)
+  Gb, gt = Ga.degrade('vx_rm', delta)
 
   return (Ga, Gb, gt)
 
@@ -55,11 +57,6 @@ k = 0
 
 for d in l_delta:
 
-  print(f'delta={d:0.2f} - {nRun:d} iterations ...', end='', flush=True)
-  start = time.time()
-
-  # --- Initialization
-
   g_FAQ = np.empty((nRun))
   q_FAQ = np.empty((nRun))
   g_GASM = np.empty((nRun))
@@ -67,41 +64,46 @@ for d in l_delta:
   g_GASM_p = np.empty((len(l_precision), nRun))
   q_GASM_p = np.empty((len(l_precision), nRun))
 
-  for i in range(nRun):
+  with alive_bar(nRun) as bar:
+    bar.title = f'delta={d:0.2f}'
 
-    Ga, Gb, gt = get_Nets(nA, p, d)
-      
-    # --- FAQ
+    for i in range(nRun):
 
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='FAQ')
-    M.compute_accuracy(gt)
+      Ga, Gb, gt = get_Nets(nA, p, d)
+        
+      # --- FAQ
 
-    g_FAQ[i] = M.accuracy
-    q_FAQ[i] = M.structural_quality
+      C = Comparison(Ga, Gb)
+      M = C.get_matching(algorithm='FAQ')
+      M.compute_accuracy(gt)
 
-    # --- GASM
+      g_FAQ[i] = M.accuracy
+      q_FAQ[i] = M.structural_quality
 
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='GASM')
-    M.compute_accuracy(gt)
-
-    g_GASM[i] = M.accuracy
-    q_GASM[i] = M.structural_quality
-
-    # --- GASM with fixed precision
-
-    for j, precision in enumerate(l_precision):
-
-      Ga.vrtx_attr[0]['precision'] = precision
-      Gb.vrtx_attr[0]['precision'] = precision
+      # --- GASM
 
       C = Comparison(Ga, Gb)
       M = C.get_matching(algorithm='GASM')
       M.compute_accuracy(gt)
 
-      g_GASM_p[j,i] = M.accuracy
-      q_GASM_p[j,i] = M.structural_quality
+      g_GASM[i] = M.accuracy
+      q_GASM[i] = M.structural_quality
+
+      # --- GASM with fixed precision
+
+      for j, precision in enumerate(l_precision):
+
+        Ga.vrtx_attr[0]['precision'] = precision
+        Gb.vrtx_attr[0]['precision'] = precision
+
+        C = Comparison(Ga, Gb)
+        M = C.get_matching(algorithm='GASM')
+        M.compute_accuracy(gt)
+
+        g_GASM_p[j,i] = M.accuracy
+        q_GASM_p[j,i] = M.structural_quality
+
+      bar()
 
   # --- FAQ
 
@@ -155,8 +157,6 @@ for d in l_delta:
     df.loc[k, 'q_std'] = np.std(q_GASM_p[j,:])
 
     k += 1
-
-  print('{:.02f} sec'.format((time.time() - start)))
 
 # --- Save
     
