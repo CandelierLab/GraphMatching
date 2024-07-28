@@ -11,8 +11,8 @@ os.system('clear')
 # === Parameters ===========================================================
 
 directed = True
-nA = 500
-p = 0.05
+nA = 1000
+# p = 0.05
 
 algo = 'GASM'
 # algo = '2opt'
@@ -21,7 +21,7 @@ algo = 'GASM'
 
 # --------------------------------------------------------------------------
 
-# p = np.log(nA)/nA
+p = np.log(nA)/nA
 
 # ==========================================================================
 
@@ -37,15 +37,19 @@ Ga = Gnp(nA, p, directed=directed)
 
 Gb, gt = Ga.shuffle()
 
-Ga.print()
+# Ga.print()
 # Gb.print()
 
-C = Comparison(Ga, Gb, verbose=True)
+C = Comparison(Ga, Gb, verbose=False)
 
-M = C.get_matching(algorithm=algo, GPU=False)
-M.compute_accuracy(gt)
-print(M)
+# M = C.get_matching(algorithm=algo, GPU=False)
+# M.compute_accuracy(gt)
+# print(M)
 
-M = C.get_matching(algorithm=algo, GPU=True, force=True)
-M.compute_accuracy(gt)
-print(M)
+M = C.get_matching(algorithm=algo, GPU=True)
+
+M = C.get_matching(algorithm=algo, GPU=True, force=True, disptime=True)
+print(M.time)
+
+# M.compute_accuracy(gt)
+# print(M)

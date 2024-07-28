@@ -22,9 +22,10 @@ os.system('clear')
 
 l_directed = [False, True]
 # l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
-l_algo = ['GASM_GPU']
+# l_n = np.unique(np.logspace(0,np.log10(10000), 101, dtype=int))
 
-l_n = np.unique(np.logspace(0,np.log10(10000), 101, dtype=int))
+l_algo = ['GASM_GPU']
+l_n = [1000]
 
 nRun = 10
 
@@ -105,12 +106,14 @@ for directed in l_directed:
 
       print(' {:.02f} sec'.format((time.time() - start)))
 
+    print(df)
+
     # --- Save
         
-    print('Saving ...', end='')
-    start = time.time()
+    # print('Saving ...', end='')
+    # start = time.time()
 
-    df.to_csv(fname)
+    # df.to_csv(fname)
 
-    print('{:.02f} sec'.format((time.time() - start)))
+    # print('{:.02f} sec'.format((time.time() - start)))
 

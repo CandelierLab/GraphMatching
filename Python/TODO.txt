@@ -1,6 +1,7 @@
 === CUDA
 
 * Speedup
+* Computation: remove first instance and rerun everything
 
 === Supplementary
 

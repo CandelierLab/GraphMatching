@@ -2,7 +2,6 @@ import time
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment, quadratic_assignment
-import time
 import numba as nb
 import numba.cuda as cuda
 
@@ -357,6 +356,13 @@ class Comparison:
       'eta' (float): Noise level (default 1e-10)
     '''
 
+    # Measure time
+    tref = time.perf_counter_ns()
+
+    def timeit(x):
+      if 'disptime' in kwargs:
+        print(x, (time.perf_counter_ns()-tref)*1e-6, 'ms')
+
     # === Definitions ======================================================
 
     Ga = self.Ga
@@ -480,6 +486,8 @@ class Comparison:
     # Random initial fluctuations
     H = np.random.rand(nA, nB)*eta
 
+    timeit(0)
+
     # === Checks ===========================================================
 
     if not mA or not mB:
@@ -524,6 +532,8 @@ class Comparison:
       d_B_tgt = cuda.to_device(B_tgt)
       d_B_edges = cuda.to_device(Gb.edges.astype(np.int64))
 
+      timeit('Sending to device')
+
       # --- Initial step
 
       Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
@@ -531,6 +541,8 @@ class Comparison:
                                  d_B_sn, d_B_src, d_B_tgt, 
                                  directed, 1, True)
      
+      timeit('Initial iteration')
+    
       # --- Iterations
 
       for i in range(nIter):
@@ -543,10 +555,14 @@ class Comparison:
                                  d_A_sn, d_A_src, d_A_tgt,
                                  d_B_sn, d_B_src, d_B_tgt, 
                                  directed, normalization, False)
+        
+        timeit(i)
 
       # --- Get back scores to the host
 
       self.X = d_X.copy_to_host()
+
+      timeit('Back to host')
 
     else:
 
