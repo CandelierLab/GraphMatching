@@ -498,10 +498,10 @@ class Comparison:
       directed = Ga.directed
 
       blockDim = (16, 16)
-      gridDim_X2Y = ((Ga.nV+(blockDim[0]-1))//blockDim[0], 
-                     (Gb.nV+(blockDim[1]-1))//blockDim[1])
-      gridDim_Y2X = ((Ga.nE+(blockDim[0]-1))//blockDim[0], 
+      gridDim_X2Y = ((Ga.nE+(blockDim[0]-1))//blockDim[0], 
                      (Gb.nE+(blockDim[1]-1))//blockDim[1])
+      gridDim_Y2X = ((Ga.nV+(blockDim[0]-1))//blockDim[0], 
+                     (Gb.nV+(blockDim[1]-1))//blockDim[1])
 
       # --- CUDA Arrays ----------------------------------------------------
       
@@ -530,7 +530,7 @@ class Comparison:
                                  d_A_sn, d_A_src, d_A_tgt,
                                  d_B_sn, d_B_src, d_B_tgt, 
                                  directed, 1, True)
-       
+     
       # --- Iterations
 
       for i in range(nIter):
@@ -538,7 +538,7 @@ class Comparison:
         X2Y[gridDim_X2Y, blockDim](d_X, d_Y, 
                                    d_A_edges, d_B_edges,
                                    directed)
-
+        
         Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
                                  d_A_sn, d_A_src, d_A_tgt,
                                  d_B_sn, d_B_src, d_B_tgt, 

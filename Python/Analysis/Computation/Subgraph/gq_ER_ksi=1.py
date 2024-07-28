@@ -23,6 +23,8 @@ nA = 200
 nRun = 1000
 
 l_delta = np.linspace(0, 1, 21)
+l_delta[-1] = 0.99
+
 l_precision = np.round(np.geomspace(0.005, 1, 5)*1000)/1000
 l_precision = np.r_[0, l_precision]
 

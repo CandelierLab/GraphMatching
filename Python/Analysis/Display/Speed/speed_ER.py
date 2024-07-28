@@ -10,13 +10,14 @@ os.system('clear')
 # === Parameters ===========================================================
 
 l_directed = [False, True]
-l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU']
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
+
 
 # ==========================================================================
 
 # Prepare figure
 plt.style.use('dark_background')
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(1,2, figsize=[10,5])
 
 
 for directed in l_directed:
@@ -37,22 +38,33 @@ for directed in l_directed:
 
       data = df.groupby('n')['t'].mean().to_frame()
 
-      print(data)
-
       # --- Display --------------------------------------------------------------
 
       if directed:
-        ax.plot(l_n, data.t, '--', label=algo)
+        ax[1].plot(l_n, data.t, '-', label=algo)
       else:
-        ax.plot(l_n, data.t, '-', label=algo)
+        ax[0].plot(l_n, data.t, '-', label=algo)
 
-ax.set_xlabel('$n_A$')
-ax.set_ylabel('$t$ (ms)')
+ax[0].set_title('Undirected')
+ax[0].set_xlabel('$n_A$')
+ax[0].set_ylabel('$t$ (ms)')
 
-ax.set_xscale('log')
-ax.set_yscale('log')
+ax[0].set_xscale('log')
+ax[0].set_yscale('log')
+ax[0].set_box_aspect(1)
 
-ax.legend()
-ax.grid(True)
+ax[0].legend()
+ax[0].grid(True)
+
+ax[1].set_title('Directed')
+ax[1].set_xlabel('$n_A$')
+ax[1].set_ylabel('$t$ (ms)')
+
+ax[1].set_xscale('log')
+ax[1].set_yscale('log')
+ax[1].set_box_aspect(1)
+
+ax[1].legend()
+ax[1].grid(True)
 
 plt.show()

@@ -1,6 +1,5 @@
 === CUDA
 
-* Sport and fix error
 * Speedup
 
 === Supplementary
@@ -26,8 +25,6 @@
   x n=1000 
 
 - Same for undirected ?
-
-- Finish degradation figure
 
 === Attribute degradation (add noise)
 

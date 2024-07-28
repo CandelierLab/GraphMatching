@@ -87,6 +87,7 @@ for i, directed in enumerate([False, True]):
     # --- General plot settings
 
     ax[i,j].set_yscale('log')
+    ax[i,j].set_ylim([0.002, 1.2])
     ax[i,j].set_ylabel('$\gamma$')
 
     ax[i,j].set_xlim([0, 1])

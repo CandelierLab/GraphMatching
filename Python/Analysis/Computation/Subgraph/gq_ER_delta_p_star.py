@@ -19,10 +19,10 @@ os.system('clear')
 # === Parameters ===========================================================
 
 directed = True
-l_nA = [10, 20, 50, 100, 200, 500, 1000]
+l_nA = [10, 20, 50, 100, 200, 500, 750, 1000]
 
-nRun = 10000
-# nRun = 100
+# nRun = 10000
+nRun = 100
 
 force = False
 
@@ -44,11 +44,6 @@ dname = project.root + '/Files/Subgraph/delta/'
 for nA in l_nA:
 
   p_star = 2/nA
-
-  # l_delta = np.linspace(0, 1, 11)
-  # l_delta[10] = 1-1/nA
-  # l_delta = np.unique(l_delta)
-
   l_delta = np.geomspace(max(0.01,1/nA), 1-1/nA, 11)
   
   # --------------------------------------------------------------------------
@@ -56,12 +51,18 @@ for nA in l_nA:
   fname = dname + f'ER_nA={nA}_nRun={nRun}.csv'
 
   # Skip if already existing
-  if os.path.exists(fname) and not force: continue
+  if os.path.exists(fname):
 
-  # Creating dataframe
-  gamma = pd.DataFrame()
+    gamma = pd.read_csv(fname, index_col=0)
 
-  for delta in l_delta:
+  else:
+
+    # Creating dataframe
+    gamma = pd.DataFrame()
+
+  # === Computation ========================================================
+
+  for delta in l_delta[len(gamma.columns):]:
 
     g = np.empty(nRun)
 

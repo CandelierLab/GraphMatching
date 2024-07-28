@@ -12,7 +12,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 dname = project.root + '/Files/Subgraph/delta/'
-nRun = 10000
+nRun = 100
 
 # ==========================================================================
 
@@ -45,7 +45,7 @@ for fname in os.listdir(dname):
 
     if nRun_!=nRun: continue
 
-  # print(nA_, nRun_)
+  print(nA_, nRun_)
 
   # Random matchings
   # ax.axhline(y = 1/nA, color = 'w', linestyle = ':')

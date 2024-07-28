@@ -11,13 +11,13 @@ os.system('clear')
 # === Parameters ===========================================================
 
 directed = True
-nA = 5
-p = 0.5
+nA = 500
+p = 0.05
 
 algo = 'GASM'
 # algo = '2opt'
 
-np.random.seed(0)
+# np.random.seed(0)
 
 # --------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ np.random.seed(0)
 
 # --- Random graphs
 
-Ga = Gnp(nA, 0, directed=directed)
+Ga = Gnp(nA, p, directed=directed)
 # Ga.add_edge_attr('rand', name='test_edge')
 # Ga.add_vrtx_attr('rand', name='test_node')
 
