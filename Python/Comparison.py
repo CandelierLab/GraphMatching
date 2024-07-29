@@ -360,8 +360,11 @@ class Comparison:
     tref = time.perf_counter_ns()
 
     def timeit(x):
-      if 'disptime' in kwargs:
-        print(x, (time.perf_counter_ns()-tref)*1e-6, 'ms')
+
+      if 'disptime' in kwargs:        
+        t = time.perf_counter_ns()
+        print(x, (t-tref)*1e-6, 'ms')
+        return t
 
     # === Definitions ======================================================
 
@@ -512,15 +515,27 @@ class Comparison:
                      (Gb.nV+(blockDim[1]-1))//blockDim[1])
 
       # --- CUDA Arrays ----------------------------------------------------
-      
-      # Scores
+
+      A_sn, A_src, A_tgt = Ga.to_CUDA_arrays()
+      B_sn, B_src, B_tgt = Gb.to_CUDA_arrays()
+
+      tref = timeit('Start sending')
+
+      # --- Scores
+
       d_X = cuda.to_device((N+H).astype(np.float32))
       d_Y = cuda.to_device(E.astype(np.float32))
 
       # --- Graph structure
 
-      A_sn, A_src, A_tgt = Ga.to_CUDA_arrays()
-      B_sn, B_src, B_tgt = Gb.to_CUDA_arrays()
+      d_A_edges = cuda.to_device(Ga.edges.astype(np.uint64))
+      d_B_edges = cuda.to_device(Gb.edges.astype(np.uint64))
+
+      timeit('Sending to device')
+
+ 
+
+
 
       d_A_sn = cuda.to_device(A_sn)
       d_A_src = cuda.to_device(A_src)

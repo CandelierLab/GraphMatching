@@ -21,7 +21,9 @@ os.system('clear')
 # === Parameters ===========================================================
 
 l_directed = [False, True]
-l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
+
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU']
+# l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
 l_n = np.unique(np.logspace(0,np.log10(10000), 101, dtype=int))
 
 # l_algo = ['GASM_GPU']
@@ -30,7 +32,7 @@ l_n = np.unique(np.logspace(0,np.log10(10000), 101, dtype=int))
 nRun = 10
 
 # Maximal time (s)
-mt = 60
+mt = 1000
 
 force = True
 
