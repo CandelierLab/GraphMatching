@@ -11,7 +11,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 directed = True
-nA = 1000
+nA = 100
 # p = 0.05
 
 algo = 'GASM'

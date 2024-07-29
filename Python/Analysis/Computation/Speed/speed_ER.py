@@ -21,11 +21,11 @@ os.system('clear')
 # === Parameters ===========================================================
 
 l_directed = [False, True]
-# l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
-# l_n = np.unique(np.logspace(0,np.log10(10000), 101, dtype=int))
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
+l_n = np.unique(np.logspace(0,np.log10(10000), 101, dtype=int))
 
-l_algo = ['GASM_GPU']
-l_n = [1000]
+# l_algo = ['GASM_GPU']
+# l_n = [1000]
 
 nRun = 10
 
@@ -68,7 +68,7 @@ for directed in l_directed:
       print(f'{algo} {sdir:s} nA={nA:d} - {nRun:d} iterations ...', end='')
       start = time.time()
       
-      for r in range(nRun):
+      for r in range(nRun+1):
 
         '''
         !! Set seed !! @ r+nA*nRun
@@ -89,6 +89,8 @@ for directed in l_directed:
           case _:
             M = C.get_matching(algorithm=algo)
 
+        if r==0: continue
+
         M.compute_accuracy(gt)
 
         # --- Store
@@ -106,14 +108,12 @@ for directed in l_directed:
 
       print(' {:.02f} sec'.format((time.time() - start)))
 
-    print(df)
-
     # --- Save
         
-    # print('Saving ...', end='')
-    # start = time.time()
+    print('Saving ...', end='')
+    start = time.time()
 
-    # df.to_csv(fname)
+    df.to_csv(fname)
 
-    # print('{:.02f} sec'.format((time.time() - start)))
+    print('{:.02f} sec'.format((time.time() - start)))
 
