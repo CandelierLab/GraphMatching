@@ -10,7 +10,8 @@ os.system('clear')
 # === Parameters ===========================================================
 
 l_directed = [False, True]
-l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
+# l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU']
 
 
 # ==========================================================================

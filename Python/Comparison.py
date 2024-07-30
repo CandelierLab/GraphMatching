@@ -516,44 +516,37 @@ class Comparison:
 
       # --- CUDA Arrays ----------------------------------------------------
 
-      A_sn, A_src, A_tgt = Ga.to_CUDA_arrays()
-      B_sn, B_src, B_tgt = Gb.to_CUDA_arrays()
+      float_type = np.float32
+      int_type = np.int64
+
+      # tref = timeit('Computing')
+      A_sn, A_ptr = Ga.to_CUDA_arrays(dtype=int_type)
+      B_sn, B_ptr = Gb.to_CUDA_arrays(dtype=int_type)
 
       tref = timeit('Start sending')
 
       # --- Scores
 
-      d_X = cuda.to_device((N+H).astype(np.float32))
-      d_Y = cuda.to_device(E.astype(np.float32))
+      d_X = cuda.to_device((N+H).astype(float_type))
+      d_Y = cuda.to_device(E.astype(float_type))
 
       # --- Graph structure
 
-      d_A_edges = cuda.to_device(Ga.edges.astype(np.uint64))
-      d_B_edges = cuda.to_device(Gb.edges.astype(np.uint64))
+      d_A_edges = cuda.to_device(Ga.edges.astype(int_type))
+      d_B_edges = cuda.to_device(Gb.edges.astype(int_type))
 
-      timeit('Sending to device')
+      d_A_sn = cuda.to_device(A_sn.astype(int_type))
+      d_A_ptr = cuda.to_device(A_ptr.astype(int_type))
 
- 
+      d_B_sn = cuda.to_device(B_sn.astype(int_type))
+      d_B_ptr = cuda.to_device(B_ptr.astype(int_type))
 
-
-
-      d_A_sn = cuda.to_device(A_sn)
-      d_A_src = cuda.to_device(A_src)
-      d_A_tgt = cuda.to_device(A_tgt)
-      d_A_edges = cuda.to_device(Ga.edges.astype(np.int64))
-
-      d_B_sn = cuda.to_device(B_sn)
-      d_B_src = cuda.to_device(B_src)
-      d_B_tgt = cuda.to_device(B_tgt)
-      d_B_edges = cuda.to_device(Gb.edges.astype(np.int64))
-
-      timeit('Sending to device')
+      tref = timeit('Sending to device')
 
       # --- Initial step
 
       Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
-                                 d_A_sn, d_A_src, d_A_tgt,
-                                 d_B_sn, d_B_src, d_B_tgt, 
+                                 d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
                                  directed, 1, True)
      
       timeit('Initial iteration')
@@ -567,8 +560,7 @@ class Comparison:
                                    directed)
         
         Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
-                                 d_A_sn, d_A_src, d_A_tgt,
-                                 d_B_sn, d_B_src, d_B_tgt, 
+                                 d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
                                  directed, normalization, False)
         
         timeit(i)
@@ -644,6 +636,16 @@ class Comparison:
 #   The CUDA kernels
 # --------------------------------------------------------------------------
 
+# @cuda.jit(cache=True)
+# def init_step_0(edges, sn, directed):
+#   i = cuda.grid(1)
+#   if i < edges.shape[0]:
+#     if i<3:
+#       print(i, edges[i,0], edges[i,1], sn[edges[i,0],1], sn[edges[i,1],1])
+#       sn[edges[i,0],1] += 1
+#       if edges[i,0]!=edges[i,1]:
+#         sn[edges[i,1],1] += 1
+
 @cuda.jit(cache=True)
 def X2Y(X, Y, A_edges, B_edges, directed):
 
@@ -678,7 +680,7 @@ def X2Y(X, Y, A_edges, B_edges, directed):
                    X[A_edges[i,0], B_edges[j,1]] + X[A_edges[i,1], B_edges[j,1]]
     
 @cuda.jit(cache=True)
-def Y2X(X, Y, A_sn, A_src, A_tgt, B_sn, B_src, B_tgt, directed, normalization, initialization):
+def Y2X(X, Y, A_sn, A_ptr, B_sn, B_ptr, directed, normalization, initialization):
 
   u, v = cuda.grid(2)
   if u < X.shape[0] and v < X.shape[1]:
@@ -690,18 +692,18 @@ def Y2X(X, Y, A_sn, A_src, A_tgt, B_sn, B_src, B_tgt, directed, normalization, i
       # Sources
       for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
         for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
-          x += Y[A_src[i], B_src[j]]
+          x += Y[A_ptr[i,0], B_ptr[j,0]]
 
       # Targets
       for i in range(A_sn[u,2], A_sn[u,2]+A_sn[u,3]):
         for j in range(B_sn[v,2], B_sn[v,2]+B_sn[v,3]):
-          x += Y[A_tgt[i], B_tgt[j]]
+          x += Y[A_ptr[i,1], B_ptr[j,1]]
 
     else:
 
       for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
         for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
-          x += Y[A_tgt[i], B_tgt[j]]
+          x += Y[A_ptr[i,0], B_ptr[j,0]]
 
     if normalization!=1:
       x /= normalization

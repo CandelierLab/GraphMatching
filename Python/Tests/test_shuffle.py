@@ -10,14 +10,14 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = True
-nA = 100
-# p = 0.05
+directed = False
+nA = 1000
+# p = 0.3
 
 algo = 'GASM'
 # algo = '2opt'
 
-# np.random.seed(0)
+np.random.seed(0)
 
 # --------------------------------------------------------------------------
 

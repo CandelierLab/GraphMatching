@@ -17,11 +17,11 @@ class Graph:
   def __init__(self, nV=0, directed=True, Adj=None, nx=None):
 
     # Numbers
-    self.nV = nV  # Number of verticex
+    self.nV = nV  # Number of vertices
     self.nVa = 0  # NUmber of vertex attributes
-    self.nE = 0   # Number of edges 
-    # self.nEd = 0  # Number of directed edges (nE for directed graphs, 2*nE for undirected graphs)
+    self.nE = 0   # Number of edges
     self.nEa = 0  # Number of edge attributes
+    self.mdeg = 0 # max degree
 
     # Edges
     self.directed = directed
@@ -84,6 +84,7 @@ class Graph:
     s = f'\nDirected\n' if self.directed else f'\nUndirected\n'
     s += f'Number of vertices: {self.nV}\n'
     s += f'Number of edges: {self.nE}\n'
+    s += f'Max degree: {self.mdeg}\n'
 
     return s
   
@@ -207,50 +208,49 @@ class Graph:
 
       # --- Start and number
 
-      A_sn = np.empty((self.nV, 4), dtype=dtype)
+      sn = np.empty((self.nV, 4), dtype=dtype)
       ks = 0  
       kt = 0
       for u in range(self.nV):
 
         # Sources
-        A_sn[u,0] = ks
-        A_sn[u,1] = len(src_[u])
-        ks += A_sn[u,1]
+        sn[u,0] = ks
+        sn[u,1] = len(src_[u])
+        ks += sn[u,1]
 
         # Targets
-        A_sn[u,2] = kt
-        A_sn[u,3] = len(tgt_[u])
-        kt += A_sn[u,3]
+        sn[u,2] = kt
+        sn[u,3] = len(tgt_[u])
+        kt += sn[u,3]
 
-      src = np.concatenate([np.array(x) for x in src_]).astype(dtype)
-      tgt = np.concatenate([np.array(x) for x in tgt_]).astype(dtype)
+      src = np.concatenate([np.array(x) for x in src_])
+      tgt = np.concatenate([np.array(x) for x in tgt_])
+      ptr = np.column_stack((src, tgt)).astype(dtype)
 
     else:
 
-      src = np.empty(0, dtype=dtype)
-
       # --- Temporary list of list
 
-      tgt_ = [[] for k in range(self.nV)]
+      ptr_ = [[] for k in range(self.nV)]
       for k in range(self.nE):
-        tgt_[self.edges[k,0]].append(k)
+        ptr_[self.edges[k,0]].append(k)
         if self.edges[k,1]!=self.edges[k,0]:
-          tgt_[self.edges[k,1]].append(k)
+          ptr_[self.edges[k,1]].append(k)
 
       # --- Start and number
 
-      A_sn = np.empty((self.nV, 2), dtype=dtype)
+      sn = np.empty((self.nV, 2), dtype=dtype)
       k = 0  
       for u in range(self.nV):
-        A_sn[u,0] = k
-        A_sn[u,1] = len(tgt_[u])
-        k += A_sn[u,1]
+        sn[u,0] = k
+        sn[u,1] = len(ptr_[u])
+        k += sn[u,1]
 
-      tgt = np.concatenate([np.array(x) for x in tgt_]).astype(dtype)
+      ptr = np.concatenate([np.array(x) for x in ptr_])[:,np.newaxis].astype(dtype)
 
     # --- Output
 
-    return (A_sn, src, tgt)
+    return (sn, ptr)
 
   # ========================================================================
   #                             GENERATION
@@ -397,7 +397,10 @@ class Graph:
           self.edges[i,:] = [I[0][i], I[1][i]]
 
         # Conversion to Scipy sparse
-        # Strangely slows down when there are several matrix multiplications
+        '''
+        Strangely it slows down the computation when there are 
+        several matrix multiplications. Abandonned.
+        '''
         # self.As = sparse.csr_matrix(self.As)
         # self.At = sparse.csr_matrix(self.At)
 
@@ -439,6 +442,9 @@ class Graph:
         self.d = nx.diameter(self.nx)
       else:
         self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.nx)])
+
+      # Maximal degree
+      self.mdeg = np.max(np.sum(self.Adj, axis=1))
 
     else:
 
