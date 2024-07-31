@@ -1,19 +1,16 @@
 === CUDA
 
-* Speedup
-* Computation: remove first instance and rerun everything
+* QAPlib:
+  - fix GPU
+  - run
+  - figure
 
 === Supplementary
 
+* Normalization coefficient
 * Influence of noise (directed / undirected)
 * Accuracy and qS vs Niterations
-* Normalization coefficient
-
-=== Speed benchmark
-
-* ER with p=nlog(n)
-* QAPLIB total time (4 algorithms + GASM_GPU)
-  
+ 
 === Node degradation (subgraph)
 
 - Finish delta_p_star in logarithmic scale:

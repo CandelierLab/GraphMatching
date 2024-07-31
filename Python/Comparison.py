@@ -67,6 +67,10 @@ class Comparison:
     M = Matching(self.Ga, self.Gb, algorithm=algorithm)
     M.time = {'total': None}
 
+    # Skip if empty grapĥs
+    if not self.Ga.nV or not self.Gb.nV:
+      return M
+
     # Measure time
     tref = time.perf_counter_ns()
 
@@ -132,10 +136,6 @@ class Comparison:
 
           if self.verbose:
             print('* No score matrix found, computing the score matrices.')
-
-          # if 'i_function' in kwargs:
-          #   output = self.compute_scores(algorithm=algorithm, **kwargs)
-          # else:
 
           match algorithm.lower():
 
@@ -408,8 +408,7 @@ class Comparison:
     if 'normalization' in kwargs:
       normalization = kwargs['normalization']
     else:
-      normalization = 4*mA*mB/nA/nB if nA and nB else 1
-      # normalization = 4*mA*mB/nA/nB + 1 if nA and nB else 1
+      normalization = 4*mA*mB/nA/nB + 1 if Ga.directed else 16*mA*mB/nA/nB + 1
 
     # Noise
     eta = kwargs['eta'] if 'eta' in kwargs else 1e-10
@@ -602,16 +601,16 @@ class Comparison:
         if normalization is not None:
           self.X /= normalization
 
-      # --- Information
-          
-      if 'info_avgScores' in kwargs:
+        # --- Information
+            
+        if 'info_avgScores' in kwargs:
 
-        # Initialization
-        if 'avgX' not in self.info:
-          self.info['avgX'] = []
+          # Initialization
+          if 'avgX' not in self.info:
+            self.info['avgX'] = []
 
-        # Update
-        self.info['avgX'].append(np.mean(self.X))
+          # Update
+          self.info['avgX'].append(np.mean(self.X))
 
     # --- Timing
         

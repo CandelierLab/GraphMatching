@@ -13,15 +13,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-id = 0 #'lipa20a'
-
-algo = 'GASM'
-
-np.random.seed(0)
-
 # --------------------------------------------------------------------------
 
-fname = project.root + f'/Files/QAPLIB/sgq.csv'
+fname = project.root + f'/Files/QAPLIB/sgqt.csv'
 
 # ==========================================================================
 
@@ -59,6 +53,7 @@ for id in Q.l_inst:
   s_FAQ = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
   g_FAQ = M.accuracy
   q_FAQ = M.structural_quality
+  t_FAQ = M.time['total']
  
   # === 2opt
 
@@ -69,6 +64,7 @@ for id in Q.l_inst:
   s_2opt = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
   g_2opt = M.accuracy
   q_2opt = M.structural_quality
+  t_2opt = M.time['total']
 
   # === Zager
 
@@ -79,24 +75,38 @@ for id in Q.l_inst:
   s_Zager = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
   g_Zager = M.accuracy
   q_Zager = M.structural_quality
+  t_Zager = M.time['total']
 
-  # === GASM
+  # === GASM CPU
 
   C = Comparison(Ga, Gb)
-  M = C.get_matching(algorithm='GASM', eta=0)
+  # M = C.get_matching(algorithm='GASM', GPU=False, eta=0)
+  M = C.get_matching(algorithm='GASM', GPU=False)
   M.compute_accuracy(gt)
 
-  s_GASM = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
-  g_GASM = M.accuracy
-  q_GASM = M.structural_quality
+  s_GASM_CPU = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
+  g_GASM_CPU = M.accuracy
+  q_GASM_CPU = M.structural_quality
+  t_GASM_CPU = M.time['total']
+
+  # === GASM CPU
+
+  C = Comparison(Ga, Gb)
+  M = C.get_matching(algorithm='GASM', GPU=True)
+  M.compute_accuracy(gt)
+
+  s_GASM_GPU = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
+  g_GASM_GPU = M.accuracy
+  q_GASM_GPU = M.structural_quality
+  t_GASM_GPU = M.time['total']
 
   # === Update
 
-  B.append([id, s_sol, s_FAQ, s_2opt, s_Zager, s_GASM, g_sol, g_FAQ, g_2opt, g_Zager, g_GASM, q_sol, q_FAQ, q_2opt, q_Zager, q_GASM])
+  B.append([id, s_sol, s_FAQ, s_2opt, s_Zager, s_GASM_CPU, s_GASM_GPU, g_sol, g_FAQ, g_2opt, g_Zager, g_GASM_CPU, g_GASM_GPU, q_sol, q_FAQ, q_2opt, q_Zager, q_GASM_CPU, q_GASM_GPU, t_FAQ, t_2opt, t_Zager, t_GASM_CPU, t_GASM_GPU])
 
   print('\t\t{:.02f} sec'.format((time.time() - start)))
 
-df = pd.DataFrame(B, columns=['id', 's_sol', 's_FAQ', 's_2opt', 's_Zager', 's_GASM', 'g_sol', 'g_FAQ', 'g_2opt', 'g_Zager', 'g_GASM', 'q_sol', 'q_FAQ', 'q_2opt', 'q_Zager', 'q_GASM'])
+df = pd.DataFrame(B, columns=['id', 's_sol', 's_FAQ', 's_2opt', 's_Zager', 's_GASM_CPU', 's_GASM_GPU', 'g_sol', 'g_FAQ', 'g_2opt', 'g_Zager', 'g_GASM_CPU', 'g_GASM_GPU', 'q_sol', 'q_FAQ', 'q_2opt', 'q_Zager', 'q_GASM_CPU', 'q_GASM_GPU', 't_FAQ', 't_2opt', 't_Zager', 't_GASM_CPU', 't_GASM_GPU'])
 
 print('Total time: {:.02f} sec'.format((time.time() - ref)))
 

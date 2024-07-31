@@ -17,21 +17,13 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-nA = 100
-# scale = 'lin'
-scale = 'log'
+l_directed = [False]
+l_scale = ['lin', 'log']
 
+nA = 100
 nRun = 100
 
-
-# Degrees (average number of edges per node)
-match scale:
-  case 'lin':
-    l_deg = np.linspace(0, nA, 31)
-  case 'log':
-    l_deg = np.geomspace(1/nA, nA, 31)
-
-force = False
+force = True
 
 # --------------------------------------------------------------------------
 
@@ -44,43 +36,57 @@ if not force:
 
 # ==========================================================================
 
+for directed in l_directed:
 
-fname = project.root + f'/Files/Normalization/ER/{scale}_n={nA:d}_nRun={nRun:d}.csv'
+  ds = 'directed' if directed else 'undirected'
 
-# Check existence
-if os.path.exists(fname) and not force:
-  sys.exit()
+  for scale in l_scale:
 
-fac = pd.DataFrame()
+    fname = project.root + f'/Files/Normalization/ER/{ds}_{scale}_n={nA:d}_nRun={nRun:d}.csv'
 
-for deg in l_deg:
+    # Check existence
+    if os.path.exists(fname) and not force:
+      continue
 
-  print('deg {:.01f} ...'.format(deg), end='')
-  start = time.time()
+    fac = pd.DataFrame()
 
-  f = np.empty(nRun)
+    # Degrees - average number of (outgoing) edges per node
+    match scale:
+      case 'lin':
+        l_deg = np.linspace(0, nA, 31)
+      case 'log':
+        l_deg = np.geomspace(1/nA, nA, 31)
 
-  for run in range(nRun):
+    for deg in l_deg:
 
-    # --- Network
+      print(f'{ds} {scale} {deg:.02f} ...', end='')
+      start = time.time()
 
-    Ga = Gnm(nA, deg*nA)
-    Gb, gt = Ga.shuffle()
+      f = np.empty(nRun)
 
-    # --- Matching
+      for run in range(nRun):
 
-    C = Comparison(Ga, Gb)
-    M = C.get_matching(algorithm='GASM', normalization=1, info_avgScores=True)
+        # --- Network
 
-    if 'avgX' in C.info and len(C.info['avgX'])>1:
-      f[run] = C.info['avgX'][-1]/C.info['avgX'][-2]
-    else:
-      f[run] = 1
+        mA = deg*nA if directed else deg*nA/2
 
-  fac[deg] = f
+        Ga = Gnm(nA, mA, directed=directed)
+        Gb, gt = Ga.shuffle()
 
-  print('{:.02f} sec'.format((time.time() - start)))
+        # --- Matching
 
-# === Save =================================================================
+        C = Comparison(Ga, Gb)
+        M = C.get_matching(algorithm='GASM', normalization=1, info_avgScores=True)
 
-fac.to_csv(fname)
+        if 'avgX' in C.info and len(C.info['avgX'])>1:
+          f[run] = C.info['avgX'][-1]/C.info['avgX'][-2]
+        else:
+          f[run] = 1
+
+      fac[deg] = f
+
+      print('{:.02f} sec'.format((time.time() - start)))
+
+    # === Save =================================================================
+
+    fac.to_csv(fname)
