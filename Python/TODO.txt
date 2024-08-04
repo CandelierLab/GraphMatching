@@ -1,13 +1,18 @@
+=== Speed & complement
+
+* Time as a function of p on poly
+* Is it beneficial to take the compelement for GPU ? If so, implement it.
+* Supp fig: time as function of p, with and without complement for CPU
+
 === CUDA
 
 * QAPlib:
-  - fix GPU
+  - fix GPU: first pass is on the non-reversed network !! Keep the complementary for GPU ? 
   - run
   - figure
 
 === Supplementary
 
-* Normalization coefficient
 * Influence of noise (directed / undirected)
 * Accuracy and qS vs Niterations
  
@@ -22,7 +27,7 @@
   🮱 n=500 
   x n=1000 
 
-- Same for undirected ?
+- Figure
 
 === Attribute degradation (add noise)
 

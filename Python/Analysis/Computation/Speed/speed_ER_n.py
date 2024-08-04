@@ -1,10 +1,5 @@
 '''
-Speed test on ER graphs
-
-- Separate per algorithm
-- directed + undirected
-- Add 2opt
-
+Speed test on ER graphs: n
 '''
 
 import os, sys
@@ -21,9 +16,7 @@ os.system('clear')
 # === Parameters ===========================================================
 
 l_directed = [False, True]
-
-# l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU', 'GASM_GPU']
-l_algo = ['GASM_GPU']
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU', 'GASM_GPU']
 
 l_n = np.unique(np.logspace(0, np.log10(10000), 101, dtype=int))
 
@@ -49,7 +42,7 @@ for directed in l_directed:
 
   for algo in l_algo:
 
-    fname = project.root + f'/Files/Speed/ER_{algo}_{sdir:s}.csv'
+    fname = project.root + f'/Files/Speed/n/ER_{algo}_{sdir:s}.csv'
 
     # Skip if already existing
     if os.path.exists(fname) and not force: continue
@@ -69,10 +62,6 @@ for directed in l_directed:
       start = time.time()
       
       for r in range(nRun+1):
-
-        '''
-        !! Set seed !! @ r+nA*nRun
-        '''
 
         Ga = Gnp(nA, l_p[i], directed=directed)
         Gb, gt = Ga.shuffle()

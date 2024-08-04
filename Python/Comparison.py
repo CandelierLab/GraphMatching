@@ -32,7 +32,7 @@ class Comparison:
     [1] J.T. Vogelstein et al., "Fast Approximate Quadratic Programming for Graph Matching",
       PLoS One 10(4) (2015); doi:10.1371/journal.pone.0121002
 
-    [2] D. E. Fishkind et al., "See de d graph matching", Pattern recognition 87, 203-215 (2019); doi:10.1016/j.patcog.2018.09.014
+    [2] D. E. Fishkind et al., "Seeded graph matching", Pattern recognition 87, 203-215 (2019); doi:10.1016/j.patcog.2018.09.014
 
     [3] L.A. Zager and G.C. Verghese, "Graph similarity scoring and matching",
         Applied Mathematics Letters 21 (2008) 86–94; doi: 10.1016/j.aml.2007.01.006
@@ -143,7 +143,6 @@ class Comparison:
               self.compute_scores_Zager(**kwargs)
 
             case 'gasm':
-
               self.compute_scores_GASM(**kwargs)
 
           # Informations
@@ -356,15 +355,9 @@ class Comparison:
       'eta' (float): Noise level (default 1e-10)
     '''
 
-    # Measure time
+    # Times
+    times = {}
     tref = time.perf_counter_ns()
-
-    def timeit(x):
-
-      if 'disptime' in kwargs:        
-        t = time.perf_counter_ns()
-        print(x, (t-tref)*1e-6, 'ms')
-        return t
 
     # === Definitions ======================================================
 
@@ -373,7 +366,10 @@ class Comparison:
 
     # --- Complements
 
-    if 'complement' in kwargs:
+    if GPU:
+      complement = False
+
+    elif 'complement' in kwargs:
       complement  = kwargs['complement']
       
     else:
@@ -488,8 +484,6 @@ class Comparison:
     # Random initial fluctuations
     H = np.random.rand(nA, nB)*eta
 
-    timeit(0)
-
     # === Checks ===========================================================
 
     if not mA or not mB:
@@ -522,8 +516,6 @@ class Comparison:
       A_sn, A_ptr = Ga.to_CUDA_arrays(dtype=int_type)
       B_sn, B_ptr = Gb.to_CUDA_arrays(dtype=int_type)
 
-      tref = timeit('Start sending')
-
       # --- Scores
 
       d_X = cuda.to_device((N+H).astype(float_type))
@@ -540,16 +532,12 @@ class Comparison:
       d_B_sn = cuda.to_device(B_sn.astype(int_type))
       d_B_ptr = cuda.to_device(B_ptr.astype(int_type))
 
-      tref = timeit('Sending to device')
-
       # --- Initial step
 
       Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
                                  d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
                                  directed, 1, True)
-     
-      timeit('Initial iteration')
-    
+      
       # --- Iterations
 
       for i in range(nIter):
@@ -561,14 +549,11 @@ class Comparison:
         Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
                                  d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
                                  directed, normalization, False)
-        
-        timeit(i)
 
       # --- Get back scores to the host
 
+      cuda.synchronize()
       self.X = d_X.copy_to_host()
-
-      timeit('Back to host')
 
     else:
 

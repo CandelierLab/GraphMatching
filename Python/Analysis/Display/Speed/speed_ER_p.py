@@ -11,8 +11,6 @@ os.system('clear')
 
 l_directed = [False, True]
 l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
-# l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU']
-
 
 # ==========================================================================
 
@@ -20,14 +18,13 @@ l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU']
 plt.style.use('dark_background')
 fig, ax = plt.subplots(1,2, figsize=[10,5])
 
-
 for directed in l_directed:
 
   sdir = 'directed' if directed else 'undirected'
 
   for algo in l_algo:
 
-    fname = project.root + f'/Files/Speed/ER_{algo}_{sdir:s}.csv'
+    fname = project.root + f'/Files/Speed/p/ER_{algo}_{sdir:s}.csv'
 
     if os.path.exists(fname):
 
@@ -35,33 +32,37 @@ for directed in l_directed:
       df = pd.read_csv(fname)
 
       # Retrieve l_n
-      l_n = np.unique(df.n)
+      # l_n = np.unique(df.n)
+      l_n = [100]
+      l_p = np.unique(df.p)
 
-      data = df.groupby('n')['t'].mean().to_frame()
+      for nA in l_n:
 
-      # --- Display --------------------------------------------------------------
+        data = df[df.n == nA].groupby('p')['t'].mean().to_frame()
 
-      if directed:
-        ax[1].plot(l_n, data.t, '-', label=algo)
-      else:
-        ax[0].plot(l_n, data.t, '-', label=algo)
+        # --- Display --------------------------------------------------------------
+
+        if directed:
+          ax[1].plot(l_p, data.t, '-', label=algo+f' {nA}')
+        else:
+          ax[0].plot(l_p, data.t, '-', label=algo+f' {nA}')
 
 ax[0].set_title('Undirected')
-ax[0].set_xlabel('$n_A$')
+ax[0].set_xlabel('$p$')
 ax[0].set_ylabel('$t$ (ms)')
 
-ax[0].set_xscale('log')
+# ax[0].set_xscale('log')
 ax[0].set_yscale('log')
 ax[0].set_box_aspect(1)
 
-ax[0].legend()
+# ax[0].legend()
 ax[0].grid(True)
 
 ax[1].set_title('Directed')
-ax[1].set_xlabel('$n_A$')
+ax[1].set_xlabel('$p$')
 ax[1].set_ylabel('$t$ (ms)')
 
-ax[1].set_xscale('log')
+# ax[1].set_xscale('log')
 ax[1].set_yscale('log')
 ax[1].set_box_aspect(1)
 

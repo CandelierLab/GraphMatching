@@ -24,7 +24,7 @@ ref = time.time()
 Q = QAPLIB()
 B = []
 
-for id in Q.l_inst:
+for id in Q.l_inst[20:23]:
 
   print(id, end='', flush=True)
   start = time.time()
@@ -80,7 +80,6 @@ for id in Q.l_inst:
   # === GASM CPU
 
   C = Comparison(Ga, Gb)
-  # M = C.get_matching(algorithm='GASM', GPU=False, eta=0)
   M = C.get_matching(algorithm='GASM', GPU=False)
   M.compute_accuracy(gt)
 
@@ -89,7 +88,7 @@ for id in Q.l_inst:
   q_GASM_CPU = M.structural_quality
   t_GASM_CPU = M.time['total']
 
-  # === GASM CPU
+  # === GASM GPU
 
   C = Comparison(Ga, Gb)
   M = C.get_matching(algorithm='GASM', GPU=True)
@@ -99,7 +98,7 @@ for id in Q.l_inst:
   g_GASM_GPU = M.accuracy
   q_GASM_GPU = M.structural_quality
   t_GASM_GPU = M.time['total']
-
+ 
   # === Update
 
   B.append([id, s_sol, s_FAQ, s_2opt, s_Zager, s_GASM_CPU, s_GASM_GPU, g_sol, g_FAQ, g_2opt, g_Zager, g_GASM_CPU, g_GASM_GPU, q_sol, q_FAQ, q_2opt, q_Zager, q_GASM_CPU, q_GASM_GPU, t_FAQ, t_2opt, t_Zager, t_GASM_CPU, t_GASM_GPU])
@@ -115,6 +114,6 @@ print('Total time: {:.02f} sec'.format((time.time() - ref)))
 print('Saving ...', end='')
 ref = time.time()
 
-df.to_csv(fname)
+# df.to_csv(fname)
 
 print('{:.02f} sec'.format((time.time() - ref)))

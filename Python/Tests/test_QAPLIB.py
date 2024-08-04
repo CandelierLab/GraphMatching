@@ -13,11 +13,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-id = 'esc128'
+id = 'els19'
 
 algo = 'GASM'
-
-np.random.seed(0)
 
 # ==========================================================================
 
@@ -36,8 +34,11 @@ print('FAQ: ', np.trace(I.A.T @ I.B[P, :][:, P]))
 
 Ga, Gb, gt = Q.get_graphs(id)
 
+Ga.print()
+Gb.print()
+
 C = Comparison(Ga, Gb)
-M = C.get_matching(algorithm=algo)
+M = C.get_matching(algorithm=algo, GPU=True)
 
 sGASM = np.trace(I.A.T @ I.B[M.idxB, :][:, M.idxB])
 
