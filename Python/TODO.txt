@@ -1,6 +1,7 @@
 === Speed & complement
 
 * Time as a function of p on poly
+* Test du temps de calcul à vide (empty Kernels)
 * Is it beneficial to take the compelement for GPU ? If so, implement it.
 * Supp fig: time as function of p, with and without complement for CPU
 
