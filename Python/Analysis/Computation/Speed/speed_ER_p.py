@@ -17,8 +17,8 @@ os.system('clear')
 # === Parameters ===========================================================
 
 l_directed = [False, True]
-# l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU', 'GASM_GPU']
-l_algo = ['GASM_GPU']
+l_algo = ['FAQ', '2opt', 'Zager', 'GASM_CPU', 'GASM_GPU', 'GASM_GPU']
+# l_algo = ['GASM_GPU']
 
 l_n = [20, 50, 100]
 l_p = np.linspace(0, 1, 21)
