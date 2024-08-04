@@ -630,7 +630,7 @@ class Comparison:
 #       if edges[i,0]!=edges[i,1]:
 #         sn[edges[i,1],1] += 1
 
-@cuda.jit(cache=False)
+@cuda.jit(cache=True)
 def X2Y(X, Y, A_edges, B_edges, directed):
 
   i, j = cuda.grid(2)
@@ -663,7 +663,7 @@ def X2Y(X, Y, A_edges, B_edges, directed):
           Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]] + \
                    X[A_edges[i,0], B_edges[j,1]] + X[A_edges[i,1], B_edges[j,1]]
     
-@cuda.jit(cache=False)
+@cuda.jit(cache=True)
 def Y2X(X, Y, A_sn, A_ptr, B_sn, B_ptr, directed, normalization, initialization):
 
   u, v = cuda.grid(2)

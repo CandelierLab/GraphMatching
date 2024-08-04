@@ -74,8 +74,6 @@ for directed in l_directed:
 
             if r==0: continue
 
-            M.compute_accuracy(gt)
-
             # --- Store
               
             # Parameters
