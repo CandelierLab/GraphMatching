@@ -636,34 +636,32 @@ def X2Y(X, Y, A_edges, B_edges, directed):
   i, j = cuda.grid(2)
   if i < Y.shape[0] and j < Y.shape[1]:
 
-    pass
+    if directed:
 
-    # if directed:
+      Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,1]]
 
-    #   Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,1]]
+    else:
 
-    # else:
+      if A_edges[i,0]==A_edges[i,1]:
 
-    #   if A_edges[i,0]==A_edges[i,1]:
+        if B_edges[j,0]==B_edges[j,1]:
 
-    #     if B_edges[j,0]==B_edges[j,1]:
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]]
 
-    #       Y[i,j] = X[A_edges[i,0], B_edges[j,0]]
+        else:
 
-    #     else:
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,0], B_edges[j,1]]
 
-    #       Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,0], B_edges[j,1]]
+      else:
 
-    #   else:
+        if B_edges[j,0]==B_edges[j,1]:
 
-    #     if B_edges[j,0]==B_edges[j,1]:
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]]
 
-    #       Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]]
+        else:
 
-    #     else:
-
-    #       Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]] + \
-    #                X[A_edges[i,0], B_edges[j,1]] + X[A_edges[i,1], B_edges[j,1]]
+          Y[i,j] = X[A_edges[i,0], B_edges[j,0]] + X[A_edges[i,1], B_edges[j,0]] + \
+                   X[A_edges[i,0], B_edges[j,1]] + X[A_edges[i,1], B_edges[j,1]]
     
 @cuda.jit(cache=False)
 def Y2X(X, Y, A_sn, A_ptr, B_sn, B_ptr, directed, normalization, initialization):
@@ -671,32 +669,30 @@ def Y2X(X, Y, A_sn, A_ptr, B_sn, B_ptr, directed, normalization, initialization)
   u, v = cuda.grid(2)
   if u < X.shape[0] and v < X.shape[1]:
 
-    pass
-
     x = 0
 
-    # if directed:
+    if directed:
 
-    #   # Sources
-    #   for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
-    #     for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
-    #       x += Y[A_ptr[i,0], B_ptr[j,0]]
+      # Sources
+      for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
+        for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
+          x += Y[A_ptr[i,0], B_ptr[j,0]]
 
-    #   # Targets
-    #   for i in range(A_sn[u,2], A_sn[u,2]+A_sn[u,3]):
-    #     for j in range(B_sn[v,2], B_sn[v,2]+B_sn[v,3]):
-    #       x += Y[A_ptr[i,1], B_ptr[j,1]]
+      # Targets
+      for i in range(A_sn[u,2], A_sn[u,2]+A_sn[u,3]):
+        for j in range(B_sn[v,2], B_sn[v,2]+B_sn[v,3]):
+          x += Y[A_ptr[i,1], B_ptr[j,1]]
 
-    # else:
+    else:
 
-    #   for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
-    #     for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
-    #       x += Y[A_ptr[i,0], B_ptr[j,0]]
+      for i in range(A_sn[u,0], A_sn[u,0]+A_sn[u,1]):
+        for j in range(B_sn[v,0], B_sn[v,0]+B_sn[v,1]):
+          x += Y[A_ptr[i,0], B_ptr[j,0]]
 
-    # if normalization!=1:
-    #   x /= normalization
+    if normalization!=1:
+      x /= normalization
 
-    # if initialization:
-    #   X[u, v] *= x
-    # else:
-    #   X[u, v] = x
+    if initialization:
+      X[u, v] *= x
+    else:
+      X[u, v] = x

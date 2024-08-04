@@ -10,7 +10,7 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-directed = False
+directed = True
 
 nA = 100
 p = 0.5
