@@ -512,48 +512,60 @@ class Comparison:
       float_type = np.float32
       int_type = np.int64
 
-      # tref = timeit('Computing')
       A_sn, A_ptr = Ga.to_CUDA_arrays(dtype=int_type)
       B_sn, B_ptr = Gb.to_CUDA_arrays(dtype=int_type)
 
       # --- Scores
 
-      d_X = cuda.to_device((N+H).astype(float_type))
-      d_Y = cuda.to_device(E.astype(float_type))
+      tref = time.perf_counter_ns()
 
-      # --- Graph structure
+      pNH = (N+H).astype(float_type)
+      pE = E.astype(float_type)
+      pAe = Ga.edges.astype(int_type)
+      pBe = Gb.edges.astype(int_type)
+      pAsn = A_sn.astype(int_type)
+      pBsn = B_sn.astype(int_type)
+      pAptr = A_ptr.astype(int_type)
+      pBptr = B_ptr.astype(int_type)
 
-      d_A_edges = cuda.to_device(Ga.edges.astype(int_type))
-      d_B_edges = cuda.to_device(Gb.edges.astype(int_type))
+      with cuda.pinned(pNH, pE, pAe, pBe, pAsn, pBsn, pAptr, pBptr):
 
-      d_A_sn = cuda.to_device(A_sn.astype(int_type))
-      d_A_ptr = cuda.to_device(A_ptr.astype(int_type))
+        d_X = cuda.to_device(pNH)
+        d_Y = cuda.to_device(pE)
 
-      d_B_sn = cuda.to_device(B_sn.astype(int_type))
-      d_B_ptr = cuda.to_device(B_ptr.astype(int_type))
+        # --- Graph structure
 
-      # --- Initial step
+        d_A_edges = cuda.to_device(pAe)
+        d_B_edges = cuda.to_device(pBe)
 
-      Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
-                                 d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
-                                 directed, 1, True)
-      
-      # --- Iterations
+        d_A_sn = cuda.to_device(pAsn)
+        d_A_ptr = cuda.to_device(pAptr)
 
-      for i in range(nIter):
+        d_B_sn = cuda.to_device(pBsn)
+        d_B_ptr = cuda.to_device(pBptr)
 
-        X2Y[gridDim_X2Y, blockDim](d_X, d_Y, 
-                                   d_A_edges, d_B_edges,
-                                   directed)
-        
+        # --- Initial step
+
         Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
-                                 d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
-                                 directed, normalization, False)
+                                   d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
+                                   directed, 1, True)
+        
+        # --- Iterations
 
-      # --- Get back scores to the host
+        for i in range(nIter):
 
-      cuda.synchronize()
-      self.X = d_X.copy_to_host()
+          X2Y[gridDim_X2Y, blockDim](d_X, d_Y, 
+                                     d_A_edges, d_B_edges,
+                                     directed)
+          
+          Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
+                                   d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
+                                   directed, normalization, False)
+
+        # --- Get back scores to the host
+
+        cuda.synchronize()
+        self.X = d_X.copy_to_host()
 
     else:
 
@@ -619,16 +631,6 @@ class Comparison:
 # --------------------------------------------------------------------------
 #   The CUDA kernels
 # --------------------------------------------------------------------------
-
-# @cuda.jit(cache=True)
-# def init_step_0(edges, sn, directed):
-#   i = cuda.grid(1)
-#   if i < edges.shape[0]:
-#     if i<3:
-#       print(i, edges[i,0], edges[i,1], sn[edges[i,0],1], sn[edges[i,1],1])
-#       sn[edges[i,0],1] += 1
-#       if edges[i,0]!=edges[i,1]:
-#         sn[edges[i,1],1] += 1
 
 @cuda.jit(cache=True)
 def X2Y(X, Y, A_edges, B_edges, directed):

@@ -1,6 +1,5 @@
 === Speed & complement
 
-* Pinned memory
 * Batching many small transfers into one larger transfer
 
 * Time as a function of p on poly
