@@ -18,7 +18,10 @@ os.system('clear')
 # === Parameters ===========================================================
 
 nA = 20
-l_directed = [False, True]
+
+# l_directed = [False, True]
+l_directed = [True]
+
 l_p = np.linspace(0, 1, 101)
 l_delta = np.linspace(0, 0.9, 10)
 nRun = 10000
@@ -58,7 +61,7 @@ for p in l_p:
 
   for delta in l_delta:
 
-    print(f'delta={delta:.2f} ({nRun:d} iterations, x2) ...', end='', flush=True)
+    print(f'delta={delta:.2f} ({nRun:d} iterations) ...', end='', flush=True)
 
     for d in l_directed:
 
@@ -75,14 +78,14 @@ for p in l_p:
         Ga = Gnp(nA, p, directed=d)
         Gb, gt = Ga.subgraph(delta=delta)
 
-        # --- Zager
+        # # --- Zager
 
-        C = Comparison(Ga, Gb)
-        M = C.get_matching(algorithm='Zager')
-        M.compute_accuracy(gt)
+        # C = Comparison(Ga, Gb)
+        # M = C.get_matching(algorithm='Zager')
+        # M.compute_accuracy(gt)
 
-        g_Zager.append(M.accuracy)
-        q_Zager.append(M.structural_quality)
+        # g_Zager.append(M.accuracy)
+        # q_Zager.append(M.structural_quality)
 
         # --- GASM
 
@@ -101,14 +104,14 @@ for p in l_p:
       df.loc[k, 'p'] = p
 
       # Mean values
-      df.loc[k, 'g_Zager'] = np.mean(g_Zager)
-      df.loc[k, 'q_Zager'] = np.mean(q_Zager)
+      # df.loc[k, 'g_Zager'] = np.mean(g_Zager)
+      # df.loc[k, 'q_Zager'] = np.mean(q_Zager)
       df.loc[k, 'g_GASM'] = np.mean(g_GASM)
       df.loc[k, 'q_GASM'] = np.mean(q_GASM)
 
       # Standard deviations
-      df.loc[k, 'g_Zager_std'] = np.std(g_Zager)
-      df.loc[k, 'q_Zager_std'] = np.std(q_Zager)
+      # df.loc[k, 'g_Zager_std'] = np.std(g_Zager)
+      # df.loc[k, 'q_Zager_std'] = np.std(q_Zager)
       df.loc[k, 'g_GASM_std'] = np.std(g_GASM)
       df.loc[k, 'q_GASM_std'] = np.std(q_GASM)
 

@@ -397,7 +397,7 @@ class Comparison:
     self.info['GPU'] = GPU
 
     # Number of iterations
-    nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(Ga.d, Gb.d), 1)
+    nIter = kwargs['nIter'] if 'nIter' in kwargs else min(Ga.d, Gb.d)-1
     self.info['nIter'] = nIter
 
     # Normalization
@@ -572,10 +572,13 @@ class Comparison:
       # --- Initialization -------------------------------------------------
       
       # Define X0
-      if Ga.directed:
-        self.X = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
+      if nIter>=0:
+        if Ga.directed:
+          self.X = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
+        else:
+          self.X = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
       else:
-        self.X = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
+        self.X = np.ones((nA, nB))
 
       self.Y = np.ones((mA, mB))
 

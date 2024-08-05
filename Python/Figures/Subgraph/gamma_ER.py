@@ -26,14 +26,12 @@ err_alpha = 0.2
 lw = 3
 fontsize = 12
 
-# Colors
-
 # ==========================================================================
 
 plt.rcParams.update({'font.size': fontsize})
 fig, ax = plt.subplots(2, 3, figsize=(15,10))
 
-cm =plt.cm.jet(np.linspace(0,1,7))
+cm = plt.cm.jet(np.linspace(0,1,7))
 ax[0,1].set_prop_cycle(plt.cycler(color=cm))
 ax[1,1].set_prop_cycle(plt.cycler(color=cm))
 ax[0,2].set_prop_cycle(plt.cycler(color=cm))
