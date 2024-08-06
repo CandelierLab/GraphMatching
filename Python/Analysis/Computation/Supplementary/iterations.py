@@ -14,13 +14,18 @@ os.system('clear')
 
 directed = True
 nA = 100
-nRun = 10
+nRun = 100
 
 # Average degree
-l_deg = [1] #[0.25, 0.5, 0.75, 1, 1.5, 2, 3]
+l_deg = [0.25, 0.5, 0.75, 1, 1.5, 2, 3]
 
-# l_nIter = range(6)
 l_nIter = range(-1,5)
+
+# --- Plot parameters
+
+err_alpha = 0.2
+lw = 3
+fontsize = 12
 
 # ==========================================================================
 
@@ -63,19 +68,22 @@ for deg in l_deg:
 
 # === Display =================================================================
 
-# plt.style.use('dark_background')
-
+cm = plt.cm.jet(np.linspace(0,1,len(l_deg)))
 fig, ax = plt.subplots(figsize=(8,5))
 
 for i, deg in enumerate(l_deg):
 
-  ax.plot(l_nIter, m_gamma[i], '.-', label=deg)
+  ax.plot(l_nIter, m_gamma[i], '.-', color=cm[i], label=deg)
+
+  ax.fill_between(l_nIter, m_gamma[i] - s_gamma[i]/2, m_gamma[i] + s_gamma[i]/2, alpha=err_alpha, facecolor=cm[i])
+
+  print(deg, ':', m_gamma[i][2])
 
 ax.set_xlabel('iteration')
 ax.set_ylabel(r'accuracy $\gamma$')
 ax.legend()
 
-# ax.set_xlim(0, max(l_nIter))
-# ax.set_ylim(0,1)
+ax.set_xlim(-1.05, max(l_nIter))
+ax.set_ylim(0,1)
 
 plt.show()
