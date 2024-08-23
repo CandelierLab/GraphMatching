@@ -212,7 +212,7 @@ class Comparison:
     # --- Algorithms parameters
 
     # Number of iterations
-    nIter = kwargs['nIter'] if 'nIter' in kwargs else max(min(Ga.d, Gb.d), 1)
+    nIter = kwargs['nIter'] if 'nIter' in kwargs else min(Ga.diameter, Gb.diameter)
     self.info['nIter'] = nIter
 
     # Non-default normalization
@@ -384,6 +384,8 @@ class Comparison:
 
     # --- Graph properties
 
+    directed = Ga.directed
+
     # Number of vertices
     nA = Ga.nV
     nB = Gb.nV
@@ -397,7 +399,7 @@ class Comparison:
     self.info['GPU'] = GPU
 
     # Number of iterations
-    nIter = kwargs['nIter'] if 'nIter' in kwargs else min(Ga.d, Gb.d)-1
+    nIter = kwargs['nIter'] if 'nIter' in kwargs else min(Ga.diameter, Gb.diameter)
     self.info['nIter'] = nIter
 
     # Normalization
@@ -499,8 +501,6 @@ class Comparison:
 
     if GPU:
 
-      directed = Ga.directed
-
       blockDim = (16, 16)
       gridDim_X2Y = ((Ga.nE+(blockDim[0]-1))//blockDim[0], 
                      (Gb.nE+(blockDim[1]-1))//blockDim[1])
@@ -552,7 +552,7 @@ class Comparison:
         
         # --- Iterations
 
-        for i in range(nIter):
+        for i in range(nIter-1):
 
           X2Y[gridDim_X2Y, blockDim](d_X, d_Y, 
                                      d_A_edges, d_B_edges,
@@ -571,9 +571,9 @@ class Comparison:
 
       # --- Initialization -------------------------------------------------
       
-      # Define X0
-      if nIter>=0:
-        if Ga.directed:
+      # Define X1
+      if nIter>=1:
+        if directed:
           self.X = (self.Ga.S @ E @ self.Gb.S.T + self.Ga.T @ E @ self.Gb.T.T) * (N+H)
         else:
           self.X = (self.Ga.R @ E @ self.Gb.R.T) * (N+H)
@@ -584,9 +584,9 @@ class Comparison:
 
       # --- Iterations
 
-      for i in range(nIter):
+      for i in range(nIter-1):
 
-        if Ga.directed:
+        if directed:
 
           self.Y = Ga.S.T @ self.X @ Gb.S + Ga.T.T @ self.X @ Gb.T
           self.X = (Ga.S @ self.Y @ Gb.S.T + Ga.T @ self.Y @ Gb.T.T)
@@ -620,8 +620,15 @@ class Comparison:
     # --- Post-processing
     
     # Isolated vertices
-    I = self.X==0
-    self.X[I] = N[I]
+    if directed:
+      Ia = np.where((np.sum(self.Ga.Adj, axis=0)+np.sum(self.Ga.Adj, axis=1))==0)[0]
+      Ib = np.where((np.sum(self.Gb.Adj, axis=0)+np.sum(self.Gb.Adj, axis=1))==0)[0]
+    else:
+      Ia = np.where(np.sum(self.Ga.Adj, axis=1)==0)[0]
+      Ib = np.where(np.sum(self.Gb.Adj, axis=1)==0)[0]
+
+    self.X[Ia,:] = N[Ia,:]/normalization**(nIter-1)
+    self.X[:,Ib] = N[:,Ib]/normalization**(nIter-1)
 
 ############################################################################
 # ######################################################################## #

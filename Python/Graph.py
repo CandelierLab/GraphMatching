@@ -439,9 +439,9 @@ class Graph:
 
       # Diameter
       if self.connected:
-        self.d = nx.diameter(self.nx)
+        self.diameter = nx.diameter(self.nx)
       else:
-        self.d = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.nx)])
+        self.diameter = max([max(j.values()) for (i,j) in nx.shortest_path_length(self.nx)])
 
       # Maximal degree
       self.mdeg = np.max(np.sum(self.Adj, axis=1))

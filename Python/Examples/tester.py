@@ -1,17 +1,17 @@
-import project
-from Examples.Example import *
+from Example import Example
+from Comparison import *
 
 algo = 'GASM'
 
-Ex = Example(1.0)
+Ex = Example(2.0)
+
+# Gb, gt = Ex.Ga.shuffle()
 
 # --- Matching
 
-C = Comparison(Ex.Ga, Ex.Gb, algorithm=algo)
-
-# C.compute_scores()
-
-M = C.get_matching(force_perfect=False)
+C = Comparison(Ex.Ga, Ex.Gb)
+M = C.get_matching(algorithm=algo, normalization=1, nIter=2)
+M.compute_accuracy(Ex.gt)
 
 # --- Output
 

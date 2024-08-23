@@ -11,13 +11,13 @@ os.system('clear')
 # === Parameters ===========================================================
 
 directed = False
-nA = 1000
+nA = 10
 # p = 0.3
 
 algo = 'GASM'
 # algo = '2opt'
 
-np.random.seed(0)
+# np.random.seed(0)
 
 # --------------------------------------------------------------------------
 
@@ -37,19 +37,19 @@ Ga = Gnp(nA, p, directed=directed)
 
 Gb, gt = Ga.shuffle()
 
-# Ga.print()
+Ga.print()
 # Gb.print()
 
 C = Comparison(Ga, Gb, verbose=False)
 
-# M = C.get_matching(algorithm=algo, GPU=False)
-# M.compute_accuracy(gt)
-# print(M)
+M = C.get_matching(algorithm=algo, GPU=False)
+M.compute_accuracy(gt)
+print(M)
 
-M = C.get_matching(algorithm=algo, GPU=True)
+# M = C.get_matching(algorithm=algo, GPU=True)
 
-M = C.get_matching(algorithm=algo, GPU=True, force=True, disptime=True)
-print(M.time)
+# M = C.get_matching(algorithm=algo, GPU=True, force=True, disptime=True)
+# print(M.time)
 
 # M.compute_accuracy(gt)
 # print(M)
