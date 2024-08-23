@@ -15,7 +15,7 @@ directed = True
 nA = 5
 nB = 5
 
-nIter = 4
+nIter = 2
 
 np.random.seed(0)
 
@@ -55,11 +55,10 @@ pa.matrix(C.X)
 print('GASM')
 
 C = Comparison(Ga, Gb)
-M = C.get_matching(algorithm='GASM', normalization=1, nIter=nIter, eta=1e-3)
+M = C.get_matching(algorithm='GASM', normalization=1, nIter=nIter, eta=1e-2)
 # M.compute_accuracy(gt)
 
 print(C.X)
-
 
 # === Second exemple ========================================================
 
@@ -105,72 +104,47 @@ M = C.get_matching(algorithm='GASM', normalization=1, nIter=nIter)
 pa.matrix(C.X)
 
 
+# === Third exemple ========================================================
 
-# X = compute_scores(NetA, NetB, algorithm='GASP', normalization=1, nIter=4)[0]
+pa.line('Third exemple')
+print()
 
-# M = matching(NetA, NetB, algorithm='GASP', normalization=1, nIter=4)
+Adj = np.zeros((nA,nA), dtype=bool)
+Adj[0,1] = True
+Adj[0,2] = True
+Adj[1,3] = True
+Adj[2,4] = True
+Ga = Graph(nA, directed=directed, Adj=Adj)
+Ga.add_vrtx_attr({'precision': 0, 'values': [0, 0, 0, 0, 0]})
 
-# H = np.zeros((nA, nB))
-# for m in M.matchings:
-#   for i,j in enumerate(m.J):
-#     H[i,j] = 1
+Adj = np.zeros((nB,nB), dtype=bool)
+Adj[0,1] = True
+Adj[0,2] = True
+Adj[1,3] = True
+Adj[2,4] = True
+Gb = Graph(nB, directed=directed, Adj=Adj)
+Gb.add_vrtx_attr({'precision': 0, 'values': [0, 1, 0, 0, 0]})
 
-# pa.matrix(X, highlight=H)
+gt = GroundTruth(Ga, Gb)
 
-# print(M)
+# --- Zager
 
-# # === Second exemple =======================================================
+print('Zager')
 
-# pa.line('Second exemple (b)')
-# print()
+C = Comparison(Ga, Gb)
+M = C.get_matching(algorithm='Zager', normalization=1, nIter=nIter)
+# M.compute_accuracy(gt)
 
-# NetA = Network(nA)
-# NetA.Adj = np.zeros((nA,nA), dtype=bool)
-# NetA.Adj[0,1] = True
-# NetA.Adj[0,2] = True
-# NetA.Adj[1,3] = True
-# NetA.Adj[2,4] = True
-# NetA.add_node_attr({'measurable': False, 'values': [0, 0, 0, 0, 0]})
-# NetA.prepare()
+pa.matrix(C.X)
 
-# NetB = Network(nB)
-# NetB.Adj = np.zeros((nB,nB), dtype=bool)
-# NetB.Adj[0,1] = True
-# NetB.Adj[0,2] = True
-# NetB.Adj[1,3] = True
-# NetB.Adj[2,4] = True
-# NetB.add_node_attr({'measurable': False, 'values': [0, 1, 0, 0, 0]})
-# NetB.prepare()
+# --- GASM
 
-# # --- Zager
+print('GASM')
 
-# print('Zager')
+C = Comparison(Ga, Gb)
+M = C.get_matching(algorithm='GASM', normalization=1, nIter=nIter, eta=1e-2)
+# M.compute_accuracy(gt)
 
-# X = compute_scores(NetA, NetB, algorithm='Zager', normalization=1, nIter=4)[0]
-# M = matching(NetA, NetB, algorithm='Zager', normalization=1, nIter=4)
-
-# H = np.zeros((nA, nB))
-# for m in M.matchings:
-#   for i,j in enumerate(m.J):
-#     H[i,j] = 1
-
-# pa.matrix(X, highlight=H)
-
-# print(M)
-
-# # --- GASP
-
-# print('GASP')
-
-# X = compute_scores(NetA, NetB, algorithm='GASP', normalization=1, nIter=4)[0]
-
-# M = matching(NetA, NetB, algorithm='GASP', normalization=1, nIter=4)
-
-# H = np.zeros((nA, nB))
-# for m in M.matchings:
-#   for i,j in enumerate(m.J):
-#     H[i,j] = 1
-
-# pa.matrix(X, highlight=H)
+print(C.X)
 
 # print(M)
