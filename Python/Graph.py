@@ -38,7 +38,7 @@ class Graph:
     self.connected = None
 
     # Diameter
-    self.d = None
+    self.diameter = None
 
     # --- Imports
 

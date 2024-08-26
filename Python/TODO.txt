@@ -1,35 +1,10 @@
-=== Speed & complement
+=== Timing
 
-* Batching many small transfers into one larger transfer
-
-* Time as a function of p on poly
-* Is it beneficial to take the compelement for GPU ? If so, implement it.
-* Supp fig: time as function of p, with and without complement for CPU
-
-=== CUDA
-
-* QAPlib:
-  - fix GPU: first pass is on the non-reversed network !! Keep the complementary for GPU ? 
-  - run
-  - figure
+* QAPlib timing figure: ecdf des temps pour les 4 algorithmes + GASM GPU
 
 === Supplementary
 
-* Influence of noise (directed / undirected)
-* Accuracy and qS vs Niterations
- 
-=== Node degradation (subgraph)
-
-- Finish delta_p_star in logarithmic scale:
-  🮱 n=10
-  🮱 n=20
-  🮱 n=50
-  🮱 n=100
-  🮱 n=200
-  🮱 n=500 
-  x n=1000 
-
-- Figure
+* Convergence: <k*> en fonction p dans des ER, pour different n*, for directed and undirected graphs
 
 === Attribute degradation (add noise)
 
@@ -39,3 +14,4 @@ x Vertex degradation: GASM only
 === To check
 
 3.3: "... the matching obtained via the update equations (14-15) and (17-18) are rigorously equal."
+
