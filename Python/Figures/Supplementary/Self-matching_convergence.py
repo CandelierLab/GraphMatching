@@ -5,7 +5,6 @@ import os
 import time
 import matplotlib.pyplot as plt
 
-import project
 from Graph import *
 from Comparison import *
 

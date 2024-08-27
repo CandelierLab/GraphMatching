@@ -31,14 +31,14 @@ for nA in l_nA:
 
   # --- Check
 
-  fname = project.root + f'/Files/k_star/{ds}_nA={nA}.csv'
+  fname = project.root + f'/Files/Diameter/{ds}_nA={nA}.csv'
 
   if os.path.exists(fname) and not force:
     continue
 
   # --- Main loop
 
-  df = pd.DataFrame(columns=['p', 'kstar', 'kstar_std'])
+  df = pd.DataFrame(columns=['p', 'diameter', 'diameter_std'])
 
   with alive_bar(l_p.size) as bar:
 
@@ -56,8 +56,8 @@ for nA in l_nA:
       # --- Store
 
       df.loc[i, 'p'] = p
-      df.loc[i, 'kstar'] = np.mean(K)
-      df.loc[i, 'kstar_std'] = np.std(K)
+      df.loc[i, 'diameter'] = np.mean(K)
+      df.loc[i, 'diameter_std'] = np.std(K)
 
       # Update display
       bar()

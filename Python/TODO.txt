@@ -2,10 +2,6 @@
 
 * QAPlib timing figure: ecdf des temps pour les 4 algorithmes + GASM GPU
 
-=== Supplementary
-
-* Convergence: <k*> en fonction p dans des ER, pour different n*, for directed and undirected graphs
-
 === Attribute degradation (add noise)
 
 x Edge degradation: FAQ and GASM

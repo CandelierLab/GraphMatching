@@ -19,7 +19,7 @@ nRun = 100
 # Average degree
 l_deg = [0.25, 0.5, 0.75, 1, 1.5, 2, 3]
 
-l_nIter = range(-1,5)
+l_nIter = np.arange(-1,21)
 
 # --- Plot parameters
 
@@ -32,9 +32,13 @@ fontsize = 12
 m_gamma = []
 s_gamma = []
 
+k_tilde = []
+g_tilde = []
+
 for deg in l_deg:
 
   l_g = []
+  k = []
   
   with alive_bar(nRun) as bar:
 
@@ -46,6 +50,8 @@ for deg in l_deg:
 
       Ga = Gnp(nA, deg/nA, directed=directed)
       Gb, gt = Ga.shuffle()
+
+      k.append(Ga.diameter)
 
       # --- Convergence
 
@@ -63,8 +69,15 @@ for deg in l_deg:
 
       bar()
 
-  m_gamma.append(np.mean(l_g, axis=0))
+  mg = np.mean(l_g, axis=0)
+  m_gamma.append(mg)
   s_gamma.append(np.std(l_g, axis=0))
+
+  k_tilde.append(np.mean(k))
+
+  # --- Interpolation
+
+  g_tilde.append(np.interp(k_tilde[-1], l_nIter, mg))
 
 # === Display =================================================================
 
@@ -78,6 +91,8 @@ for i, deg in enumerate(l_deg):
   ax.fill_between(l_nIter, m_gamma[i] - s_gamma[i]/2, m_gamma[i] + s_gamma[i]/2, alpha=err_alpha, facecolor=cm[i])
 
   print(deg, ':', m_gamma[i][2])
+
+ax.plot(k_tilde, g_tilde, 'k--')
 
 ax.set_xlabel('iteration')
 ax.set_ylabel(r'accuracy $\gamma$')

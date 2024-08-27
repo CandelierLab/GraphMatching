@@ -12,6 +12,8 @@ import project
 l_directed = [True, False]
 l_nA = [10, 20, 50]
 
+color = ['#E3A5C7', '#B692C2', '#694F8E']
+
 # --------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser()
@@ -26,16 +28,15 @@ figfile = args.filename
 if figfile is None:
   os.system('clear')
 
-plt.style.use('dark_background')
 fig, ax = plt.subplots()
 
 for directed in l_directed:
 
   ds = 'directed' if directed else 'undirected'
 
-  for nA in l_nA:
+  for i, nA in enumerate(l_nA):
 
-    fname = project.root + f'/Files/k_star/{ds}_nA={nA:d}.csv'
+    fname = project.root + f'/Files/Diameter/{ds}_nA={nA:d}.csv'
 
     if os.path.exists(fname):
 
@@ -44,14 +45,15 @@ for directed in l_directed:
 
       # Plot
       if directed:
-        ax.plot(F.p, F.kstar, '.-', label=nA)
+        ax.plot(F.p, F.diameter, '-', color=color[i], label=nA)
+        # ax.axvline(np.log(nA)/nA, color='k', linestyle=':')
       else:
-        ax.plot(F.p, F.kstar, '--')
+        ax.plot(F.p, F.diameter, '--', color=color[i], label=nA)
 
 ax.legend()
 
 ax.set_xlabel('$p$')
-ax.set_ylabel(r'$k^\ast$')
+ax.set_ylabel(r'$\Delta$')
 
 #  --- Output --------------------------------------------------------------
 
