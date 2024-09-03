@@ -19,18 +19,18 @@ os.system('clear')
 # === Parameters ===========================================================
 
 # algo = 'FAQ'
-algo = '2opt'
-# algo = 'Zager'
+# algo = '2opt'
+algo = 'Zager'
 # algo = 'GASM'
 
 directed = False
 
 # l_k = np.arange(2,11)
 # l_k = np.arange(2,6)
-l_k = [2, 5, 10]
+l_k = [3]
 l_n = np.arange(1,11)
 
-nRun = 1000
+nRun = 10000
 
 force = True
 
@@ -46,7 +46,7 @@ if not force:
 # ==========================================================================
 
 ds = 'directed' if directed else 'undirected'
-fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}.csv'
+fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}_k=3.csv'
 
 # Check existence
 if os.path.exists(fname) and not force:

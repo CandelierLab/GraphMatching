@@ -18,7 +18,8 @@ os.system('clear')
 l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
 directed = False
 
-l_k = np.array([2, 5, 10])
+# l_k = np.array([2, 5, 10])
+l_k = np.array([3])
 
 # --- Plot parameters
 
@@ -49,7 +50,7 @@ for algo in l_algo:
 
   # --- Load data ----------------------------------------------------------
 
-  datapath = project.root + f'/Files/Self-matching/SB/{algo}_{ds}.csv'
+  datapath = project.root + f'/Files/Self-matching/SB/{algo}_{ds}_k=3.csv'
 
   if os.path.exists(datapath):
 
@@ -70,12 +71,15 @@ for algo in l_algo:
       data = df.loc[df['k'] == k]
 
       # Accuracy    
-      ax[0].plot(data.n, data.g, linestyle=ks[ki], linewidth=lw, color=c[algo], label=f'{algo} $k = {k:d}$')
+      # ax[0].plot(data.n, data.g, linestyle=ks[ki], linewidth=lw, color=c[algo], label=f'{algo} $k = {k:d}$')
+      ax[0].plot(data.n, data.g, '.', color=c[algo], label=f'{algo} $k = {k:d}$')
 
       # Structural quality
       if ki==0:
         ax[1].plot(data.n, data.q, linestyle=ks[ki], linewidth=lw, color=c[algo], label=f'{algo} $k = {k:d}$')
         ax[1].fill_between(data.n, data.q - data.q_std, data.q + data.q_std, alpha=err_alpha, facecolor=c['e'+algo])
+
+ax[0].plot(data.n, (data.n+1)/(3*data.n+1), 'k--')
 
 ax[0].set_xticks(range(1,11,3))
 ax[1].set_xticks(range(1,11,3))
