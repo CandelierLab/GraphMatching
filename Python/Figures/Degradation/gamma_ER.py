@@ -60,6 +60,7 @@ for i, directed in enumerate([False, True]):
     data = df.loc[df['algo']=='FAQ']
       
     ax[i,j].plot(l_delta, data.g, '--', color='k', label=f'FAQ')
+    # print(data.g[10])
 
     # --- GASM
 
@@ -85,6 +86,9 @@ for i, directed in enumerate([False, True]):
         data = df.loc[(df['algo']=='GASM') & (df['precision']==p)]
         
         ax[i,j].plot(l_delta, data.g, '-', label=f'GASM $\\rho={p:.03f}$')
+
+        # if j==1 and i==1 and p==0:
+        #   print(data.g[10])
 
     # --- General plot settings
 
