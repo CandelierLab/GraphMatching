@@ -448,7 +448,7 @@ class Graph:
 
     else:
 
-      self.d = 0
+      self.diameter = 0
       
   # ========================================================================
   #                             MODIFICATIONS

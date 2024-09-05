@@ -24,9 +24,12 @@ ref = time.time()
 Q = QAPLIB()
 B = []
 
-for id in Q.l_inst[20:23]:
+# for id in Q.l_inst[20:23]:
+for id in Q.l_inst:
 
   print(id, end='', flush=True)
+  print()
+
   start = time.time()
 
   # Get instance

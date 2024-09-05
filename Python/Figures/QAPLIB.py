@@ -49,6 +49,8 @@ if os.path.exists(datapath):
   # Load data
   data = pd.read_csv(datapath)
 
+print(data.columns)
+
 # --- Computation ----------------------------------------------------------
 
 # --- FAQ
