@@ -28,7 +28,6 @@ B = []
 for id in Q.l_inst:
 
   print(id, end='', flush=True)
-  print()
 
   start = time.time()
 
@@ -117,6 +116,6 @@ print('Total time: {:.02f} sec'.format((time.time() - ref)))
 print('Saving ...', end='')
 ref = time.time()
 
-# df.to_csv(fname)
+df.to_csv(fname)
 
 print('{:.02f} sec'.format((time.time() - ref)))
