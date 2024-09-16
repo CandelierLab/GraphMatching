@@ -116,7 +116,7 @@ class Graph:
       attr = self.vrtx_attr[0]
 
       if 'name' in attr:
-        print("\nVertex attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['presicion'] else 'not '))
+        print("\nVertex attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
       else:
         print('\nVertex attribute {:d}:'.format(i))
 
@@ -129,7 +129,7 @@ class Graph:
       attr = self.edge_attr[0]
 
       if 'name' in attr:
-        print("\nEdge attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['precision'] else 'not '))
+        print("\nEdge attribute '{:s}' ({:s}measurable):".format(attr['name'], '' if attr['measurable'] else 'not '))
       else:
         print('\nEdge attribute {:d}:'.format(i))
 
@@ -264,7 +264,7 @@ class Graph:
 
     if isinstance(args[0], str):
 
-      precision = kwargs['precision'] if 'precision' in kwargs else None
+      rho = kwargs['error'] if 'error' in kwargs else None
 
       match args[0]:
 
@@ -275,7 +275,8 @@ class Graph:
           Mv = kwargs['max'] if 'max' in kwargs else 1
 
           # Attribute
-          attr = {'precision': precision, 
+          attr = {'measurable': False,
+                  'error': rho, 
                   'values': np.random.random(self.nE)*(Mv-mv) + mv}
 
         case 'gauss':
@@ -285,7 +286,8 @@ class Graph:
           sigma = kwargs['std'] if 'std' in kwargs else 1
 
           # Attribute
-          attr = {'precision': precision, 
+          attr = {'measurable': False,
+                  'error': rho,
                   'values': mu + sigma*np.random.randn(self.nE)}
 
     else:
@@ -307,13 +309,13 @@ class Graph:
   def add_vrtx_attr(self, *args, **kwargs):
     '''
     In case attr is fed directly, it should have the following structure:
-    attr = {'precision': float/None, 'values': val}
-    attr = {'precision': float/None, 'values': val, 'name': name}
+    attr = {'measurable': boolean, 'error': float/None, 'values': val}
+    attr = {'measurable': boolean, 'error': float/None, 'values': val, 'name': name}
     '''
 
     if isinstance(args[0], str):
 
-      precision = kwargs['precision'] if 'precision' in kwargs else None
+      rho = kwargs['error'] if 'error' in kwargs else None
 
       match args[0]:
 
@@ -324,7 +326,8 @@ class Graph:
           Mv = kwargs['max'] if 'max' in kwargs else 1
 
           # Attribute
-          attr = {'precision': precision, 
+          attr = {'measurable': False,
+                  'error': rho,
                   'values': np.random.random(self.nV)*(Mv-mv) + mv}
 
         case 'gauss':
@@ -334,7 +337,8 @@ class Graph:
           sigma = kwargs['std'] if 'std' in kwargs else 1
 
           # Attribute
-          attr = {'precision': precision, 
+          attr = {'measurable': False,
+                  'error': rho,
                   'values': mu + sigma*np.random.randn(self.nV)}
 
     else:
@@ -593,7 +597,9 @@ class Graph:
     for attr in self.vrtx_attr:
 
       # Attribute reproduction
-      a = {'precision': attr['precision'], 'values': attr['values'][Kv]}
+      a = {'measurable': attr['measurable'],
+           'error': attr['error'],
+           'values': attr['values'][Kv]}
       if 'name' in attr: a['name'] = attr['name']
 
       H.add_vrtx_attr(a)
@@ -602,7 +608,9 @@ class Graph:
     for attr in self.edge_attr:
 
       # Attribute reproduction
-      a = {'precision': attr['precision'], 'values': attr['values'][Ke]}
+      a = {'measurable': attr['measurable'],
+           'error': attr['error'],
+           'values': attr['values'][Ke]}
       if 'name' in attr: a['name'] = attr['name']
 
       H.add_edge_attr(a)

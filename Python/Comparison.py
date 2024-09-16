@@ -430,26 +430,25 @@ class Comparison:
         wA = attr['values']
         wB = Gb.vrtx_attr[k]['values']
 
-        if attr['precision'] is None or attr['precision']:
+        if attr['error'] is None:
+          rho_a2 = np.var(np.subtract.outer(wA, wB))
+        else:
+          rho_a2 = attr['error']**2
+
+        if attr['measurable']:
 
           # --- Measurable attributes
-
-          # Edge weights differences
-          W = np.subtract.outer(wA, wB)
-
-          if attr['precision'] is None:
-            rho_a2 = np.var(W)
-          else:
-            rho_a2 = attr['precision']**2
-
+          
           if rho_a2>0:
-            N *= np.exp(-W**2/2/rho_a2)
+            N *= np.exp(-np.subtract.outer(wA, wB)**2/2/rho_a2)
 
         else:
 
           # --- Categorical attributes
 
-          N *= np.equal.outer(wA, wB)
+          AM = np.equal.outer(wA, wB)
+          AM[AM==0] = np.exp(-1/2/rho_a2)          
+          N *= AM
 
       # --- Edge attributes
 
@@ -463,25 +462,25 @@ class Comparison:
           wA = attr['values']
           wB = self.Gb.edge_attr[k]['values']
 
-          if attr['precision'] is None or attr['precision']:
+          if attr['error'] is None:
+            rho_a2 = np.var(np.subtract.outer(wA, wB))
+          else:
+            rho_a2 = attr['error']**2
+
+          if attr['measurable']:
 
             # --- Measurable attributes
 
-            # Edge weights differences
-            W = np.subtract.outer(wA, wB)
-
-            if attr['precision'] is None:
-              rho_a2 = np.var(W)
-            else:
-              rho_a2 = attr['precision']**2
-
             if rho_a2>0:
-              E *= np.exp(-W**2/2/rho_a2)
+              E *= np.exp(-np.subtract.outer(wA, wB)**2/2/rho_a2)
 
           else:
+
             # --- Categorical attributes
 
-            E *= np.equal.outer(wA, wB)
+            AM = np.equal.outer(wA, wB)
+            AM[AM==0] = np.exp(-1/2/rho_a2)          
+            E *= AM
 
     # Random initial fluctuations
     H = np.random.rand(nA, nB)*eta
