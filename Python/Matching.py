@@ -210,13 +210,19 @@ class Matching:
     else:
 
       # Matching matrix
-      Z = np.full((self.nA, self.nB), False)
+      M = np.full((self.nA, self.nB), 0)
       for (i,j) in zip(self.idxA, self.idxB):
         if j is not None and i<self.nA and j<self.nB:
-          Z[i,j] = True
+          M[i,j] = 1
 
       # Compute structural correspondence
-      self.structural_quality = np.count_nonzero(Z @ self.Gb.Adj == self.Ga.Adj @ Z)/self.nA/self.nB
+      # self.structural_quality = np.count_nonzero(self.Ga.Adj @ M == M @ self.Gb.Adj)/self.nA/self.nB
+
+      Z = self.Ga.Adj @ M - M @ self.Gb.Adj
+
+      print(Z)
+
+      self.structural_quality = 1-np.trace(Z@Z.T)/self.nA/self.nB
 
   def compute_accuracy(self, gt=None):
     '''

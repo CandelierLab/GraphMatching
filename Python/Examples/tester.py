@@ -1,9 +1,9 @@
 from Example import Example
 from Comparison import *
 
-algo = 'GASM'
+algo = 'Zager'
 
-Ex = Example(2.0)
+Ex = Example(1.0)
 
 # Gb, gt = Ex.Ga.shuffle()
 
