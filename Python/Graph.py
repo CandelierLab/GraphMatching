@@ -458,7 +458,7 @@ class Graph:
   #                             MODIFICATIONS
   # ========================================================================
 
-  def shuffle(self):
+  def shuffle(self, gt=None):
     '''
     Shuffled version of the graph, and shuffling indices.
     Use np.random for the RNG.
@@ -494,8 +494,11 @@ class Graph:
         attr['values'] = a['values'][J]
         H.add_edge_attr(attr)
 
-    # Ground Truth
-    gt = GroundTruth(self, H)
+    # --- Ground Truth
+
+    if gt is None:
+      gt = GroundTruth(self, H)
+      
     gt.Ib = np.argsort(Idx)
 
     return (H, gt)

@@ -21,6 +21,9 @@ class Matching:
     self.Gb = Gb
     self.nA = Ga.nV
     self.nB = Gb.nV
+    self.mA = Ga.nE
+    self.mB = Gb.nE
+    self.directed = Ga.directed
 
     # Matching
     self.idxA = np.empty(0)
@@ -219,10 +222,11 @@ class Matching:
       # self.structural_quality = np.count_nonzero(self.Ga.Adj @ M == M @ self.Gb.Adj)/self.nA/self.nB
 
       Z = self.Ga.Adj @ M - M @ self.Gb.Adj
+      if self.directed:
+        self.structural_quality = 1-np.trace(Z@Z.T)/(self.mA+self.mB)
+      else:
+        self.structural_quality = 1-np.trace(Z@Z.T)/2/(self.mA+self.mB)
 
-      print(Z)
-
-      self.structural_quality = 1-np.trace(Z@Z.T)/self.nA/self.nB
 
   def compute_accuracy(self, gt=None):
     '''

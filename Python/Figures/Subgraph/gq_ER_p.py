@@ -18,8 +18,8 @@ import project
 directed = True
 nA = 20
 
-nRun = 10000
-# nRun = 100
+nRun = 100
+# nRun = 10000
 
 # --- Plot parameters
 

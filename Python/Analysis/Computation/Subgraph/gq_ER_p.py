@@ -76,7 +76,8 @@ for p in l_p:
 
         # Graphs
         Ga = Gnp(nA, p, directed=d)
-        Gb, gt = Ga.subgraph(delta=delta)
+        G_, gt = Ga.subgraph(delta=delta)
+        Gb, gt = G_.shuffle(gt=gt)
 
         # # --- Zager
 
@@ -117,7 +118,7 @@ for p in l_p:
 
       k += 1
 
-    print('{:.02f} sec'.format((time.time() - start)))
+    print(' {:.02f} sec'.format((time.time() - start)))
 
 # --- Save
     

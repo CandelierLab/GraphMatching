@@ -1,9 +1,9 @@
 from Example import Example
 from Comparison import *
 
-algo = 'Zager'
+algo = 'GASM'
 
-Ex = Example(1.0)
+Ex = Example(2.2)
 
 # Gb, gt = Ex.Ga.shuffle()
 
@@ -11,7 +11,12 @@ Ex = Example(1.0)
 
 C = Comparison(Ex.Ga, Ex.Gb)
 M = C.get_matching(algorithm=algo, normalization=1, nIter=2)
+
+M.idxB = [0, 2, 4, 3, 1]
+
+
 M.compute_accuracy(Ex.gt)
+M.compute_structural_quality()
 
 # --- Output
 
