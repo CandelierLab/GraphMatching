@@ -103,8 +103,8 @@ cdf_Zager = ecdf(s_Zager)
 cdf_GASM = ecdf(s_GASM)
 
 cdf_FAQ.cdf.plot(ax[0], color=c['FAQ'], linewidth=lw, label='FAQ')
-# cdf_2opt.cdf.plot(ax[0], color=c['2opt'], linewidth=lw, label='2opt')
-# cdf_Zager.cdf.plot(ax[0], color=c['Zager'], linewidth=lw, label='Zager')
+cdf_2opt.cdf.plot(ax[0], color=c['2opt'], linewidth=lw, label='2opt')
+cdf_Zager.cdf.plot(ax[0], color=c['Zager'], linewidth=lw, label='Zager')
 cdf_GASM.cdf.plot(ax[0], color=c['GASM'], linewidth=lw, label='GASM')
 
 cdf_FAQ = ecdf(t_FAQ)
