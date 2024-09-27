@@ -19,14 +19,14 @@ os.system('clear')
 # === Parameters ===========================================================
 
 # algo = 'FAQ'
-algo = '2opt'
+# algo = '2opt'
 # algo = 'Zager'
-# algo = 'GASM'
+algo = 'GASM'
 
 r = 2
 l_h = np.arange(2,11)
 
-force = False
+force = True
 
 # --------------------------------------------------------------------------
 
