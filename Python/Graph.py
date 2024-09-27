@@ -275,7 +275,7 @@ class Graph:
           Mv = kwargs['max'] if 'max' in kwargs else 1
 
           # Attribute
-          attr = {'measurable': False,
+          attr = {'measurable': True,
                   'error': rho, 
                   'values': np.random.random(self.nE)*(Mv-mv) + mv}
 
@@ -286,7 +286,7 @@ class Graph:
           sigma = kwargs['std'] if 'std' in kwargs else 1
 
           # Attribute
-          attr = {'measurable': False,
+          attr = {'measurable': True,
                   'error': rho,
                   'values': mu + sigma*np.random.randn(self.nE)}
 

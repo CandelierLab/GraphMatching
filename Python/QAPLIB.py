@@ -140,8 +140,13 @@ class QAPLIB:
 
     # --- Edge attributes
 
-    Ga.add_edge_attr({'precision':precision[0], 'values':[I.A[e[0], e[1]] for e in Ga.edges]})
-    Gb.add_edge_attr({'precision':precision[1], 'values':[I.B[e[0], e[1]] for e in Gb.edges]})
+    Ga.add_edge_attr({'measurable': True,
+                      'error':precision[0],
+                      'values':[I.A[e[0], e[1]] for e in Ga.edges]})
+    
+    Gb.add_edge_attr({'measurable': True,
+                      'error':precision[1],
+                      'values':[I.B[e[0], e[1]] for e in Gb.edges]})
 
     # --- Ground truth
 
