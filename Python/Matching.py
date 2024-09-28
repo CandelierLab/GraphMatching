@@ -206,9 +206,9 @@ class Matching:
     Compute the structural quality of the matching
     '''
 
-    if not self.nA or not self.nB:
+    if not self.mA or not self.mB:
 
-      self.structural_quality = 0
+      self.structural_quality = 1
 
     else:
 

@@ -39,7 +39,7 @@ fig, ax = plt.subplots(1,2, figsize=(20,10))
 
 for algo in l_algo:
 
-  fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}.csv'
+  fname = project.root + f'/Files/Self-matching/SB/{algo}_{ds}_k=3.csv'
   
   # print(fname)
 
@@ -70,8 +70,8 @@ for algo in l_algo:
 
 ax[0].set_yscale('log')
 
-# ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.9, 1])
+ax[0].set_ylim([0, 1])
+ax[1].set_ylim([0, 1])
 
 ax[0].set_xlabel('n')
 ax[1].set_xlabel('n')
