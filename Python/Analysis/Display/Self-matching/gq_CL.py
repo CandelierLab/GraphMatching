@@ -53,6 +53,11 @@ ax[0].plot(l_n, 0.5/l_n, '--', color='white', label='$\\frac{1}{2n}$')
 # Plot 0 scales 
 ax[0].set_yscale('log')
 ax[0].set_xscale('log')
+
+ax[1].set_xscale('log')
+ax[1].set_yscale('log')
+
+
 ax[0].set_xlim([0, np.max(l_n)+1])
 ax[0].set_ylim([0, 1.01])
 

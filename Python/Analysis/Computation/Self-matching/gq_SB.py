@@ -18,9 +18,9 @@ os.system('clear')
 
 # === Parameters ===========================================================
 
-# algo = 'FAQ'
+algo = 'FAQ'
 # algo = '2opt'
-algo = 'Zager'
+# algo = 'Zager'
 # algo = 'GASM'
 
 directed = False

@@ -69,6 +69,8 @@ for algo in l_algo:
       ax[1].plot(data.n, data.q, linestyle=ls[algo], color=cm[ki], label=f'{algo} $k = {k:d}$')
 
 ax[0].set_yscale('log')
+ax[1].set_xscale('log')
+ax[1].set_yscale('log')
 
 ax[0].set_ylim([0, 1])
 ax[1].set_ylim([0, 1])

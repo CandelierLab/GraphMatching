@@ -22,8 +22,7 @@ r = 2
 
 err_alpha = 0.2
 lw = 3
-fontsize = 48
-
+fontsize = 36
 # Colors
 c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
      'FAQ': '#FFA500', 'eFAQ': '#FACC2E',
@@ -33,7 +32,7 @@ c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
 # ==========================================================================
 
 plt.rcParams.update({'font.size': fontsize})
-fig, ax = plt.subplots(1, 2, figsize=(25,10))
+fig, ax = plt.subplots(1, 2, figsize=(15,8))
 
 l_h = None
 
@@ -70,8 +69,8 @@ ax[0].set_yscale('log')
 ax[0].set_xticks(range(2,11,2))
 ax[1].set_xticks(range(2,11,2))
 
-ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.4, 1])
+ax[0].set_ylim([0.001, 1])
+ax[1].set_ylim([0, 1])
 
 ax[0].set_xlabel('$h$')
 ax[1].set_xlabel('$h$')
@@ -80,5 +79,8 @@ ax[0].set_ylabel('$\gamma$')
 ax[1].set_ylabel('$q_s$')
 
 ax[0].legend()
+
+ax[0].set_box_aspect(aspect=1)
+ax[1].set_box_aspect(aspect=1)
 
 plt.show()

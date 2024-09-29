@@ -61,8 +61,10 @@ for algo in l_algo:
     # Structural quality
     ax[1].plot(data.p, data.q, '-', label=algo)
 
+# ax[1].set_yscale('log')
+
 ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.7, 1.001])
+ax[1].set_ylim([0, 1.001])
 
 ax[0].set_xlabel('p')
 ax[1].set_xlabel('p')

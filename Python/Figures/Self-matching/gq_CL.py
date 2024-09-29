@@ -21,7 +21,7 @@ l_algo = ['FAQ', '2opt', 'Zager', 'GASM']
 
 err_alpha = 0.2
 lw = 3
-fontsize = 48
+fontsize = 36
 markersize = 10
 
 # Colors
@@ -33,7 +33,7 @@ c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
 # ==========================================================================
 
 plt.rcParams.update({'font.size': fontsize})
-fig, ax = plt.subplots(1,2, figsize=(25,10))
+fig, ax = plt.subplots(1,2, figsize=(15,8))
 
 for algo in l_algo:
 
@@ -63,8 +63,8 @@ ax[0].plot(l_n, 1/2/l_n, '--', color='k', linewidth=lw, label='Theoretical')
 ax[0].set_xscale('log')
 ax[0].set_yscale('log')
 
-ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.4, 1])
+ax[0].set_ylim([0.001, 1])
+ax[1].set_ylim([0, 1])
 
 ax[0].set_xlabel('$c$')
 ax[1].set_xlabel('$c$')
@@ -73,5 +73,8 @@ ax[0].set_ylabel('$\gamma$')
 ax[1].set_ylabel('$q_s$')
 
 ax[0].legend()
+
+ax[0].set_box_aspect(aspect=1)
+ax[1].set_box_aspect(aspect=1)
 
 plt.show()

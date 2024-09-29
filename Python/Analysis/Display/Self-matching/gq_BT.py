@@ -61,6 +61,7 @@ if l_h is not None:
   ax[0].plot(l_h, (l_h+1)/(2**(l_h+1) - 1), '--', color='w', label='Th')
 
 ax[0].set_yscale('log')
+# ax[1].set_yscale('log')
 
 ax[0].set_ylim([1e-3, 1])
 ax[1].set_ylim([0, 1.01])

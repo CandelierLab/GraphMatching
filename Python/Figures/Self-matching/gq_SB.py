@@ -25,7 +25,7 @@ l_k = np.array([3])
 
 err_alpha = 0.2
 lw = 3
-fontsize = 48
+fontsize = 36
 
 # Colors
 c = {'2opt': '#CC4F1B', 'e2opt': '#FF9848',
@@ -42,7 +42,7 @@ ds = 'directed' if directed else 'undirected'
 # ==========================================================================
 
 plt.rcParams.update({'font.size': fontsize})
-fig, ax = plt.subplots(1, 2, figsize=(25,10))
+fig, ax = plt.subplots(1, 2, figsize=(15,8))
 
 l_h = None
 
@@ -71,8 +71,8 @@ for algo in l_algo:
       data = df.loc[df['k'] == k]
 
       # Accuracy    
-      # ax[0].plot(data.n, data.g, linestyle=ks[ki], linewidth=lw, color=c[algo], label=f'{algo} $k = {k:d}$')
-      ax[0].plot(data.n, data.g, '.', color=c[algo], label=f'{algo} $k = {k:d}$')
+      ax[0].plot(data.n, data.g, linestyle=ks[ki], linewidth=lw, color=c[algo], label=f'{algo} $k = {k:d}$')
+      # ax[0].plot(data.n, data.g, '-', color=c[algo], label=f'{algo} $k = {k:d}$')
 
       # Structural quality
       if ki==0:
@@ -87,8 +87,8 @@ ax[1].set_xticks(range(1,11,3))
 # ax[0].set_xscale('log')
 ax[0].set_yscale('log')
 
-ax[0].set_ylim([0, 1])
-ax[1].set_ylim([0.4, 1])
+ax[0].set_ylim([0.001, 1])
+ax[1].set_ylim([0, 1])
 
 ax[0].set_xlabel('$n$')
 ax[1].set_xlabel('$n$')
@@ -96,6 +96,9 @@ ax[1].set_xlabel('$n$')
 ax[0].set_ylabel('$\gamma$')
 ax[1].set_ylabel('$q_s$')
 
-ax[0].legend()
+# ax[0].legend()
+
+ax[0].set_box_aspect(aspect=1)
+ax[1].set_box_aspect(aspect=1)
 
 plt.show()

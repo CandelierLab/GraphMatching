@@ -208,7 +208,7 @@ class Matching:
 
     if not self.mA or not self.mB:
 
-      self.structural_quality = 1
+      self.structural_quality = 0
 
     else:
 
