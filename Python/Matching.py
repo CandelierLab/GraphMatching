@@ -218,14 +218,11 @@ class Matching:
         if j is not None and i<self.nA and j<self.nB:
           M[i,j] = 1
 
-      # Compute structural correspondence
-      # self.structural_quality = np.count_nonzero(self.Ga.Adj @ M == M @ self.Gb.Adj)/self.nA/self.nB
-
       Z = self.Ga.Adj @ M - M @ self.Gb.Adj
       if self.directed:
         self.structural_quality = 1-np.trace(Z@Z.T)/(self.mA+self.mB)
       else:
-        self.structural_quality = 1-np.trace(Z@Z.T)/2/(self.mA+self.mB)
+        self.structural_quality = 1-np.trace(Z@Z.T)/(2*(self.mA+self.mB) - self.Ga.nEs - self.Gb.nEs)
 
 
   def compute_accuracy(self, gt=None):

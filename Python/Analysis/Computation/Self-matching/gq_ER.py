@@ -20,8 +20,8 @@ os.system('clear')
 
 # algo = 'FAQ'
 # algo = '2opt'
-algo = 'Zager'
-# algo = 'GASM'
+# algo = 'Zager'
+algo = 'GASM'
 
 directed = False
 nA = 20
@@ -90,9 +90,6 @@ for p in l_p:
   # Mean values
   df.loc[k, 'g'] = np.mean(g)
   df.loc[k, 'q'] = np.mean(q)
-
-  print(np.mean(q))
-  print(np.std(q))
 
   # Standard deviations
   df.loc[k, 'g_std'] = np.std(g)
