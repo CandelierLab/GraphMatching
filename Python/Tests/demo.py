@@ -12,7 +12,7 @@ os.system('clear')
 
 '''
 In this section you define the two graphs to match. It has to be instances 
-of the Graph class, and you can importr you graphs either from networkx or 
+of the Graph class, and you can import your graphs either from networkx or 
 from the adjacency matrix.
 '''
 
