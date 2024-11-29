@@ -447,7 +447,8 @@ class Comparison:
           # --- Categorical attributes
 
           AM = np.equal.outer(wA, wB)
-          AM[AM==0] = np.exp(-1/2/rho_a2)          
+          if rho_a2>0:
+            AM[AM==0] = np.exp(-1/2/rho_a2)
           N *= AM
 
       # --- Edge attributes
@@ -479,7 +480,8 @@ class Comparison:
             # --- Categorical attributes
 
             AM = np.equal.outer(wA, wB)
-            AM[AM==0] = np.exp(-1/2/rho_a2)          
+            if rho_a2>0:
+              AM[AM==0] = np.exp(-1/2/rho_a2)          
             E *= AM
 
     # Random initial fluctuations

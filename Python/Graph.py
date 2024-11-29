@@ -106,8 +106,8 @@ class Graph:
         print('The graph is {:s}connected'.format('' if self.connected else 'dis'))
 
 
-    if self.d is not None:
-      print('Diameter: {:d}'.format(self.d))
+    if self.diameter is not None:
+      print('Diameter: {:d}'.format(self.diameter))
 
     # --- Vertex attributes
 
