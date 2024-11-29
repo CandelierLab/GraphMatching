@@ -20,6 +20,7 @@ class Graph:
     self.nV = nV  # Number of vertices
     self.nVa = 0  # NUmber of vertex attributes
     self.nE = 0   # Number of edges
+    self.nEs = 0  # Number of self-loops
     self.nEa = 0  # Number of edge attributes
     self.mdeg = 0 # max degree
 
@@ -449,6 +450,9 @@ class Graph:
 
       # Maximal degree
       self.mdeg = np.max(np.sum(self.Adj, axis=1))
+
+      # Number of self-loops
+      self.nEs = np.trace(self.Adj)
 
     else:
 
