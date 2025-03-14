@@ -224,7 +224,6 @@ class Matching:
       else:
         self.structural_quality = 1-np.trace(Z@Z.T)/(2*(self.mA+self.mB) - self.Ga.nEs - self.Gb.nEs)
 
-
   def compute_accuracy(self, gt=None):
     '''
     Compute the matching accuracy

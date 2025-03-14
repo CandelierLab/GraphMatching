@@ -180,7 +180,6 @@ class Comparison:
     
     return M
 
-
   # ========================================================================
   # |                                                                      |
   # |                              Scores                                  |
@@ -366,10 +365,7 @@ class Comparison:
 
     # --- Complements
 
-    if GPU:
-      complement = False
-
-    elif 'complement' in kwargs:
+    if 'complement' in kwargs:
       complement  = kwargs['complement']
       
     else:
@@ -516,6 +512,10 @@ class Comparison:
       A_sn, A_ptr = Ga.to_CUDA_arrays(dtype=int_type)
       B_sn, B_ptr = Gb.to_CUDA_arrays(dtype=int_type)
 
+      if complement:
+        A_sn0, A_ptr0 = self.Ga.to_CUDA_arrays(dtype=int_type)
+        B_sn0, B_ptr0 = self.Gb.to_CUDA_arrays(dtype=int_type)
+
       # --- Scores
 
       tref = time.perf_counter_ns()
@@ -528,6 +528,12 @@ class Comparison:
       pBsn = B_sn.astype(int_type)
       pAptr = A_ptr.astype(int_type)
       pBptr = B_ptr.astype(int_type)
+
+      if complement:
+        pAsn0 = A_sn0.astype(int_type)
+        pBsn0 = B_sn0.astype(int_type)
+        pAptr0 = A_ptr0.astype(int_type)
+        pBptr0 = B_ptr0.astype(int_type)
 
       with cuda.pinned(pNH, pE, pAe, pBe, pAsn, pBsn, pAptr, pBptr):
 
@@ -545,11 +551,27 @@ class Comparison:
         d_B_sn = cuda.to_device(pBsn)
         d_B_ptr = cuda.to_device(pBptr)
 
+        if complement:
+          d_A_sn0 = cuda.to_device(pAsn0)
+          d_A_ptr0 = cuda.to_device(pAptr0)
+
+          d_B_sn0 = cuda.to_device(pBsn0)
+          d_B_ptr0 = cuda.to_device(pBptr0)
+
+
         # --- Initial step
 
-        Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
-                                   d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
-                                   directed, 1, True)
+        if complement:
+
+          Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
+                                    d_A_sn0, d_A_ptr0, d_B_sn0, d_B_ptr0, 
+                                    directed, 1, True)
+
+        else:
+
+          Y2X[gridDim_Y2X, blockDim](d_X, d_Y, 
+                                    d_A_sn, d_A_ptr, d_B_sn, d_B_ptr, 
+                                    directed, 1, True)
         
         # --- Iterations
 

@@ -22,8 +22,8 @@ from the adjacency matrix.
 Here I use a random graph with 1000 nodes and an average degree of 5 with
 the dedicated networkx generation function.
 '''
-n = 100
-d = 5
+n = 150
+d = n*0.75
 Ga = Graph(nx=nx.gnp_random_graph(n, d/n, seed=np.random, directed=True))
 
 # Add some attributes
