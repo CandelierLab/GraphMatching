@@ -1,6 +1,6 @@
 import os
 
-import project
+# import project
 from Graph import *
 from  Comparison import *
 
@@ -22,7 +22,7 @@ from the adjacency matrix.
 Here I use a random graph with 1000 nodes and an average degree of 5 with
 the dedicated networkx generation function.
 '''
-n = 1000
+n = 100
 d = 5
 Ga = Graph(nx=nx.gnp_random_graph(n, d/n, seed=np.random, directed=True))
 
@@ -57,7 +57,7 @@ Gb, gt = Ga.shuffle()
 
 C = Comparison(Ga, Gb, verbose=False)
 
-M = C.get_matching(algorithm='GASM', GPU=False)
+M = C.get_matching(algorithm='GASM', GPU=True)
 
 # You can comment this line if you don't have the ground truth, you won't have the accuracy
 M.compute_accuracy(gt)
