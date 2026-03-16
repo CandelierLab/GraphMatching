@@ -5,22 +5,19 @@ import os
 import copy
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
 
 import paprint as pa
 
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
-# █░░░░░░░░░░░░░░░░░░░░░░░ GENERIC GRAPH CLASS ░░░░░░░░░░░░░░░░░░░░░░░░░░█
-# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-
-  # ────────────────────────────────────────────────────────────────────────
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░ GENERIC GRAPH CLASS ░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 class Graph:
-  ''' Generic class for graphs '''
-    
-  # === CONSTRUCTOR ========================================================
 
+  # ────────────────────────────────────────────────────────────────────────
   def __init__(self, nV=0, directed=True, Adj=None, nx=None):
 
     # Numbers
@@ -59,29 +56,31 @@ class Graph:
     if Adj is not None:
       self.from_adjacency_matrix(Adj)
 
-  # ========================================================================
-  #                             DISPLAY
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
+  #                               DISPLAY
+  # ════════════════════════════════════════════════════════════════════════
 
-  # ------------------------------------------------------------------------
-  #                             Display
-  # ------------------------------------------------------------------------
-
-  def display(self):
+  # ────────────────────────────────────────────────────────────────────────
+  def display(self, values=None, cm=plt.cm.turbo, seed=0):
     '''
     Display with matplotlib
     '''
+    # pos = nx.arf_layout(self.nx, seed=seed)
+    pos = nx.spring_layout(self.nx, seed=seed)
+    
 
-    import matplotlib.pyplot as plt
-
-    nx.draw(self.nx)
+    if values is None:
+      nx.draw(self.nx, pos=pos)
+    else:
+      if np.max(values)>np.min(values):
+        V = (values-np.min(values))/(np.max(values)-np.min(values))
+        nx.draw(self.nx, pos=pos, node_color=cm(V))
+      else:
+        nx.draw(self.nx, pos=pos, node_color=cm(0))
     
     plt.show()
 
-  # ------------------------------------------------------------------------
-  #                          Console print
-  # ------------------------------------------------------------------------
-
+  # ────────────────────────────────────────────────────────────────────────
   def __repr__(self):
     ''' 
     Some info on the graph
@@ -96,6 +95,7 @@ class Graph:
 
     return s
   
+  # ────────────────────────────────────────────────────────────────────────
   def print(self, maxrow=20, maxcol=20):
     '''Extended info on the graph'''
 
@@ -147,10 +147,11 @@ class Graph:
     pa.line()
     print('')
 
-  # ========================================================================
-  #                             IMPORT
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
+  #                               IMPORT
+  # ════════════════════════════════════════════════════════════════════════
 
+  # ────────────────────────────────────────────────────────────────────────
   def from_adjacency_matrix(self, Adj):
 
     # Check adjacency matrix is symmetric for undirected graphs
@@ -171,6 +172,7 @@ class Graph:
     # Finalize preparation
     self.prepare()
 
+  # ────────────────────────────────────────────────────────────────────────
   def import_from_networkx(self, G):
 
     # Assign netorkx graph
@@ -195,10 +197,11 @@ class Graph:
     # Preparation
     self.prepare()
     
-  # ========================================================================
-  #                              EXPORT
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
+  #                               EXPORT
+  # ════════════════════════════════════════════════════════════════════════
 
+  # ────────────────────────────────────────────────────────────────────────
   def to_CUDA_arrays(self, dtype=np.int64):
 
     if self.directed:
@@ -260,14 +263,11 @@ class Graph:
 
     return (sn, ptr)
 
-  # ========================================================================
-  #                             GENERATION
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
+  #                              GENERATION
+  # ════════════════════════════════════════════════════════════════════════
 
-  # ------------------------------------------------------------------------
-  #                              Attributes
-  # ------------------------------------------------------------------------
-
+  # ────────────────────────────────────────────────────────────────────────
   def add_edge_attr(self, *args, **kwargs):
 
     if isinstance(args[0], str):
@@ -312,8 +312,7 @@ class Graph:
     # Update number of edge attributes
     self.nEa = len(self.edge_attr)
 
-  # ------------------------------------------------------------------------
-
+  # ────────────────────────────────────────────────────────────────────────
   def add_vrtx_attr(self, *args, **kwargs):
     '''
     In case attr is fed directly, it should have the following structure:
@@ -363,10 +362,11 @@ class Graph:
     # Update number of node attributes
     self.nVa = len(self.vrtx_attr)
 
-  # ========================================================================
-  #                             PREPARATION
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
+  #                              PREPARATION
+  # ════════════════════════════════════════════════════════════════════════
 
+  # ────────────────────────────────────────────────────────────────────────
   def prepare(self):
     '''
     Prepares the Graph for comparison by:
@@ -465,10 +465,11 @@ class Graph:
 
       self.diameter = 0
       
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
   #                             MODIFICATIONS
-  # ========================================================================
+  # ════════════════════════════════════════════════════════════════════════
 
+  # ────────────────────────────────────────────────────────────────────────
   def shuffle(self, gt=None):
     '''
     Shuffled version of the graph, and shuffling indices.
@@ -514,8 +515,7 @@ class Graph:
 
     return (H, gt)
 
-  # ========================================================================
-
+  # ────────────────────────────────────────────────────────────────────────
   def complement(self):
     '''
     Complementary graph
@@ -536,8 +536,7 @@ class Graph:
 
     return H
 
-  # ========================================================================
-
+  # ────────────────────────────────────────────────────────────────────────
   def trim(self, Kv=None, Ke=None, Rv=None, Re=None):
     '''
     Trim nodes and edges.
@@ -631,8 +630,7 @@ class Graph:
 
     return H
 
-  # ========================================================================
-
+  # ────────────────────────────────────────────────────────────────────────
   def degrade(self, type, delta, shuffle=True, localization=False, source=None, **kwargs):
     '''
     Graph degradation
@@ -746,8 +744,7 @@ class Graph:
 
     return (H, gt)
 
-  # ========================================================================
-
+  # ────────────────────────────────────────────────────────────────────────
   def subgraph(self, Idx=None, delta=None, localization=False):
     '''
     Subgraph generator.
@@ -805,19 +802,21 @@ class Graph:
     return (H, gt)
   
 
-# ##########################################################################
-#                          Ground Truth class
-# ##########################################################################
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░ GROUND TRUTH CLASS ░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 class GroundTruth:
 
-  # === CONSTRUCTOR ========================================================
-
+  # ────────────────────────────────────────────────────────────────────────
   def __init__(self, Ga, Gb):
     
     self.Ia = np.arange(Ga.nV)
     self.Ib = np.arange(Gb.nV)
 
+  # ────────────────────────────────────────────────────────────────────────
   def __str__(self):
     '''
     Print function
@@ -894,15 +893,18 @@ class GroundTruth:
 
     return s
 
-# ##########################################################################
-#                        Graph generation functions
-# ##########################################################################
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░ GRAPH GENERATION FUNCTION ░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
-# ------------------------------------------------------------------------
+# ══════════════════════════════════════════════════════════════════════════
 #                        Random graphs (Erdös-Rényi)
-# ------------------------------------------------------------------------
+# ══════════════════════════════════════════════════════════════════════════
 
-def Gnm(n, m, directed=True, selfloops=True):
+# ──────────────────────────────────────────────────────────────────────────
+def Gnm(n, m, directed=True, selfloops=True, rng=None, seed=None):
   '''
   G(n,m) or Erdös-Rényi random graph.
   In the ER model, the number of edges m is guaranteed.
@@ -910,6 +912,13 @@ def Gnm(n, m, directed=True, selfloops=True):
 
   # Check boundaries
   m = round(min(max(m, 0), n**2))
+
+  # Random number generator
+  if rng is None:
+    if seed is None:
+      rng = np.random.default_rng()
+    else:
+      rng = np.random.default_rng(seed)
 
   # Selfloops
   if selfloops:
@@ -920,9 +929,9 @@ def Gnm(n, m, directed=True, selfloops=True):
       Adj = np.full((n,n), True)
     else:
       if directed:
-        A = np.random.rand(n,n)
+        A = rng.random((n,n))
       else:
-        A = np.triu(np.random.rand(n,n))
+        A = np.triu(rng.random((n,n)))
 
       Adj = A >= np.sort(A.flatten())[-m]
 
@@ -931,9 +940,10 @@ def Gnm(n, m, directed=True, selfloops=True):
 
   else:
 
-    return Graph(nx=nx.gnm_random_graph(n, m, seed=np.random, directed=directed))
+    return Graph(nx=nx.gnm_random_graph(n, m, seed=rng, directed=directed))
 
-def Gnp(n, p, directed=True, selfloops=True):
+# ──────────────────────────────────────────────────────────────────────────
+def Gnp(n, p, directed=True, selfloops=True, rng=None, seed=None):
   '''
   G(n,p) or Erdös-Rényi-Gilbert random graph.
   In the ERG model, the number of edges m is not guaranteed.
@@ -944,6 +954,13 @@ def Gnp(n, p, directed=True, selfloops=True):
   # Check boundaries
   p = min(max(p, 0), 1)
 
+  # Random number generator
+  if rng is None:
+    if seed is None:
+      rng = np.random.default_rng()
+    else:
+      rng = np.random.default_rng(seed)
+
   # Selfloops
   if selfloops:
 
@@ -952,21 +969,22 @@ def Gnp(n, p, directed=True, selfloops=True):
     elif p==1:
       Adj = np.full((n,n), True)
     elif directed:
-      Adj = np.random.rand(n,n) < p
+      Adj = rng.random((n,n)) < p
     else:
-      Adj = np.triu(np.random.rand(n,n)) > 1-p
+      Adj = np.triu(rng.random((n,n))) > 1-p
 
     # Output
     return Graph(nV=n, directed=directed, Adj=Adj)
 
   else:
 
-    return Graph(nx=nx.gnp_random_graph(n, p, seed=np.random, directed=directed))
+    return Graph(nx=nx.gnp_random_graph(n, p, seed=rng, directed=directed))
 
-# ------------------------------------------------------------------------
+# ══════════════════════════════════════════════════════════════════════════
 #                           Star-branched-graph
-# ------------------------------------------------------------------------
+# ══════════════════════════════════════════════════════════════════════════
 
+# ──────────────────────────────────────────────────────────────────────────
 def star_branched(k, n, directed=False):
   '''
   Define the star-branched graph with k branches made of linear paths of length n.
@@ -992,10 +1010,11 @@ def star_branched(k, n, directed=False):
 
   return Graph(nV, directed=directed, Adj=Adj)
 
-# ------------------------------------------------------------------------
-#                                QAPLIB
-# ------------------------------------------------------------------------
+# ══════════════════════════════════════════════════════════════════════════
+#                                 QAPLIB
+# ══════════════════════════════════════════════════════════════════════════
 
+# ──────────────────────────────────────────────────────────────────────────
 def qaplib(n):
 
   from QAPLIB import QAPLIB
