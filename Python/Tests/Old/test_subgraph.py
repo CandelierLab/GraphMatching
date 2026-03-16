@@ -3,41 +3,47 @@ import os
 import project
 from Graph import *
 from  Comparison import *
+
 import paprint as pa
 
 os.system('clear')
 
-# --- Parameters -----------------------------------------------------------
+# === Parameters ===========================================================
 
-nA = 10
+# nA = 5
+# p = 0.2
 
-# ER edge ratio
-p = 0.01
+nA = 20
+p = 0.5
 
-# Subgraph ratio
-rho = 1
+algo = 'FAQ'
+
+delta = 0.5
+# localization = 'last'
+# localization = False
 
 # --------------------------------------------------------------------------
 
-Net = Network(nA)
-Net.set_rand_edges('ER', n_epn=0.5)
-# Net.add_edge_attr('rand', name='test')
-# Net.add_node_attr('rand', name='node_attr_1')
+# np.random.seed(0)
 
-# Net.print()
+# ==========================================================================
 
-Sub, Icor = Net.subnet(round(nA*rho))
+# print('p', p)
 
-# Sub.print()
+# --- Random graphs
 
-# print(Icor)
+Ga = Gnp(nA, p, directed=True)
+# Ga.add_vrtx_attr('rand')
+# Ga.add_edge_attr('rand')
 
-pa.line(f'mA = {Net.nEd}')
+Gb, gt = Ga.degrade('vx_rm', delta)
 
-M = matching(Net, Sub)
+# Ga.print()
+# print(gt.__dict__)
+# Gb.print()
 
-M.compute_accuracy(Icor)
+C = Comparison(Ga, Gb, verbose=True)
+M = C.get_matching(algorithm=algo)
+M.compute_accuracy(gt)
+
 print(M)
-
-# Correct matches
-# print(np.count_nonzero([Icor[m[1]]==m[0] for m in M])/Sub.nNd)

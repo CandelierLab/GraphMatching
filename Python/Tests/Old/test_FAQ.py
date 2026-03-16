@@ -1,16 +1,48 @@
-import numpy as np
+import os
 from scipy.optimize import quadratic_assignment
+import project
+from Graph import *
+from  Comparison import *
 
-# Parameters
-n = 5
-p = np.log(n)/n
+import paprint as pa
 
-# Definitions
-A = np.random.rand(n,n)<p
+os.system('clear')
 
-# Quadratic assignmeent
-res = quadratic_assignment(A, A)
+# --- Parameters -----------------------------------------------------------
 
-print(res.col_ind)
+nA = 100
+p = 0.5
 
-print(p)
+# np.random.seed(0)
+
+# --------------------------------------------------------------------------
+
+# --- Random graphs
+
+Ga = Network(nA)
+Ga.set_rand_edges('ER', p_edges=p)
+
+Gb, Idx = Ga.shuffle()
+
+# pa.matrix(Ga.Adj)
+# pa.matrix(Gb.Adj)
+
+# res = quadratic_assignment(Ga.Adj, Gb.Adj, options={'maximize': True})
+
+# print(res)
+
+# print(Idx)
+# print(res.col_ind)
+
+# print(res.col_ind[Idx])
+
+C = Comparison(Ga, Gb)
+M = C.get_matching(algorithm='GASM')
+M.compute_accuracy(Idx)
+
+print(M)
+
+M2 = C.get_matching(algorithm='FAQ')
+M2.compute_accuracy(Idx)
+
+print(M2)

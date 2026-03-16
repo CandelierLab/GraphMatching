@@ -1,30 +1,57 @@
 import os
+
+import project
 from Graph import *
 from  Comparison import *
 
+import paprint as pa
+
 os.system('clear')
 
-# --- Parameters -----------------------------------------------------------
+# === Parameters ===========================================================
 
-n = 5
-p = 10
+directed = True
+
+nA = 10
+p = 2/nA
+
+algo = 'GASM'
+
+type = 'vx_rm'
+delta = 0.1
+# localization = 'first'
+localization = False
 
 # --------------------------------------------------------------------------
 
-Net = Network(n)
-Net.set_rand_edges('ER', p)
+np.random.seed(0)
 
-Det, Jcor = Net.degrade('struct', n=1)
+# ==========================================================================
 
-Net.print()
-print(Jcor, np.setdiff1d(range(n), Jcor))
-Det.print()
+# print('p', p)
 
-X, Y = scores(Net, Det)
+res = []
+nIter = 1
 
-M = matching(Net, Det, nIter=100, verbose=True)
+for iter in range(nIter):
 
-print(M)
+  # --- Random graphs
 
-# Correct matches
-print(np.count_nonzero([[m[1]]==m[0] for m in M])/n)
+  Ga = Gnp(nA, p, directed=directed)
+  Ga.add_edge_attr('gauss')
+
+  Gb, gt = Ga.degrade(type, delta, shuffle=False)
+
+  # Ga.print()
+  # Gb.print()
+  
+  C = Comparison(Ga, Gb)
+  M = C.get_matching(algorithm=algo)
+  M.compute_accuracy(gt)
+
+  print(M)
+  # print(gt)
+
+  res.append(M.accuracy)
+
+print(f'{nIter} iterations, <gamma> = {np.mean(res)}')

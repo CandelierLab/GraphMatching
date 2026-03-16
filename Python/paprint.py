@@ -1,20 +1,20 @@
 ''' 
 Pretty ASCII prints
-
 '''
 
 import os
 import numpy as np
-from colorama import init as colorama_init, Fore, Back, Style
+from rich import print
+from rich.console import Console
 
-# Initialize colors
-colorama_init()
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░ COMMAND WINDOW ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
-# ==========================================================================
-#                            COMMAND WINDOW
-# ========================================================================== 
-
-def line(text=None, thickness=1, char=None, color=Style.DIM):
+# ──────────────────────────────────────────────────────────────────────────
+def line(text=None, thickness=1, char=None, style=None, linestyle=None):
   '''
   Pretty ASCII line
 
@@ -25,13 +25,13 @@ def line(text=None, thickness=1, char=None, color=Style.DIM):
     Triple line: ≡
   '''
 
-  # Terminal width
+  # ─── Terminal width
   try:
     tw = os.get_terminal_size().columns
   except:
     tw = 50
 
-  # Thickness
+  # ─── Thickness
   if char is None:
     match thickness:
       case 1: char = '─'
@@ -39,48 +39,76 @@ def line(text=None, thickness=1, char=None, color=Style.DIM):
       case 3: char = '≡'
 
   if text is None or text=='':
-    S = color + char*tw + Style.RESET_ALL
+
+    # Set linestyle from style
+    if linestyle is None and style is not None:
+      linestyle = style
+
+    if linestyle is None:
+      S = char*tw
+    else:
+      S = f'[{linestyle}]' + char*tw + '[/]'
 
   else:
-    S = color + char*3 + Style.RESET_ALL + ' ' + text + ' '
-    S += color + char*(tw-len(S)+len(color+Style.RESET_ALL)) + Style.RESET_ALL
+
+    # ─── Prefix line
+    if linestyle is None:
+      S = char*3
+    else:
+      S = f'[{linestyle}]' + char*3 + '[/]'
+
+    # ─── Text
+    if style is None:
+      S += ' ' + text + ' '
+    else:
+      S += f' [{style}]' + text + '[/] '
+
+    # ─── Suffix line
+
+    L = tw - 5 - Console().measure(text).maximum
+    if linestyle is None:
+      S += char*L
+    else:
+      S += f'[{linestyle}]' + char*L + '[/]'
 
   # Display
   print(S)
 
-# ==========================================================================
-#                            MATRIX DIPLAY
-# ========================================================================== 
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░ OBJECTS DISPLAY ░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
+# ──────────────────────────────────────────────────────────────────────────
 def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
-           highlight=None, highColor=Fore.RED, title=None,
+           highlight=None, style='red', title=None,
            cTrue='1', cFalse='.',
            precision=None):
     ''' 
     Pretty ASCII print of a matrix
     '''
 
-    # === Title ============================================================
+    # ─── Title
 
     if title is not None:
-      line(title, 1)
-      print('')
+      line(title)
 
-    # === Checks ===========================================================
+    # ─── Checks
     
     if not isinstance(M, np.ndarray):
       M = np.ndarray(M)
 
-    # === Colors ===========================================================
+    # ─── Colors
 
     # Hidden parts
-    escchar = Fore.CYAN + escchar + Style.RESET_ALL
+    escchar = f'[dim white]{escchar}[/]'
 
     # Highlights
     if highlight is not None:
       Hlg = highlight[0:maxrow, 0:maxcol]
 
-    # === Max digits =======================================================
+    # ─── Max digits
 
     # Subpanel
     Sub = M[0:maxrow, 0:maxcol]
@@ -107,7 +135,11 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
       
       raise TypeError(f'{__name__} > matrix : dtype {Sub.dtype!r} is not recognized')
 
-    # === Column headers ===================================================
+    # ═══ Display ══════════════════════════════════════════════════════════
+
+    S = ''
+
+    # ─── Column headers ───────────────────────────────────────────────────
 
     # Row/column header max symbol
     if M.size:
@@ -122,9 +154,9 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
 
     if rowf:
 
-      # --- Index line
+      # ─── Index line
 
-      hdr = [' '*(rms+2) + Style.DIM]
+      hdr = [' '*(rms+2) + '[dim]']
 
       for j in range(Sub.shape[1]):
         match halign:
@@ -135,12 +167,12 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
           case 'l' | 'left':
             hdr[0] += f' {j:<{ms}d}'
 
-      hdr[0] += Style.RESET_ALL
+      hdr[0] += '[/]'
 
     else:
 
       # Prepare rows
-      hdr = [' '*(rms+3)+Style.DIM for i in range(cms)]
+      hdr = [' '*(rms+3) for i in range(cms)]
 
       for j in range(Sub.shape[1]):
 
@@ -162,16 +194,18 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
 
             hdr[k] += f'{h:{ms+1}s}'
 
-      hdr[-1] += Style.RESET_ALL
+      # Dimming
+      for k in range(cms):
+        hdr[k] = '[dim]' + hdr[k] + '[/dim]'
 
-    # --- Deco line header
+    # ─── Deco line header
 
     r = ' '*(rms+1) + '┌' + ' '*((ms+1)*Sub.shape[1]+1) 
     if M.shape[1]>maxcol: r += escchar*2 + ' '
     r += '┐'
     hdr.append(r)
 
-    # --- Deco line footer
+    # ─── Deco line footer
 
     r = ' '*(rms+1) + '└' + ' '*((ms+1)*Sub.shape[1]+1)
     if M.shape[1]>maxcol: 
@@ -180,9 +214,9 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
     ftr = [r]
 
     # Print header
-    for r in hdr: print(r)
+    for r in hdr: S += r + '\n'
 
-    # === Rows =============================================================
+    # ─── Rows ─────────────────────────────────────────────────────────────
 
     for i, row in enumerate(M):
 
@@ -191,17 +225,17 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
         r = ' '*(rms+1) + '│' + escchar*((ms+1)*Sub.shape[1]+1) 
         if M.shape[1]>maxcol: r += escchar*2 + ' '
         r += '│'
-        print(r)
+        S += r + '\n'
         break
 
       # Row header
-      print(Style.DIM + f'{i:>{rms}d}' + Style.RESET_ALL + ' │', end='')
+      S += '[dim]' + f'{i:>{rms}d}' + '[/dim] │'
 
       for j, a in enumerate(row):
 
         # Columns to skip
         if j>maxcol-1:
-          print(' ' + escchar*2, end='')
+          S += ' ' + escchar*2
           break
 
         # --- Cell content
@@ -231,14 +265,16 @@ def matrix(M, maxrow=20, maxcol=20, chsep=' ', halign='right', escchar='░',
               s = f'{a:<{ms}.{prec}f}'
 
         if highlight is None or not Hlg[i,j]:
-          print(' ' + s, end='')
+          S += ' ' + s
         else:
-          print(' ' + highColor + s + Style.RESET_ALL, end='')
+          S += ' ' + f'[{style}]' + s + '[/]'
 
-      print(' │')
+      S += ' │\n'
 
-    # === Footer ===========================================================
+    # ─── Footer ───────────────────────────────────────────────────────────
 
-    for r in ftr: print(r)
+    for r in ftr: S += r + '\n'
+    S += '\n'
 
-    print('')
+    # Display
+    Console(highlight=False).print(S)
