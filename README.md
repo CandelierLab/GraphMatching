@@ -4,15 +4,10 @@
 
 * Clone locally
 * Create a virtual environment
-* Install dependencies
-* 
-```
-pip install numpy scipy numba matplotlib networkx colorama pandas
-```
+* Install dependencies:
 
-* To remove the low occupancy warnings, add this line in `virtualen/bin/activate`:
 ```
-export NUMBA_CUDA_LOW_OCCUPANCY_WARNINGS=0
+pip install numpy scipy matplotlib networkx rich
 ```
 
 ## Authors and acknowledgment
