@@ -61,24 +61,25 @@ class Graph:
   # ════════════════════════════════════════════════════════════════════════
 
   # ────────────────────────────────────────────────────────────────────────
-  def display(self, values=None, cm=plt.cm.turbo, seed=0):
+  def display(self, ax=None, values=None, p0=None, cm=plt.cm.turbo, seed=0):
     '''
     Display with matplotlib
     '''
     # pos = nx.arf_layout(self.nx, seed=seed)
-    pos = nx.spring_layout(self.nx, seed=seed)
-    
+
+    pos = nx.spring_layout(self.nx, seed=seed, k=0.25, pos=p0)
 
     if values is None:
-      nx.draw(self.nx, pos=pos)
+      nx.draw(self.nx, pos=pos, ax=ax, edgecolors='k')
     else:
       if np.max(values)>np.min(values):
         V = (values-np.min(values))/(np.max(values)-np.min(values))
-        nx.draw(self.nx, pos=pos, node_color=cm(V))
+        nx.draw(self.nx, pos=pos, node_color=cm(V), ax=ax, edgecolors='k')
       else:
-        nx.draw(self.nx, pos=pos, node_color=cm(0))
+        nx.draw(self.nx, pos=pos, node_color=cm(0), ax=ax, edgecolors='k')
     
-    plt.show()
+    if ax is None:
+      plt.show()
 
   # ────────────────────────────────────────────────────────────────────────
   def __repr__(self):
